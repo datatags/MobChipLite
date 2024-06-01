@@ -1,12 +1,14 @@
-# 🚚 MobChip
-> Minecraft Entity AI and Bosses Library for 1.13 and above
+# 🚚 MobChipLite
+> Minecraft Entity AI and Bosses Library for 1.17 and above
 
 ## Background
 <details>
     <summary>Click to Expand</summary>
     
-MobChip is an all-in-one Entity AI and Bosses Library for Minecraft 1.13 and above. It allows you to easily implement Minecraft's native entity
+MobChipLite is an all-in-one Entity AI and Bosses Library for Minecraft 1.17 and above. It allows you to easily implement Minecraft's native entity
 AI into your own plugins for simple use.
+
+MobChipLite is a fork of the original MobChip library, which was created by gmitch215/GamerCoder215. MobChipLite is a continuation of the original library, with some features and versions removed, but the ultimate goal of updating it to work with the latest versions of Minecraft.
 </details>
 
 ## ❓ Why?
@@ -35,11 +37,6 @@ AI into your own plugins for simple use.
 
 
 ## 📥 Installation
-![GitHub](https://img.shields.io/github/license/GamerCoder215/MobChip)
-[![GitHub branch checks state](https://github.com/GamerCoder215/MobChip/actions/workflows/build.yml/badge.svg)](https://github.com/GamerCoder215/MobChip/actions/workflows/build.yml)
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/GamerCoder215/MobChip)
-![GitHub issues](https://img.shields.io/github/issues/GamerCoder215/MobChip)
-![Discord](https://img.shields.io/discord/972684412359680040?color=5865F2)
 
 <details>
     <summary>Maven</summary>
@@ -51,14 +48,14 @@ AI into your own plugins for simple use.
     
     <repositories>
         <repository>
-            <id>codemc-snapshots</id>
-            <url>https://repo.codemc.io/repository/maven-snapshots/</url>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
     
     <dependencies>
         <dependency>
-            <groupId>me.gamercoder215</groupId>
+            <groupId>com.github.datatags.MobChipLite</groupId>
             <artifactId>mobchip-bukkit</artifactId>
             <version>[VERSION]</version>
 
@@ -90,12 +87,12 @@ dependencies {
 
 ```kotlin
 repositories {
-    maven(url = "https://repo.codemc.io/repository/maven-snapshots/")
+    maven(url = "https://jitpack.io")
 }
 
 dependencies {
     // Use something like 1.9.1-SNAPSHOT for a stable release
-    implementation('me.gamercoder215:mobchip-bukkit:[VERSION]')
+    implementation('com.github.datatags.MobChipLite:mobchip-bukkit:[VERSION]')
 }
 ```
 </details>

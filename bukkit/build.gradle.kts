@@ -1,13 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val versions = mapOf(
-    "1_13_R1" to 8,
-    "1_13_R2" to 8,
-    "1_14_R1" to 8,
-    "1_15_R1" to 8,
-    "1_16_R1" to 8,
-    "1_16_R2" to 8,
-    "1_16_R3" to 8,
     "1_17_R1" to 16,
     "1_18_R1" to 17,
     "1_18_R2" to 17,
@@ -33,8 +26,7 @@ dependencies {
     api(project(":mobchip-abstraction"))
 
     versions.forEach {
-        if (JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(it.value)))
-            api(project(":mobchip-${it.key}"))
+        api(project(":mobchip-${it.key}"))
     }
 }
 
@@ -47,7 +39,7 @@ sourceSets["main"].allJava.srcDir("src/main/javadoc")
 tasks {
     compileJava {
         for (version in versions) {
-            if (JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(version.value)) && version.value >= 17) {
+            if (version.value >= 17) {
                 dependsOn(project(":mobchip-${version.key}").tasks["remap"])
             }
         }

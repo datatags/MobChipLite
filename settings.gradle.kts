@@ -14,13 +14,6 @@ listOf("base", "abstraction", "bukkit").forEach {
 }
 
 mapOf(
-    "1_13_R1" to 8,
-    "1_13_R2" to 8,
-    "1_14_R1" to 8,
-    "1_15_R1" to 8,
-    "1_16_R1" to 8,
-    "1_16_R2" to 8,
-    "1_16_R3" to 8,
     "1_17_R1" to 16,
     "1_18_R1" to 17,
     "1_18_R2" to 17,
@@ -33,10 +26,7 @@ mapOf(
     "1_20_R4" to 21
 ).forEach {
     val id = it.key
-    val minJava = it.value
 
-    if (JavaVersion.current().isCompatibleWith(JavaVersion.toVersion(minJava))) {
-        include(":mobchip-$id")
-        project(":mobchip-$id").projectDir = rootDir.resolve("nms/$id")
-    }
+    include(":mobchip-$id")
+    project(":mobchip-$id").projectDir = rootDir.resolve("nms/$id")
 }
