@@ -14,3 +14,18 @@ java {
     sourceCompatibility = JavaVersion.VERSION_16
     targetCompatibility = JavaVersion.VERSION_16
 }
+
+tasks {
+    javadoc {
+        enabled = true
+
+        source.removeAll { it.path.contains("abstraction") }
+
+        options {
+            require(this is StandardJavadocDocletOptions)
+
+            links("https://hub.spigotmc.org/javadocs/spigot/")
+            links("https://javadoc.io/doc/org.jetbrains/annotations-java5/23.0.0/")
+        }
+    }
+}

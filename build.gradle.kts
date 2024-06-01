@@ -29,7 +29,7 @@ sonarqube {
 val jdProjects = listOf(
     ":mobchip-bukkit",
     ":mobchip-base",
-    ":mobchip-1_14_R1"
+    ":mobchip-1_17_R1"
 )
 
 tasks {
