@@ -97,4 +97,4 @@ gradle-app.setting
 
 hts*
 
-target/
+/*/target/
