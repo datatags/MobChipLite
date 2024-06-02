@@ -31,7 +31,7 @@ final class EntityCombatTracker1_17_R1 implements EntityCombatTracker {
 
     @Override
     public @Nullable CombatEntry getLatestEntry() {
-        return handle.i() == null ? null : ChipUtil1_17_R1.fromNMS(m, handle.i());
+        return handle.getLastEntry() == null ? null : ChipUtil1_17_R1.fromNMS(m, handle.getLastEntry());
     }
 
     @Override
@@ -64,17 +64,17 @@ final class EntityCombatTracker1_17_R1 implements EntityCombatTracker {
 
     @Override
     public int getCombatDuration() {
-        return handle.f();
+        return handle.getCombatDuration();
     }
 
     @Override
     public boolean isTakingDamage() {
-        return handle.d();
+        return handle.isTakingDamage();
     }
 
     @Override
     public boolean isInCombat() {
-        return handle.e();
+        return handle.isInCombat();
     }
 
     @Override

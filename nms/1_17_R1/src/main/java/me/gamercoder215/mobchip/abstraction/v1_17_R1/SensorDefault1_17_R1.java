@@ -2,9 +2,8 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 
 import me.gamercoder215.mobchip.ai.memories.Memory;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
-import net.minecraft.core.IRegistry;
-import net.minecraft.server.level.WorldServer;
-import net.minecraft.world.entity.EntityLiving;
+import net.minecraft.core.Registry;
+import net.minecraft.server.level.ServerLevel;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.World;
@@ -31,7 +30,7 @@ final class SensorDefault1_17_R1 implements Sensor<LivingEntity> {
 
     @Override
     public @NotNull List<Memory<?>> required() {
-        return handle.a().stream().map(ChipUtil1_17_R1::fromNMS).collect(Collectors.toList());
+        return handle.requires().stream().map(ChipUtil1_17_R1::fromNMS).collect(Collectors.toList());
     }
 
     @Override
@@ -56,7 +55,7 @@ final class SensorDefault1_17_R1 implements Sensor<LivingEntity> {
     @Override
     public void run(@NotNull World w, LivingEntity entity) {
         try {
-            Method doTick = net.minecraft.world.entity.ai.sensing.Sensor.class.getDeclaredMethod("a", WorldServer.class, EntityLiving.class);
+            Method doTick = net.minecraft.world.entity.ai.sensing.Sensor.class.getDeclaredMethod("a", ServerLevel.class, net.minecraft.world.entity.LivingEntity.class);
             doTick.setAccessible(true);
             doTick.invoke(handle, ChipUtil1_17_R1.toNMS(w), ChipUtil1_17_R1.toNMS(entity));
         } catch (ReflectiveOperationException e) {
@@ -70,10 +69,10 @@ final class SensorDefault1_17_R1 implements Sensor<LivingEntity> {
     public NamespacedKey getKey() {
         AtomicReference<NamespacedKey> key = new AtomicReference<>(NamespacedKey.minecraft("unknown"));
 
-        IRegistry.as.g()
-                .filter(s -> s.a().equals(handle))
+        Registry.SENSOR_TYPE.stream()
+                .filter(s -> s.create().equals(handle))
                 .findFirst()
-                .ifPresent(s -> key.set(ChipUtil1_17_R1.fromNMS(IRegistry.as.getKey(s))));
+                .ifPresent(s -> key.set(ChipUtil1_17_R1.fromNMS(Registry.SENSOR_TYPE.getKey(s))));
 
         return key.get();
     }

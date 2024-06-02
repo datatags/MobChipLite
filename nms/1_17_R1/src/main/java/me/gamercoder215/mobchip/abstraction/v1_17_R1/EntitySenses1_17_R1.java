@@ -3,10 +3,9 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 import com.google.common.collect.ImmutableList;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
-import net.minecraft.core.IRegistry;
-import net.minecraft.resources.MinecraftKey;
-import net.minecraft.world.entity.EntityInsentient;
-import net.minecraft.world.entity.ai.BehaviorController;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 final class EntitySenses1_17_R1 implements EntitySenses {
 
     private final Mob m;
-    private final EntityInsentient nmsMob;
+    private final net.minecraft.world.entity.Mob nmsMob;
 
     private final Map<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>> sensorsHandle = new HashMap<>();
 
@@ -34,9 +33,9 @@ final class EntitySenses1_17_R1 implements EntitySenses {
         this.nmsMob = ChipUtil1_17_R1.toNMS(m);
 
         try {
-            Field sensorsF = BehaviorController.class.getDeclaredField("e");
+            Field sensorsF = Brain.class.getDeclaredField("e");
             sensorsF.setAccessible(true);
-            Map<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>> sensors = (Map<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>>) sensorsF.get(nmsMob.getBehaviorController());
+            Map<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>> sensors = (Map<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>>) sensorsF.get(nmsMob.getBrain());
 
             sensorsHandle.putAll(sensors);
         } catch (ReflectiveOperationException e) {
@@ -52,10 +51,10 @@ final class EntitySenses1_17_R1 implements EntitySenses {
 
     private void save() {
         try {
-            Field sensorsF = BehaviorController.class.getDeclaredField("e");
+            Field sensorsF = Brain.class.getDeclaredField("e");
             sensorsF.setAccessible(true);
 
-            sensorsF.set(nmsMob.getBehaviorController(), sensorsHandle);
+            sensorsF.set(nmsMob.getBrain(), sensorsHandle);
         } catch (ReflectiveOperationException e) {
             Bukkit.getLogger().severe(e.getMessage());
             for (StackTraceElement st : e.getStackTrace()) Bukkit.getLogger().severe(st.toString());
@@ -83,14 +82,14 @@ final class EntitySenses1_17_R1 implements EntitySenses {
         if (!new ChipUtil1_17_R1().existsSensor(sensor.getKey())) throw new IllegalArgumentException("Unregistered Sensor: " + sensor.getKey());
 
         SensorType<?> type = ChipUtil1_17_R1.toNMSType(sensor);
-        MinecraftKey key = IRegistry.as.getKey(type);
+        ResourceLocation key = Registry.SENSOR_TYPE.getKey(type);
 
         Iterator<Map.Entry<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>>> it = sensorsHandle.entrySet().iterator();
 
         while (it.hasNext()) {
             Map.Entry<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>> entry = it.next();
             SensorType<?> currentType = entry.getKey();
-            MinecraftKey currentKey = IRegistry.as.getKey(currentType);
+            ResourceLocation currentKey = Registry.SENSOR_TYPE.getKey(currentType);
 
             if (currentKey.equals(key)) {
                 it.remove();
@@ -110,13 +109,13 @@ final class EntitySenses1_17_R1 implements EntitySenses {
     public void removeSensor(@NotNull NamespacedKey key) {
         if (!new ChipUtil1_17_R1().existsSensor(key)) throw new IllegalArgumentException("Unregistered Sensor: " + key);
 
-        MinecraftKey keyH = ChipUtil1_17_R1.toNMS(key);
+        ResourceLocation keyH = ChipUtil1_17_R1.toNMS(key);
         Iterator<Map.Entry<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>>> it = sensorsHandle.entrySet().iterator();
 
         while (it.hasNext()) {
             Map.Entry<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>> entry = it.next();
             SensorType<?> currentType = entry.getKey();
-            MinecraftKey currentKey = IRegistry.as.getKey(currentType);
+            ResourceLocation currentKey = Registry.SENSOR_TYPE.getKey(currentType);
 
             if (currentKey.equals(keyH)) {
                 it.remove();
@@ -137,7 +136,7 @@ final class EntitySenses1_17_R1 implements EntitySenses {
         AtomicBoolean b = new AtomicBoolean(false);
 
         for (SensorType<?> t : sensorsHandle.keySet()) {
-            MinecraftKey currentKey = IRegistry.as.getKey(t);
+            ResourceLocation currentKey = Registry.SENSOR_TYPE.getKey(t);
             if (ChipUtil1_17_R1.toNMS(key).equals(currentKey)) {
                 b.set(true);
                 break;

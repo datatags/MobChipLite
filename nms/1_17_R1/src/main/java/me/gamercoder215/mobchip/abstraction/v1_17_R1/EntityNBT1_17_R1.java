@@ -1,8 +1,7 @@
 package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 
 import me.gamercoder215.mobchip.nbt.EntityNBT;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.entity.EntityInsentient;
+import net.minecraft.nbt.CompoundTag;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,9 +12,9 @@ final class EntityNBT1_17_R1 extends NBTSection1_17_R1 implements EntityNBT {
     public EntityNBT1_17_R1(Mob m) {
         super(m);
         this.mob = m;
-        EntityInsentient handle = ChipUtil1_17_R1.toNMS(m);
-        NBTTagCompound root = new NBTTagCompound();
-        handle.d(root);
+        net.minecraft.world.entity.Mob handle = ChipUtil1_17_R1.toNMS(m);
+        CompoundTag root = new CompoundTag();
+        handle.saveWithoutId(root);
     }
 
     @Override

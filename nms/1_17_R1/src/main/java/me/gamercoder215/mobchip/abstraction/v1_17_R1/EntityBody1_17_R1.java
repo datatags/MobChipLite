@@ -3,16 +3,14 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 import me.gamercoder215.mobchip.EntityBody;
 import me.gamercoder215.mobchip.ai.animation.EntityAnimation;
 import me.gamercoder215.mobchip.util.Position;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.PacketPlayOutAnimation;
-import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
-import net.minecraft.world.EnumHand;
-import net.minecraft.world.entity.EntityInsentient;
-import net.minecraft.world.entity.EntityLiving;
-import net.minecraft.world.entity.EnumMainHand;
-import net.minecraft.world.entity.IEntitySelector;
-import net.minecraft.world.entity.ai.control.ControllerMove;
-import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
+import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.level.block.Blocks;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
@@ -31,19 +29,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 final class EntityBody1_17_R1 implements EntityBody {
-    private final EntityInsentient nmsMob;
+    private final net.minecraft.world.entity.Mob nmsMob;
     private final Mob m;
 
     public EntityBody1_17_R1(Mob m) {
-        this.nmsMob = ChipUtil1_17_R1.toNMS(m);
         this.m = m;
+        this.nmsMob = ChipUtil1_17_R1.toNMS(m);
     }
 
     private void update() {
-        PacketPlayOutEntityMetadata packet = new PacketPlayOutEntityMetadata(nmsMob.getId(), nmsMob.getDataWatcher(), true);
+        ClientboundSetEntityDataPacket packet = new ClientboundSetEntityDataPacket(nmsMob.getId(), nmsMob.getEntityData(), true);
 
         for (Player p : m.getWorld().getPlayers())
-            ((CraftPlayer) p).getHandle().b.sendPacket(packet);
+            ((CraftPlayer) p).getHandle().connection.send(packet);
     }
 
     /**
@@ -68,17 +66,17 @@ final class EntityBody1_17_R1 implements EntityBody {
 
     @Override
     public boolean canBreatheUnderwater() {
-        return nmsMob.dr();
+        return nmsMob.canBreatheUnderwater();
     }
 
     @Override
     public boolean shouldDiscardFriction() {
-        return nmsMob.dL();
+        return nmsMob.shouldDiscardFriction();
     }
 
     @Override
     public void setDiscardFriction(boolean discard) {
-        nmsMob.p(discard);
+        nmsMob.setDiscardFriction(discard);
     }
 
     /**
@@ -90,28 +88,28 @@ final class EntityBody1_17_R1 implements EntityBody {
      */
     @Override
     public InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand) {
-        final EnumHand h;
+        final net.minecraft.world.InteractionHand h;
 
-        if (hand == InteractionHand.OFF_HAND) h = EnumHand.b;
-        else h = EnumHand.a;
+        if (hand == InteractionHand.OFF_HAND) h = net.minecraft.world.InteractionHand.OFF_HAND;
+        else h = net.minecraft.world.InteractionHand.MAIN_HAND;
 
-        return switch (nmsMob.a(ChipUtil1_17_R1.toNMS(p), h)) {
-            case a -> InteractionResult.SUCCESS;
-            case b -> InteractionResult.CONSUME;
-            case c -> InteractionResult.CONSUME_PARTIAL;
-            case e -> InteractionResult.FAIL;
+        return switch (nmsMob.interact(ChipUtil1_17_R1.toNMS(p), h)) {
+            case SUCCESS -> InteractionResult.SUCCESS;
+            case CONSUME -> InteractionResult.CONSUME;
+            case CONSUME_PARTIAL -> InteractionResult.CONSUME_PARTIAL;
+            case FAIL -> InteractionResult.FAIL;
             default -> InteractionResult.PASS;
         };
     }
 
     @Override
     public boolean isSensitiveToWater() {
-        return nmsMob.ex();
+        return nmsMob.isSensitiveToWater();
     }
 
     @Override
     public boolean isAffectedByPotions() {
-        return nmsMob.eQ();
+        return nmsMob.isAffectedByPotions();
     }
 
     @Override
@@ -121,48 +119,48 @@ final class EntityBody1_17_R1 implements EntityBody {
 
     @Override
     public float getArmorCoverPercentage() {
-        return nmsMob.en();
+        return nmsMob.getArmorCoverPercentage();
     }
 
     @Override
     public void useItem(@Nullable InteractionHand hand) {
         if (hand == null) return;
 
-        final EnumHand h;
-        if (hand == InteractionHand.OFF_HAND) h = EnumHand.b;
-        else h = EnumHand.a;
+        final net.minecraft.world.InteractionHand h;
+        if (hand == InteractionHand.OFF_HAND) h = net.minecraft.world.InteractionHand.OFF_HAND;
+        else h = net.minecraft.world.InteractionHand.MAIN_HAND;
 
-        nmsMob.c(h);
+        nmsMob.startUsingItem(h);
     }
 
     @Override
     public boolean isUsingItem() {
-        return nmsMob.isHandRaised();
+        return nmsMob.isUsingItem();
     }
 
     @Override
     public boolean isFireImmune() {
-        return nmsMob.isFireProof();
+        return nmsMob.fireImmune();
     }
 
     @Override
     public boolean isSwinging() {
-        return nmsMob.aF;
+        return nmsMob.swinging;
     }
 
     @Override
     public boolean canRideUnderwater() {
-        return nmsMob.bC();
+        return nmsMob.rideableUnderWater();
     }
 
     @Override
     public boolean isInvisibleTo(@Nullable Player p) {
-        return nmsMob.c((EntityHuman) ChipUtil1_17_R1.toNMS(p));
+        return nmsMob.isInvisibleTo(ChipUtil1_17_R1.toNMS(p));
     }
 
     @Override
     public @NotNull InteractionHand getMainHand() {
-        if (nmsMob.getMainHand() == EnumMainHand.a) return InteractionHand.OFF_HAND;
+        if (nmsMob.getMainArm() == HumanoidArm.LEFT) return InteractionHand.OFF_HAND;
         return InteractionHand.MAIN_HAND;
     }
 
@@ -178,18 +176,18 @@ final class EntityBody1_17_R1 implements EntityBody {
 
     @Override
     public boolean isInCombat() {
-        return nmsMob.getCombatTracker().e();
+        return nmsMob.combatTracker.isInCombat();
     }
 
     @Override
     public float getFlyingSpeed() {
-        return nmsMob.bb;
+        return nmsMob.flyingSpeed;
     }
 
     @Override
     public void setFlyingSpeed(float speed) throws IllegalArgumentException {
         if (speed < 0 || speed > 1) throw new IllegalArgumentException("Flying speed must be between 0.0F and 1.0F");
-        nmsMob.bb = speed;
+        nmsMob.flyingSpeed = speed;
     }
 
     @Override
@@ -204,29 +202,29 @@ final class EntityBody1_17_R1 implements EntityBody {
 
     @Override
     public boolean isMoving() {
-        double x = nmsMob.locX() - nmsMob.u;
-        double z = nmsMob.locZ() - nmsMob.w;
+        double x = nmsMob.getX() - nmsMob.xo;
+        double z = nmsMob.getZ() - nmsMob.zo;
         return x * x + z * z > 2.500000277905201E-7D;
     }
 
     @Override
     public float getBodyRotation() {
-        return nmsMob.aX;
+        return nmsMob.yBodyRot;
     }
 
     @Override
     public void setBodyRotation(float rotation) {
-        nmsMob.aX = EntityBody.normalizeRotation(rotation);
+        nmsMob.yBodyRot = EntityBody.normalizeRotation(rotation);
     }
 
     @Override
     public float getHeadRotation() {
-        return nmsMob.aZ;
+        return nmsMob.yHeadRot;
     }
 
     @Override
     public void setHeadRotation(float rotation) {
-        nmsMob.aZ = EntityBody.normalizeRotation(rotation);
+        nmsMob.yHeadRot = EntityBody.normalizeRotation(rotation);
     }
 
     @Override
@@ -260,76 +258,76 @@ final class EntityBody1_17_R1 implements EntityBody {
     @Override
     public void playAnimation(@NotNull EntityAnimation anim) {
         switch (anim) {
-            case SPAWN -> nmsMob.doSpawnEffect();
-            case DAMAGE -> nmsMob.bv();
+            case SPAWN -> nmsMob.spawnAnim();
+            case DAMAGE -> nmsMob.animateHurt();
             case CRITICAL_DAMAGE -> {
-                PacketPlayOutAnimation pkt = new PacketPlayOutAnimation(nmsMob, 4);
+                ClientboundAnimatePacket pkt = new ClientboundAnimatePacket(nmsMob, 4);
                 for (Player p : ChipUtil1_17_R1.fromNMS(nmsMob).getWorld().getPlayers())
-                    ChipUtil1_17_R1.toNMS(p).b.sendPacket(pkt);
+                    ChipUtil1_17_R1.toNMS(p).connection.send(pkt);
             }
             case MAGICAL_CRITICAL_DAMAGE -> {
-                PacketPlayOutAnimation pkt = new PacketPlayOutAnimation(nmsMob, 5);
+                ClientboundAnimatePacket pkt = new ClientboundAnimatePacket(nmsMob, 5);
                 for (Player p : ChipUtil1_17_R1.fromNMS(nmsMob).getWorld().getPlayers())
-                    ChipUtil1_17_R1.toNMS(p).b.sendPacket(pkt);
+                    ChipUtil1_17_R1.toNMS(p).connection.send(pkt);
             }
         }
     }
 
     @Override
     public float getAnimationSpeed() {
-        return nmsMob.aS;
+        return nmsMob.animationSpeed;
     }
 
     @Override
     public void setAnimationSpeed(float speed) throws IllegalArgumentException {
         if (speed < 0) throw new IllegalArgumentException("Animation speed cannot be negative");
-        nmsMob.aS = speed;
+        nmsMob.animationSpeed = speed;
     }
 
     @Override
     public boolean hasVerticalCollision() {
-        return nmsMob.B;
+        return nmsMob.verticalCollision;
     }
 
     @Override
     public void setVerticalCollision(boolean collision) {
-        nmsMob.B = collision;
+        nmsMob.verticalCollision = collision;
     }
 
     @Override
     public boolean hasHorizontalCollision() {
-        return nmsMob.A;
+        return nmsMob.horizontalCollision;
     }
 
     @Override
     public void setHorizontalCollision(boolean collision) {
-        nmsMob.A = collision;
+        nmsMob.horizontalCollision = collision;
     }
 
     @Override
     public float getWalkDistance() {
-        return nmsMob.H;
+        return nmsMob.walkDist;
     }
 
     @Override
     public float getMoveDistance() {
-        return nmsMob.I;
+        return nmsMob.moveDist;
     }
 
     @Override
     public float getFlyDistance() {
-        return nmsMob.J;
+        return nmsMob.flyDist;
     }
 
     @Override
     public boolean isImmuneToExplosions() {
-        return nmsMob.cx();
+        return nmsMob.ignoreExplosion();
     }
 
     @Override
     public boolean isPeacefulCompatible() {
         try {
-            Method m = EntityInsentient.class.getDeclaredMethod("Q");
+            Method m = net.minecraft.world.entity.Mob.class.getDeclaredMethod("P");
             m.setAccessible(true);
             return (boolean) m.invoke(nmsMob);
         } catch (Exception e) {
@@ -339,22 +337,22 @@ final class EntityBody1_17_R1 implements EntityBody {
 
     @Override
     public boolean isInBubbleColumn() {
-        return nmsMob.t.getType(nmsMob.getChunkCoordinates()).a(Blocks.lq);
+        return nmsMob.level.getBlockState(nmsMob.blockPosition()).is(Blocks.BUBBLE_COLUMN);
     }
 
     @Override
     public boolean isInvulnerableTo(EntityDamageEvent.@Nullable DamageCause cause) {
-        return nmsMob.isInvulnerable(ChipUtil1_17_R1.toNMS(cause));
+        return nmsMob.isInvulnerableTo(ChipUtil1_17_R1.toNMS(cause));
     }
 
     @Override
     public int getMaxFallDistance() {
-        return nmsMob.ce();
+        return nmsMob.getMaxFallDistance();
     }
 
     @Override
     public boolean isPushableBy(@Nullable Entity entity) {
-        return IEntitySelector.a(ChipUtil1_17_R1.toNMS(entity)).test(ChipUtil1_17_R1.toNMS(entity));
+        return EntitySelector.pushableBy(ChipUtil1_17_R1.toNMS(entity)).test(ChipUtil1_17_R1.toNMS(entity));
     }
 
     @Override
@@ -379,12 +377,12 @@ final class EntityBody1_17_R1 implements EntityBody {
 
     @Override
     public float getMaxUpStep() {
-        return nmsMob.O;
+        return nmsMob.maxUpStep;
     }
 
     @Override
     public void setMaxUpStep(float maxUpStep) {
-        nmsMob.O = maxUpStep;
+        nmsMob.maxUpStep = maxUpStep;
     }
 
     @Override
@@ -397,12 +395,12 @@ final class EntityBody1_17_R1 implements EntityBody {
     public void setRiptideTicks(int ticks) {
         if (ticks < 0) throw new IllegalArgumentException("Riptide ticks cannot be negative");
         try {
-            Field f = EntityLiving.class.getDeclaredField("bC");
+            Field f = LivingEntity.class.getDeclaredField("bC");
             f.setAccessible(true);
             f.setInt(nmsMob, ticks);
 
-            if (!nmsMob.t.isClientSide()) {
-                Method setFlags = EntityLiving.class.getDeclaredMethod("c", int.class, boolean.class);
+            if (!nmsMob.level.isClientSide) {
+                Method setFlags = LivingEntity.class.getDeclaredMethod("c", int.class, boolean.class);
                 setFlags.setAccessible(true);
                 setFlags.invoke(nmsMob, 4, true);
             }
@@ -417,7 +415,7 @@ final class EntityBody1_17_R1 implements EntityBody {
     @Override
     public int getRiptideTicks() {
         try {
-            Field f = EntityLiving.class.getDeclaredField("bC");
+            Field f = LivingEntity.class.getDeclaredField("bC");
             f.setAccessible(true);
             return f.getInt(nmsMob);
         } catch (ReflectiveOperationException e) {
@@ -432,45 +430,45 @@ final class EntityBody1_17_R1 implements EntityBody {
 
     @Override
     public boolean shouldRenderFrom(double x, double y, double z) {
-        return nmsMob.j(x, y, z);
+        return nmsMob.shouldRender(x, y, z);
     }
 
     @Override
     public boolean shouldRenderFromSqr(double dist) {
-        return nmsMob.a(dist);
+        return nmsMob.shouldRenderAtSqrDistance(dist);
     }
 
     @Override
     public void sendTo(@NotNull Player p) {
-        Packet<?> packet = nmsMob.getPacket();
-        ((CraftPlayer) p).getHandle().b.sendPacket(packet);
+        Packet<?> packet = nmsMob.getAddEntityPacket();
+        ((CraftPlayer) p).getHandle().connection.send(packet);
     }
 
     @Override
     public void resetFallDistance() {
-        nmsMob.K = 0.0F;
+        nmsMob.fallDistance = 0.0F;
     }
 
     @Override
     public boolean isInUnloadedChunk() {
-        return nmsMob.cM();
+        return nmsMob.touchingUnloadedChunk();
     }
 
     @Override
     public void naturalKnockback(double force, double xForce, double zForce) {
-        nmsMob.p(force, xForce, zForce);
+        nmsMob.knockback(force, xForce, zForce);
     }
 
     @Override
     public void eat(@NotNull ItemStack item) {
-        nmsMob.a(ChipUtil1_17_R1.toNMS(m.getWorld()), ChipUtil1_17_R1.toNMS(item));
+        nmsMob.eat(ChipUtil1_17_R1.toNMS(m.getWorld()), ChipUtil1_17_R1.toNMS(item));
     }
 
     @Override
     public void setRotation(float yaw, float pitch) {
         try {
             if (m instanceof Slime) {
-                ControllerMove moveControl = nmsMob.getControllerMove();
+                MoveControl moveControl = nmsMob.getMoveControl();
 
                 Method setRotation = moveControl.getClass().getDeclaredMethod("a", float.class, boolean.class);
                 setRotation.setAccessible(true);
@@ -479,66 +477,66 @@ final class EntityBody1_17_R1 implements EntityBody {
         } catch (ReflectiveOperationException e) {
             Bukkit.getLogger().severe(e.getMessage());
             for (StackTraceElement ste : e.getStackTrace()) Bukkit.getLogger().severe(ste.toString());
-        }       
+        }
     }
 
     @Override
     public int getHurtTime() {
-        return nmsMob.aK;
+        return nmsMob.hurtTime;
     }
 
     @Override
     public void setHurtTime(int hurtTime) {
-        nmsMob.aK = hurtTime;
+        nmsMob.hurtTime = hurtTime;
     }
 
     @Override
     public int getHurtDuration() {
-        return nmsMob.aL;
+        return nmsMob.hurtDuration;
     }
 
     @Override
     public void setHurtDuration(int hurtDuration) {
-        nmsMob.aL = hurtDuration;
+        nmsMob.hurtDuration = hurtDuration;
     }
 
     @Override
     public int getDeathTime() {
-        return nmsMob.aN;
+        return nmsMob.deathTime;
     }
 
     @Override
     public void setDeathTime(int deathTime) {
-        nmsMob.aN = deathTime;
+        nmsMob.deathTime = deathTime;
     }
 
     @Override
     public float getForwardSpeed() {
-        return nmsMob.bq;
+        return nmsMob.zza;
     }
 
     @Override
     public void setForwardSpeed(float speed) {
-        nmsMob.u(speed);
+        nmsMob.setZza(speed);
     }
 
     @Override
     public float getSidewaysSpeed() {
-        return nmsMob.bo;
+        return nmsMob.xxa;
     }
 
     @Override
     public void setSidewaysSpeed(float speed) {
-        nmsMob.w(speed);
+        nmsMob.setXxa(speed);
     }
 
     @Override
     public float getUpwardSpeed() {
-        return nmsMob.bp;
+        return nmsMob.yya;
     }
 
     @Override
     public void setUpwardSpeed(float speed) {
-        nmsMob.v(speed);
+        nmsMob.setYya(speed);
     }
 }

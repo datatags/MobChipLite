@@ -14,7 +14,7 @@ listOf("base", "abstraction", "bukkit").forEach {
 }
 
 mapOf(
-    "1_17_R1" to 16,
+    "1_17_R1" to 17,
     "1_18_R1" to 17,
     "1_18_R2" to 17,
     "1_19_R1" to 17,

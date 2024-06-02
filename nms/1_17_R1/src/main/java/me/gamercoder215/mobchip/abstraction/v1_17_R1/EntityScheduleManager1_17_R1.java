@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import me.gamercoder215.mobchip.ai.schedule.Activity;
 import me.gamercoder215.mobchip.ai.schedule.EntityScheduleManager;
 import me.gamercoder215.mobchip.ai.schedule.Schedule;
-import net.minecraft.world.entity.EntityInsentient;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,8 +15,8 @@ import java.util.stream.Collectors;
 @SuppressWarnings("deprecation")
 final class EntityScheduleManager1_17_R1 implements EntityScheduleManager {
 
-    private final EntityInsentient nmsMob;
- 
+    private final net.minecraft.world.entity.Mob nmsMob;
+
     public EntityScheduleManager1_17_R1(Mob m) {
         this.nmsMob = ChipUtil1_17_R1.toNMS(m);
     }
@@ -25,64 +24,64 @@ final class EntityScheduleManager1_17_R1 implements EntityScheduleManager {
 
     @Override
     public @Nullable Schedule getCurrentSchedule() {
-        return ChipUtil1_17_R1.fromNMS(nmsMob.getBehaviorController().getSchedule());
+        return ChipUtil1_17_R1.fromNMS(nmsMob.getBrain().getSchedule());
     }
 
     @Override
     public void setSchedule(@NotNull Schedule s) {
-        nmsMob.getBehaviorController().setSchedule(ChipUtil1_17_R1.toNMS(s));
+        nmsMob.getBrain().setSchedule(ChipUtil1_17_R1.toNMS(s));
     }
 
     @Override
     public @NotNull Set<Activity> getActiveActivities() {
-        return nmsMob.getBehaviorController().c().stream().map(ChipUtil1_17_R1::fromNMS).collect(Collectors.toSet());
+        return nmsMob.getBrain().getActiveActivities().stream().map(ChipUtil1_17_R1::fromNMS).collect(Collectors.toSet());
     }
 
     @Override
     public void setDefaultActivity(@NotNull Activity a) {
-        nmsMob.getBehaviorController().b(ChipUtil1_17_R1.toNMS(a));
+        nmsMob.getBrain().setDefaultActivity(ChipUtil1_17_R1.toNMS(a));
     }
 
     @Override
     public void useDefaultActivity() {
-        nmsMob.getBehaviorController().e();
+        nmsMob.getBrain().useDefaultActivity();
     }
 
     @Override
     public void setRunningActivity(@NotNull Activity a) {
-        nmsMob.getBehaviorController().a(ChipUtil1_17_R1.toNMS(a));
+        nmsMob.getBrain().setActiveActivityIfPossible(ChipUtil1_17_R1.toNMS(a));
     }
 
     @Override
     public @Nullable Activity getRunningActivity() {
-        return nmsMob.getBehaviorController().f().isPresent() ? ChipUtil1_17_R1.fromNMS(nmsMob.getBehaviorController().f().get()) : null;
+        return nmsMob.getBrain().getActiveNonCoreActivity().isPresent() ? ChipUtil1_17_R1.fromNMS(nmsMob.getBrain().getActiveNonCoreActivity().get()) : null;
     }
 
     @Override
     public boolean isRunning(@NotNull Activity a) {
-        return nmsMob.getBehaviorController().c(ChipUtil1_17_R1.toNMS(a));
+        return nmsMob.getBrain().isActive(ChipUtil1_17_R1.toNMS(a));
     }
 
     @Override
     public int size() {
-        return nmsMob.getBehaviorController().d().size();
+        return nmsMob.getBrain().getRunningBehaviors().size();
     }
 
     @Override
     public boolean isEmpty() {
-        return nmsMob.getBehaviorController().d().isEmpty();
+        return nmsMob.getBrain().getRunningBehaviors().isEmpty();
     }
 
     @Nullable
     @Override
     public Consumer<Mob> put(@NotNull Activity key, Consumer<Mob> value) {
-        nmsMob.getBehaviorController().a(ChipUtil1_17_R1.toNMS(key), 0, ImmutableList.of(ChipUtil1_17_R1.toNMS(value)));
+        nmsMob.getBrain().addActivity(ChipUtil1_17_R1.toNMS(key), 0, ImmutableList.of(ChipUtil1_17_R1.toNMS(value)));
         return value;
     }
 
     @Override
     public void clear() {
-        nmsMob.getBehaviorController().g();
+        nmsMob.getBrain().removeAllBehaviors();
     }
 
 }

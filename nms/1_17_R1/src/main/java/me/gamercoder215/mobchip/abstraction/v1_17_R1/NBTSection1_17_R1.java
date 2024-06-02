@@ -3,6 +3,7 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
 import me.gamercoder215.mobchip.nbt.NBTSection;
 import net.minecraft.nbt.*;
+import net.minecraft.nbt.Tag;
 import org.bukkit.*;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
@@ -24,45 +25,45 @@ import java.util.stream.Collectors;
 @SuppressWarnings({"unchecked", "deprecation"})
 class NBTSection1_17_R1 implements NBTSection {
 
-    private final NBTTagCompound tag;
+    private final CompoundTag tag;
     private final Runnable saveFunc;
 
     private final String currentPath;
 
-    public NBTSection1_17_R1(NBTTagCompound tag, Runnable saveFunc, String path) {
+    public NBTSection1_17_R1(CompoundTag tag, Runnable saveFunc, String path) {
         this.tag = tag;
         this.saveFunc = saveFunc;
         this.currentPath = path;
     }
 
     public NBTSection1_17_R1(Mob m) {
-        this.tag = new NBTTagCompound();
+        this.tag = new CompoundTag();
         this.currentPath = "";
-        ChipUtil1_17_R1.toNMS(m).save(tag);
+        ChipUtil1_17_R1.toNMS(m).saveWithoutId(tag);
         this.saveFunc = () -> ChipUtil1_17_R1.toNMS(m).load(tag);
     }
 
-    static NBTBase serialize(Object v) {
+    static net.minecraft.nbt.Tag serialize(Object v) {
         if (v.getClass().isArray()) {
-            NBTTagList tag = new NBTTagList();
+            ListTag tag = new ListTag();
             for (int i = 0; i < Array.getLength(v); i++) tag.add(i, serialize(Array.get(v, i)));
             return tag;
         }
 
         if (v instanceof Collection<?>) {
             List<?> collection = new ArrayList<>((Collection<?>) v);
-            NBTTagCompound coll = new NBTTagCompound();
+            CompoundTag coll = new CompoundTag();
 
             try {
-                coll.setString(ChipUtil.CLASS_TAG, Collection.class.getName());
-                NBTTagList tag = new NBTTagList();
+                coll.putString(ChipUtil.CLASS_TAG, Collection.class.getName());
+                ListTag tag = new ListTag();
                 for (int i = 0; i < collection.size(); i++) tag.add(i, serialize(collection.get(i)));
-                coll.set("values", tag);
+                coll.put("values", tag);
 
-                Field idF = NBTTagList.class.getDeclaredField("w");
+                Field idF = ListTag.class.getDeclaredField("w");
                 idF.setAccessible(true);
 
-                coll.setByte("id", idF.getByte(tag));
+                coll.putByte("id", idF.getByte(tag));
             } catch (ReflectiveOperationException e) {
                 Bukkit.getLogger().severe("Failed to serialize collection: " + e.getMessage());
                 for (StackTraceElement ste : e.getStackTrace()) Bukkit.getLogger().severe(ste.toString());
@@ -72,116 +73,116 @@ class NBTSection1_17_R1 implements NBTSection {
         }
 
         if (v instanceof Map<?, ?> map) {
-            NBTTagCompound tag = new NBTTagCompound();
+            CompoundTag tag = new CompoundTag();
             for (Map.Entry<?, ?> entry : map.entrySet()) {
-                tag.set(entry.getKey().toString(), serialize(entry.getValue()));
+                tag.put(entry.getKey().toString(), serialize(entry.getValue()));
             }
             return tag;
         }
 
         if (v instanceof Enum<?> enumeration) {
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setString(ChipUtil.CLASS_TAG, enumeration.getClass().getName());
-            tag.setString("value", ((Enum<?>) v).name());
+            CompoundTag tag = new CompoundTag();
+            tag.putString(ChipUtil.CLASS_TAG, enumeration.getClass().getName());
+            tag.putString("value", ((Enum<?>) v).name());
             return tag;
         }
 
         if (v instanceof ConfigurationSerializable serializable) {
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setString(ChipUtil.CLASS_TAG, serializable.getClass().getName());
-            tag.set("value", serialize(serializable.serialize()));
+            CompoundTag tag = new CompoundTag();
+            tag.putString(ChipUtil.CLASS_TAG, serializable.getClass().getName());
+            tag.put("value", serialize(serializable.serialize()));
             return tag;
         }
 
         return switch (v.getClass().getSimpleName().toLowerCase()) {
-            case "short" -> NBTTagShort.a((short) v);
-            case "float" -> NBTTagFloat.a((float) v);
-            case "long" -> NBTTagLong.a((long) v);
-            case "byte" -> NBTTagByte.a((byte) v);
-            case "integer", "int" -> NBTTagInt.a((int) v);
-            case "double" -> NBTTagDouble.a((double) v);
+            case "short" -> ShortTag.valueOf((short) v);
+            case "float" -> FloatTag.valueOf((float) v);
+            case "long" -> LongTag.valueOf((long) v);
+            case "byte" -> ByteTag.valueOf((byte) v);
+            case "integer", "int" -> IntTag.valueOf((int) v);
+            case "double" -> DoubleTag.valueOf((double) v);
             case "uuid" -> {
                 UUID uid = (UUID) v;
-                NBTTagCompound uuid = new NBTTagCompound();
-                uuid.setString(ChipUtil.CLASS_TAG, uid.getClass().getName());
-                uuid.setLong("least", uid.getLeastSignificantBits());
-                uuid.setLong("most", uid.getMostSignificantBits());
+                CompoundTag uuid = new CompoundTag();
+                uuid.putString(ChipUtil.CLASS_TAG, uid.getClass().getName());
+                uuid.putLong("least", uid.getLeastSignificantBits());
+                uuid.putLong("most", uid.getMostSignificantBits());
                 yield uuid;
             }
             case "namespacedkey" -> {
                 NamespacedKey key = (NamespacedKey) v;
-                NBTTagCompound nmsKey = new NBTTagCompound();
-                nmsKey.setString(ChipUtil.CLASS_TAG, key.getClass().getName());
-                nmsKey.setString("namespace", key.getNamespace());
-                nmsKey.setString("key", key.getKey());
+                CompoundTag nmsKey = new CompoundTag();
+                nmsKey.putString(ChipUtil.CLASS_TAG, key.getClass().getName());
+                nmsKey.putString("namespace", key.getNamespace());
+                nmsKey.putString("key", key.getKey());
                 yield nmsKey;
             }
             case "itemstack" -> {
                 ItemStack item = (ItemStack) v;
-                NBTTagCompound stack = new NBTTagCompound();
-                stack.setString(ChipUtil.CLASS_TAG, item.getClass().getName());
-                stack.set("item", CraftItemStack.asNMSCopy(item).getOrCreateTag());
+                CompoundTag stack = new CompoundTag();
+                stack.putString(ChipUtil.CLASS_TAG, item.getClass().getName());
+                stack.put("item", CraftItemStack.asNMSCopy(item).getOrCreateTag());
 
                 yield stack;
             }
             case "offlineplayer" -> {
                 OfflinePlayer p = (OfflinePlayer) v;
-                NBTTagCompound player = new NBTTagCompound();
-                player.setString(ChipUtil.CLASS_TAG, OfflinePlayer.class.getName());
-                player.setString("id", p.getUniqueId().toString());
+                CompoundTag player = new CompoundTag();
+                player.putString(ChipUtil.CLASS_TAG, OfflinePlayer.class.getName());
+                player.putString("id", p.getUniqueId().toString());
 
                 yield player;
             }
             case "location" -> {
                 Location l = (Location) v;
-                NBTTagCompound loc = new NBTTagCompound();
-                loc.setString(ChipUtil.CLASS_TAG, l.getClass().getName());
-                loc.setDouble("x", l.getX());
-                loc.setDouble("y", l.getY());
-                loc.setDouble("z", l.getZ());
-                loc.setFloat("yaw", l.getYaw());
-                loc.setFloat("pitch", l.getPitch());
-                loc.setString("world", l.getWorld().getName());
+                CompoundTag loc = new CompoundTag();
+                loc.putString(ChipUtil.CLASS_TAG, l.getClass().getName());
+                loc.putDouble("x", l.getX());
+                loc.putDouble("y", l.getY());
+                loc.putDouble("z", l.getZ());
+                loc.putFloat("yaw", l.getYaw());
+                loc.putFloat("pitch", l.getPitch());
+                loc.putString("world", l.getWorld().getName());
                 yield loc;
             }
             case "vector" -> {
                 Vector vec = (Vector) v;
-                NBTTagCompound vector = new NBTTagCompound();
-                vector.setString(ChipUtil.CLASS_TAG, vec.getClass().getName());
-                vector.setDouble("x", vec.getX());
-                vector.setDouble("y", vec.getY());
-                vector.setDouble("z", vec.getZ());
+                CompoundTag vector = new CompoundTag();
+                vector.putString(ChipUtil.CLASS_TAG, vec.getClass().getName());
+                vector.putDouble("x", vec.getX());
+                vector.putDouble("y", vec.getY());
+                vector.putDouble("z", vec.getZ());
                 yield vector;
             }
             case "color" -> {
                 Color color = (Color) v;
-                NBTTagCompound clr = new NBTTagCompound();
-                clr.setString(ChipUtil.CLASS_TAG, color.getClass().getName());
-                clr.setInt("rgb", color.asRGB());
+                CompoundTag clr = new CompoundTag();
+                clr.putString(ChipUtil.CLASS_TAG, color.getClass().getName());
+                clr.putInt("rgb", color.asRGB());
                 yield clr;
             }
             case "eulerangle" -> {
                 EulerAngle angle = (EulerAngle) v;
-                NBTTagCompound euler = new NBTTagCompound();
-                euler.setString(ChipUtil.CLASS_TAG, angle.getClass().getName());
-                euler.setDouble("x", angle.getX());
-                euler.setDouble("y", angle.getY());
-                euler.setDouble("z", angle.getZ());
+                CompoundTag euler = new CompoundTag();
+                euler.putString(ChipUtil.CLASS_TAG, angle.getClass().getName());
+                euler.putDouble("x", angle.getX());
+                euler.putDouble("y", angle.getY());
+                euler.putDouble("z", angle.getZ());
                 yield euler;
             }
-            default -> NBTTagString.a(v.toString());
+            default -> StringTag.valueOf(v.toString());
         };
     }
 
-    static Object deserialize(NBTBase v) {
-        if (v instanceof NBTTagList list) {
+    static Object deserialize(Tag v) {
+        if (v instanceof ListTag list) {
             List<Object> l = new ArrayList<>();
             list.stream().map(NBTSection1_17_R1::deserialize).forEach(l::add);
             return l.toArray();
         }
 
-        if (v instanceof NBTTagCompound cmp) {
-            boolean isClass = cmp.get(ChipUtil.CLASS_TAG) != null && cmp.get(ChipUtil.CLASS_TAG) instanceof NBTTagString && !cmp.getString(ChipUtil.CLASS_TAG).isEmpty();
+        if (v instanceof CompoundTag cmp) {
+            boolean isClass = cmp.get(ChipUtil.CLASS_TAG) != null && cmp.get(ChipUtil.CLASS_TAG) instanceof StringTag && !cmp.getString(ChipUtil.CLASS_TAG).isEmpty();
 
             if (isClass) {
                 String className = cmp.getString(ChipUtil.CLASS_TAG);
@@ -210,12 +211,12 @@ class NBTSection1_17_R1 implements NBTSection {
                     return switch (clazz.getSimpleName()) {
                         case "map" -> {
                             Map<String, Object> map = new HashMap<>();
-                            for (String key : cmp.getKeys()) map.put(key, deserialize(cmp.get(key)));
+                            for (String key : cmp.getAllKeys()) map.put(key, deserialize(cmp.get(key)));
                             yield map;
                         }
                         case "collection" -> {
                             int id = cmp.getInt("id");
-                            NBTTagList list = cmp.getList("values", id);
+                            ListTag list = cmp.getList("values", id);
 
                             List<? super Object> l = new ArrayList<>();
                             list.stream().map(NBTSection1_17_R1::deserialize).forEach(l::add);
@@ -236,8 +237,8 @@ class NBTSection1_17_R1 implements NBTSection {
                             yield new NamespacedKey(namespace, key);
                         }
                         case "itemstack" -> {
-                            NBTTagCompound item = cmp.getCompound("item");
-                            yield CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.a(item));
+                            CompoundTag item = cmp.getCompound("item");
+                            yield CraftItemStack.asBukkitCopy(net.minecraft.world.item.ItemStack.of(item));
                         }
                         case "location" -> {
                             String world = cmp.getString("world");
@@ -273,20 +274,20 @@ class NBTSection1_17_R1 implements NBTSection {
                 }
             } else {
                 Map<String, Object> map = new HashMap<>();
-                for (String key : cmp.getKeys()) map.put(key, deserialize(cmp.get(key)));
+                for (String key : cmp.getAllKeys()) map.put(key, deserialize(cmp.get(key)));
                 return map;
             }
         }
 
-        return switch (v.getTypeId()) {
-            case 1 -> ((NBTTagByte) v).asByte();
-            case 2 -> ((NBTTagShort) v).asShort();
-            case 3 -> ((NBTTagInt) v).asInt();
-            case 4 -> ((NBTTagLong) v).asLong();
-            case 5 -> ((NBTTagFloat) v).asFloat();
-            case 6 -> ((NBTTagDouble) v).asDouble();
-            case 7 -> ((NBTTagByteArray) v).getBytes();
-            default -> v.asString();
+        return switch (v.getId()) {
+            case 1 -> ((ByteTag) v).getAsByte();
+            case 2 -> ((ShortTag) v).getAsShort();
+            case 3 -> ((IntTag) v).getAsInt();
+            case 4 -> ((LongTag) v).getAsLong();
+            case 5 -> ((FloatTag) v).getAsFloat();
+            case 6 -> ((DoubleTag) v).getAsDouble();
+            case 7 -> ((ByteArrayTag) v).getAsByteArray();
+            default -> v.getAsString();
         };
     }
 
@@ -301,10 +302,10 @@ class NBTSection1_17_R1 implements NBTSection {
 
     @Override
     public @NotNull Map<String, Object> getValues(boolean deep) {
-        Map<String, Object> map = tag.getKeys().stream().filter(k -> !(tag.get(k) instanceof NBTTagCompound)).collect(Collectors.toMap(Function.identity(), k -> deserialize(tag.get(k))));
+        Map<String, Object> map = tag.getAllKeys().stream().filter(k -> !(tag.get(k) instanceof CompoundTag)).collect(Collectors.toMap(Function.identity(), k -> deserialize(tag.get(k))));
         if (!deep) return map;
 
-        tag.getKeys().stream().filter(k -> (tag.get(k) instanceof NBTTagCompound)).forEach(s -> {
+        tag.getAllKeys().stream().filter(k -> (tag.get(k) instanceof CompoundTag)).forEach(s -> {
             NBTSection sec = getSection(s);
             sec.getValues(true).forEach((k, v) -> map.put(s + "." + k, v));
         });
@@ -318,13 +319,13 @@ class NBTSection1_17_R1 implements NBTSection {
         if (key.equals(ChipUtil.CLASS_TAG)) return;
 
         if (value == null) tag.remove(key);
-        else tag.set(key, serialize(value));
+        else tag.put(key, serialize(value));
         save();
     }
 
     @Override
     public boolean isSet(@Nullable String key) {
-        return tag.hasKey(key);
+        return tag.contains(key);
     }
 
     @Override
@@ -595,7 +596,7 @@ class NBTSection1_17_R1 implements NBTSection {
 
     @Override
     public @NotNull NBTSection getOrCreateSection(@NotNull String key) throws IllegalArgumentException {
-        return getSection(key, new NBTSection1_17_R1(new NBTTagCompound(), this::save, currentPath + "." + key));
+        return getSection(key, new NBTSection1_17_R1(new CompoundTag(), this::save, currentPath + "." + key));
     }
 
     @Override
@@ -607,7 +608,7 @@ class NBTSection1_17_R1 implements NBTSection {
 
     @Override
     public boolean isSection(@Nullable String key) {
-        return isSet(key) && tag.get(key) instanceof NBTTagCompound && tag.getCompound(key).getString(ChipUtil.CLASS_TAG).isEmpty();
+        return isSet(key) && tag.get(key) instanceof CompoundTag && tag.getCompound(key).getString(ChipUtil.CLASS_TAG).isEmpty();
     }
 
     @Override

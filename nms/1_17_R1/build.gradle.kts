@@ -1,31 +1,36 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import io.github.patrick.gradle.remapper.RemapTask
+
+plugins {
+    id("io.github.patrick.remapper") version "1.4.1"
+}
+
 val mcVersion = "1.17.1"
 
 dependencies {
     api(project(":mobchip-base"))
     api(project(":mobchip-abstraction"))
 
-    compileOnly("org.spigotmc:spigot-api:$mcVersion-R0.1-SNAPSHOT")
-    compileOnly("org.spigotmc:spigot:$mcVersion-R0.1-SNAPSHOT")
-    testImplementation("org.spigotmc:spigot-api:$mcVersion-R0.1-SNAPSHOT")
-    testImplementation("org.spigotmc:spigot:$mcVersion-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot:$mcVersion-R0.1-SNAPSHOT:remapped-mojang")
+    testImplementation("org.spigotmc:spigot:$mcVersion-R0.1-SNAPSHOT:remapped-mojang")
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_16
-    targetCompatibility = JavaVersion.VERSION_16
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks {
-    javadoc {
-        enabled = true
+    assemble {
+        dependsOn("remap")
+    }
 
-        source.removeAll { it.path.contains("abstraction") }
+    remap {
+        dependsOn("shadowJar")
 
-        options {
-            require(this is StandardJavadocDocletOptions)
-
-            links("https://hub.spigotmc.org/javadocs/spigot/")
-            links("https://javadoc.io/doc/org.jetbrains/annotations-java5/23.0.0/")
-        }
+        inputTask.set(getByName<ShadowJar>("shadowJar"))
+        version.set(mcVersion)
+        action.set(RemapTask.Action.MOJANG_TO_SPIGOT)
+        archiveName.set("${project.name}-${project.version}.jar")
     }
 }

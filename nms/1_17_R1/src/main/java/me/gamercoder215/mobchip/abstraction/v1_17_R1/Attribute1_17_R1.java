@@ -1,25 +1,25 @@
 package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 
 import me.gamercoder215.mobchip.ai.attribute.Attribute;
-import net.minecraft.core.IRegistry;
-import net.minecraft.world.entity.ai.attributes.AttributeRanged;
+import net.minecraft.core.Registry;
+import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_17_R1.util.CraftNamespacedKey;
 import org.jetbrains.annotations.NotNull;
 
-final class Attribute1_17_R1 extends AttributeRanged implements Attribute {
+final class Attribute1_17_R1 extends RangedAttribute implements Attribute {
 
     private final NamespacedKey key;
     private final double defaultV;
     private final double min;
     private final double max;
 
-    public Attribute1_17_R1(AttributeRanged a) {
-        super(a.getName(), a.getDefault(), a.d(), a.e());
-        this.key = IRegistry.al.getKey(a) == null ? NamespacedKey.minecraft(a.getName()) : CraftNamespacedKey.fromMinecraft(IRegistry.al.getKey(a));
-        this.defaultV = a.getDefault();
-        this.min = a.d();
-        this.max = a.e();
+    public Attribute1_17_R1(RangedAttribute a) {
+        super(a.getDescriptionId(), a.getDefaultValue(), a.getMinValue(), a.getMaxValue());
+        this.key = Registry.ATTRIBUTE.getKey(a) == null ? NamespacedKey.minecraft(a.getDescriptionId()) : CraftNamespacedKey.fromMinecraft(Registry.ATTRIBUTE.getKey(a));
+        this.defaultV = a.getDefaultValue();
+        this.min = a.getMinValue();
+        this.max = a.getMaxValue();
     }
 
     public Attribute1_17_R1(NamespacedKey key, double defaultV, double min, double max, boolean clientSide) {
@@ -28,7 +28,7 @@ final class Attribute1_17_R1 extends AttributeRanged implements Attribute {
         this.min = min;
         this.defaultV = defaultV;
         this.max = max;
-        this.a(clientSide);
+        this.setSyncable(clientSide);
     }
 
     public double getMinValue() {
@@ -45,7 +45,7 @@ final class Attribute1_17_R1 extends AttributeRanged implements Attribute {
 
     @Override
     public boolean isClientSide() {
-        return b();
+        return isClientSyncable();
     }
 
     @NotNull

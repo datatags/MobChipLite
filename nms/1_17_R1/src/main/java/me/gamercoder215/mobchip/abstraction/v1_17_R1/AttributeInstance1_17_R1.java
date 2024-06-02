@@ -3,7 +3,6 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 import com.google.common.base.Preconditions;
 import me.gamercoder215.mobchip.ai.attribute.Attribute;
 import me.gamercoder215.mobchip.ai.attribute.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifiable;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.craftbukkit.v1_17_R1.attribute.CraftAttributeInstance;
 import org.jetbrains.annotations.NotNull;
@@ -13,10 +12,10 @@ import java.util.stream.Collectors;
 
 final class AttributeInstance1_17_R1 implements AttributeInstance {
 
-    private final AttributeModifiable handle;
+    private final net.minecraft.world.entity.ai.attributes.AttributeInstance handle;
     private final Attribute a;
 
-    public AttributeInstance1_17_R1(Attribute a, AttributeModifiable handle) {
+    public AttributeInstance1_17_R1(Attribute a, net.minecraft.world.entity.ai.attributes.AttributeInstance handle) {
         this.a = a;
         this.handle = handle;
     }
@@ -33,7 +32,7 @@ final class AttributeInstance1_17_R1 implements AttributeInstance {
 
     @Override
     public void setBaseValue(double v) {
-        handle.setValue(v);
+        handle.setBaseValue(v);
     }
 
     @NotNull
@@ -45,7 +44,7 @@ final class AttributeInstance1_17_R1 implements AttributeInstance {
     @Override
     public void addModifier(@NotNull AttributeModifier mod) {
         Preconditions.checkArgument(mod != null, "modifier");
-        handle.addModifier(CraftAttributeInstance.convert(mod));
+        handle.addPermanentModifier(CraftAttributeInstance.convert(mod));
     }
 
     @Override
@@ -61,6 +60,6 @@ final class AttributeInstance1_17_R1 implements AttributeInstance {
 
     @Override
     public double getDefaultValue() {
-        return handle.getAttribute().getDefault();
+        return handle.getAttribute().getDefaultValue();
     }
 }

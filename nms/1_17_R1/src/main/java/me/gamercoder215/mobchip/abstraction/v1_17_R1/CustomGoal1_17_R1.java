@@ -1,9 +1,9 @@
 package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 
 import me.gamercoder215.mobchip.ai.goal.CustomPathfinder;
-import net.minecraft.world.entity.ai.goal.PathfinderGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
 
-final class CustomGoal1_17_R1 extends PathfinderGoal {
+final class CustomGoal1_17_R1 extends Goal {
 
     private final CustomPathfinder p;
 
@@ -12,32 +12,35 @@ final class CustomGoal1_17_R1 extends PathfinderGoal {
     }
 
     @Override
-    public boolean a() {
+    public boolean canUse() {
         return p.canStart();
     }
     @Override
-    public boolean b() {
+    public boolean canContinueToUse() {
         return p.canContinueToUse();
     }
     @Override
-    public boolean C_() {
+    public boolean isInterruptable() {
         return p.canInterrupt();
     }
 
     @Override
-    public void c() {
+    public void start() {
         p.start();
     }
 
     @Override
-    public void e() {
+    public void tick() {
         p.tick();
     }
 
     @Override
-    public void d() { p.stop(); }
+    public void stop() {
+        p.stop();
+    }
 
     public CustomPathfinder getPathfinder() {
         return p;
     }
+
 }

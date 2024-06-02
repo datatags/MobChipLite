@@ -3,8 +3,8 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
 import me.gamercoder215.mobchip.ai.navigation.NavigationPath;
 import me.gamercoder215.mobchip.util.Position;
-import net.minecraft.world.level.pathfinder.PathEntity;
-import net.minecraft.world.level.pathfinder.PathPoint;
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 final class NavigationPath1_17_R1 implements NavigationPath {
     private String name;
     private final Mob m;
-    private final PathEntity handle;
+    private final Path handle;
     private double speedMod;
 
-    public NavigationPath1_17_R1(@NotNull PathEntity nms, @NotNull Mob m, double speedMod) {
+    public NavigationPath1_17_R1(@NotNull Path nms, @NotNull Mob m, double speedMod) {
         this.m = m;
         this.name = "bukkitpath";
         this.handle = nms;
@@ -31,7 +31,7 @@ final class NavigationPath1_17_R1 implements NavigationPath {
         try {
             Field points = this.handle.getClass().getDeclaredField("a");
             points.setAccessible(true);
-            List<PathPoint> pathPoints = (List<PathPoint>) points.get(this.handle);
+            List<Node> pathPoints = (List<Node>) points.get(this.handle);
 
             nodes.addAll(pathPoints.stream()
                     .map(ChipUtil1_17_R1::fromNMS)
@@ -50,10 +50,10 @@ final class NavigationPath1_17_R1 implements NavigationPath {
     public void advance() {
         if (isDone()) throw new IllegalArgumentException("Path is already done");
 
-        PathPoint n = handle.h();
-        new EntityController1_17_R1(m).moveTo(n.a, n.b, n.c, speedMod);
+        Node n = handle.getNextNode();
+        new EntityController1_17_R1(m).moveTo(n.x, n.y, n.z, speedMod);
 
-        this.handle.a();
+        this.getHandle().advance();
     }
 
     /**
@@ -74,6 +74,10 @@ final class NavigationPath1_17_R1 implements NavigationPath {
         this.name = name;
     }
 
+    public Path getHandle() {
+        return this.handle;
+    }
+
     /**
      * Whether this NavigationPath is complete.
      *
@@ -81,7 +85,7 @@ final class NavigationPath1_17_R1 implements NavigationPath {
      */
     @Override
     public boolean isDone() {
-        return this.handle.c();
+        return this.handle.isDone();
     }
 
     /**

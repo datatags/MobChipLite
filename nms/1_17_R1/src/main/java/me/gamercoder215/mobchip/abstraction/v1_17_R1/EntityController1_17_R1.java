@@ -2,12 +2,11 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 
 import me.gamercoder215.mobchip.ai.controller.EntityController;
 import me.gamercoder215.mobchip.ai.controller.NaturalMoveType;
-import net.minecraft.world.entity.EntityInsentient;
-import net.minecraft.world.entity.EnumMoveType;
-import net.minecraft.world.entity.ai.control.ControllerJump;
-import net.minecraft.world.entity.ai.control.ControllerLook;
-import net.minecraft.world.entity.ai.control.ControllerMove;
-import net.minecraft.world.phys.Vec3D;
+import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.ai.control.JumpControl;
+import net.minecraft.world.entity.ai.control.LookControl;
+import net.minecraft.world.entity.ai.control.MoveControl;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.entity.Mob;
 import org.bukkit.util.Vector;
@@ -15,19 +14,19 @@ import org.jetbrains.annotations.NotNull;
 
 final class EntityController1_17_R1 implements EntityController {
 
-    private final ControllerJump jumpC;
-    private final ControllerMove moveC;
-    private final ControllerLook lookC;
+    private final JumpControl jumpC;
+    private final MoveControl moveC;
+    private final LookControl lookC;
 
     private final Mob m;
 
-    private final EntityInsentient nms;
+    private final net.minecraft.world.entity.Mob nms;
 
     public EntityController1_17_R1(Mob m) {
-        EntityInsentient nms = ChipUtil1_17_R1.toNMS(m);
-        this.lookC = nms.getControllerLook();
-        this.moveC = nms.getControllerMove();
-        this.jumpC = nms.getControllerJump();
+        net.minecraft.world.entity.Mob nms = ChipUtil1_17_R1.toNMS(m);
+        this.lookC = nms.getLookControl();
+        this.moveC = nms.getMoveControl();
+        this.jumpC = nms.getJumpControl();
         this.m = m;
         this.nms = nms;
     }
@@ -35,7 +34,7 @@ final class EntityController1_17_R1 implements EntityController {
     @Override
     public EntityController jump() {
         jumpC.jump();
-        jumpC.b();
+        jumpC.tick();
         return this;
     }
 
@@ -45,27 +44,27 @@ final class EntityController1_17_R1 implements EntityController {
         int x = dir.getBlockX();
         int y = dir.getBlockY();
         int z = dir.getBlockZ();
-        return lookC.e() == x && lookC.f() == y && lookC.g() == z;
+        return lookC.getWantedX() == x && lookC.getWantedY() == y && lookC.getWantedZ() == z;
     }
 
     @Override
     public EntityController moveTo(double x, double y, double z, double speedMod) {
-        moveC.a(x, y, z, speedMod);
-        moveC.a();
-        nms.getNavigation().a(moveC.d(), moveC.e(), moveC.f(), moveC.c());
-        nms.getNavigation().c();
+        moveC.setWantedPosition(x, y, z, speedMod);
+        moveC.tick();
+        nms.getNavigation().moveTo(moveC.getWantedX(), moveC.getWantedY(), moveC.getWantedZ(), moveC.getSpeedModifier());
+        nms.getNavigation().tick();
         return this;
     }
 
     @Override
     public EntityController naturalMoveTo(double x, double y, double z, NaturalMoveType type) {
-        Vec3D vec = new Vec3D(x, y, z);
-        EnumMoveType m = switch (type) {
-            default -> EnumMoveType.a;
-            case PLAYER -> EnumMoveType.b;
-            case PISTON -> EnumMoveType.c;
-            case SHULKER_BOX -> EnumMoveType.d;
-            case SHULKER -> EnumMoveType.e;
+        Vec3 vec = new Vec3(x, y, z);
+        MoverType m = switch (type) {
+            default -> MoverType.SELF;
+            case PLAYER -> MoverType.PLAYER;
+            case PISTON -> MoverType.PISTON;
+            case SHULKER_BOX -> MoverType.SHULKER_BOX;
+            case SHULKER -> MoverType.SHULKER;
         };
 
         nms.move(m, vec);
@@ -74,45 +73,46 @@ final class EntityController1_17_R1 implements EntityController {
 
     @Override
     public EntityController strafe(float fwd, float right) {
-        moveC.a(fwd, right);
-        moveC.a();
-        nms.getNavigation().a(moveC.d(), moveC.e(), moveC.f(), moveC.c());
-        nms.getNavigation().c();
+        moveC.strafe(fwd, right);
+        moveC.tick();
+        nms.getNavigation().moveTo(moveC.getWantedX(), moveC.getWantedY(), moveC.getWantedZ(), moveC.getSpeedModifier());
+        nms.getNavigation().tick();
         return this;
     }
 
+
     @Override
     public double getCurrentSpeedModifier() {
-        return moveC.c();
+        return moveC.getSpeedModifier();
     }
 
     @Override
     public Location getTargetMoveLocation() {
-        return new Location(m.getWorld(), moveC.d(), moveC.e(), moveC.f());
+        return new Location(m.getWorld(), moveC.getWantedX(), moveC.getWantedY(), moveC.getWantedZ());
     }
 
     @Override
     public Location getTargetLookLocation() {
-        return new Location(m.getWorld(), lookC.e(), lookC.f(), lookC.g());
+        return new Location(m.getWorld(), lookC.getWantedX(), lookC.getWantedY(), lookC.getWantedZ());
     }
 
     @Override
     public EntityController lookAt(double x, double y, double z) {
-        lookC.a(x, y, z);
-        lookC.a();
+        lookC.setLookAt(x, y, z);
+        lookC.tick();
         return this;
     }
 
     @Override
     public @NotNull Vector getDeltaMovement() {
-        Vec3D delta = nms.getMot();
-        return new Vector(delta.getX(), delta.getY(), delta.getZ());
+        Vec3 delta = nms.getDeltaMovement();
+        return new Vector(delta.x, delta.y, delta.z);
     }
 
     @Override
     public void setDeltaMovement(@NotNull Vector delta) {
-        Vec3D vec = new Vec3D(delta.getX(), delta.getY(), delta.getZ());
-        nms.setMot(vec);
+        Vec3 vec = new Vec3(delta.getX(), delta.getY(), delta.getZ());
+        nms.setDeltaMovement(vec);
     }
 
 }

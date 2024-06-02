@@ -3,9 +3,9 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 import me.gamercoder215.mobchip.ai.navigation.EntityNavigation;
 import me.gamercoder215.mobchip.ai.navigation.NavigationPath;
 import me.gamercoder215.mobchip.util.Position;
-import net.minecraft.world.entity.ai.navigation.NavigationAbstract;
-import net.minecraft.world.level.pathfinder.PathEntity;
-import net.minecraft.world.level.pathfinder.PathPoint;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +14,7 @@ import java.util.List;
 
 final class EntityNavigation1_17_R1 implements EntityNavigation {
 
-    private final NavigationAbstract handle;
+    private final PathNavigation handle;
 
     private int speedMod;
     private int range;
@@ -44,7 +44,7 @@ final class EntityNavigation1_17_R1 implements EntityNavigation {
 
     @Override
     public EntityNavigation recompute() {
-        this.handle.j();
+        this.handle.recomputePath();
         return this;
     }
 
@@ -72,10 +72,10 @@ final class EntityNavigation1_17_R1 implements EntityNavigation {
         return this;
     }
 
-    private List<PathPoint> toNodes() {
-        List<PathPoint> nodes = new ArrayList<>();
+    private List<Node> toNodes() {
+        List<Node> nodes = new ArrayList<>();
         for (Position p : this.points)
-            nodes.add(new PathPoint(p.getX(), p.getY(), p.getZ()));
+            nodes.add(new Node(p.getX(), p.getY(), p.getZ()));
 
         return nodes;
     }
@@ -85,7 +85,7 @@ final class EntityNavigation1_17_R1 implements EntityNavigation {
     public NavigationPath buildPath() {
         if (this.points.isEmpty()) throw new IllegalArgumentException("Path is empty");
 
-        return new NavigationPath1_17_R1(new PathEntity(toNodes(), null, true), m, speedMod);
+        return new NavigationPath1_17_R1(new Path(toNodes(), null, true), m, speedMod);
     }
 
     @Override

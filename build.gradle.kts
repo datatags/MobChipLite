@@ -144,8 +144,6 @@ allprojects {
     }
 }
 
-val jvmVersion = JavaVersion.VERSION_1_8
-
 subprojects {
     apply<JacocoPlugin>()
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -161,11 +159,6 @@ subprojects {
 
         compileOnly("org.jetbrains:annotations:24.1.0")
         compileOnly("org.jetbrains.kotlin:kotlin-stdlib")
-    }
-
-    java {
-        sourceCompatibility = jvmVersion
-        targetCompatibility = jvmVersion
     }
 
     tasks {
