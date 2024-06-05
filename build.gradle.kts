@@ -173,12 +173,6 @@ subprojects {
             options.compilerArgs.addAll(listOf("-Xlint:all", "-Xlint:-processing", "-Xlint:-options"))
         }
 
-        compileKotlin {
-            compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_1_8)
-            }
-        }
-
         jacocoTestReport {
             dependsOn(test)
 

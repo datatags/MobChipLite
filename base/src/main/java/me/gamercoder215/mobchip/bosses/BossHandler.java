@@ -14,14 +14,14 @@ import org.bukkit.plugin.Plugin;
  * Represents a Boss Handler
  */
 public final class BossHandler {
-    
+
     private final Plugin plugin;
     private final Boss<?> boss;
 
     BossHandler(Boss<?> boss, Plugin p) {
-        new BossEvents(this);
         this.plugin = p;
         this.boss = boss;
+        new BossEvents(this);
     }
 
     /**
