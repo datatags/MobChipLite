@@ -29,7 +29,7 @@ tasks {
         jdProjects.forEach { dependsOn(project(it).tasks["javadoc"]) }
 
         enabled = true
-        title = "MobChip $version API"
+        title = "MobChipLite $version API"
 
         source = files(jdProjects.map { project(it).sourceSets["main"].allJava }).asFileTree
         classpath = files(jdProjects.map { project(it).sourceSets["main"].compileClasspath })
