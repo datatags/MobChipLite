@@ -14,17 +14,9 @@ plugins {
 
 val pGroup = "me.gamercoder215"
 val pVersion = "1.10.1-SNAPSHOT"
-val pAuthor = "gmitch215"
+val pAuthor = "datatags" // Originally "gmitch215"
 
-val github = "$pAuthor/MobChip"
-
-sonarqube {
-    properties {
-        property("sonar.projectKey", "GamerCoder215_MobChip")
-        property("sonar.organization", "gmitch215")
-        property("sonar.host.url", "https://sonarcloud.io")
-    }
-}
+val github = "$pAuthor/MobChipLite" // Originally "$pAuthor/MobChip"
 
 val jdProjects = listOf(
     ":mobchip-bukkit",
@@ -101,8 +93,6 @@ allprojects {
                         developer {
                             id.set(pAuthor)
                             roles.add("Owner")
-                            email.set("me@gmitch215.xyz")
-                            organization.set("Team Inceptus")
                         }
                     }
 
