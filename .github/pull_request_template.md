@@ -6,9 +6,6 @@ _I want x to be added because y doesn't work._
 
 ## Tested Environments
 
-### OS
-OS: 
-
 ### Java / Minecraft
 
 #### MC Builds
@@ -17,8 +14,8 @@ OS:
 
 #### JDK Builds
 Tested on:
-- [ ] JDK Version 8/11
-- [ ] JDK Version 17/18
+- [ ] JDK Version 17
+- [ ] JDK Version 21
 
 ## Demonstration
 _Screenshots or any other info, if you please._
