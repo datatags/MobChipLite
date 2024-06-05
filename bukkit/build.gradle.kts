@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val versions = mapOf(
-    "1_17_R1" to 16,
+    "1_17_R1" to 17,
     "1_18_R1" to 17,
     "1_18_R2" to 17,
     "1_19_R1" to 17,
@@ -32,6 +32,8 @@ dependencies {
 
 java {
     withJavadocJar()
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 sourceSets["main"].allJava.srcDir("src/main/javadoc")
