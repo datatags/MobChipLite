@@ -39,9 +39,7 @@ sourceSets["main"].allJava.srcDir("src/main/javadoc")
 tasks {
     compileJava {
         for (version in versions) {
-            if (version.value >= 17) {
-                dependsOn(project(":mobchip-${version.key}").tasks["remap"])
-            }
+            dependsOn(project(":mobchip-${version.key}").tasks["remap"])
         }
     }
 
