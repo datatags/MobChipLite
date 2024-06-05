@@ -213,6 +213,12 @@ subprojects {
             archiveClassifier.set("")
             archiveFileName.set("${project.name}-${project.version}.jar")
         }
+
+        java {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(17))
+            }
+        }
     }
 
     artifacts {
