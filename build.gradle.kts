@@ -134,6 +134,8 @@ allprojects {
     }
 }
 
+val jvmVersion = JavaVersion.VERSION_1_8
+
 subprojects {
     apply<JacocoPlugin>()
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -152,8 +154,8 @@ subprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = jvmVersion
+        targetCompatibility = jvmVersion
     }
 
     tasks {
@@ -170,7 +172,7 @@ subprojects {
 
         compileKotlin {
             compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_17)
+                jvmTarget.set(JvmTarget.JVM_1_8)
             }
         }
 
@@ -192,7 +194,6 @@ subprojects {
                 events("passed", "skipped", "failed")
             }
             finalizedBy(jacocoTestReport)
-            testLogging { exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL }
         }
 
         javadoc {
