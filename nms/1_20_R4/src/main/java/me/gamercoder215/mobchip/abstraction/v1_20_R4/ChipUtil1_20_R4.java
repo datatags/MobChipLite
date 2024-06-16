@@ -460,7 +460,7 @@ final class ChipUtil1_20_R4 implements ChipUtil {
             }
             case "Tempt" -> {
                 PathfinderTempt p = (PathfinderTempt) b;
-                yield new TemptGoal((PathfinderMob) m, p.getSpeedModifier(), Ingredient.of(p.getItems().stream().map(CraftItemStack::asNMSCopy)), true);
+                yield new TemptGoal((PathfinderMob) m, p.getSpeedModifier(), toNMS(p), true);
             }
             case "TradeWithPlayer" -> new TradeWithPlayerGoal((net.minecraft.world.entity.npc.AbstractVillager) m);
             case "UseItem" -> {
@@ -1449,7 +1449,7 @@ final class ChipUtil1_20_R4 implements ChipUtil {
                 case "StrollVillageGolem" -> new PathfinderRandomStrollInVillage((Creature) m, getDouble(g, "f"));
                 case "Swell" -> new PathfinderSwellCreeper((Creeper) m);
                 case "Tame" -> new PathfinderTameHorse((AbstractHorse) m);
-                case "Tempt" -> new PathfinderTempt((Creature) m, getDouble(g, "e"), fromNMS(getObject(g, "m", Ingredient.class)));
+                case "Tempt" -> createPathfinderTempt((Creature) m, g);
                 case "TradeWithPlayer" -> new PathfinderTradePlayer((AbstractVillager) m);
                 case "UniversalAngerReset" -> new PathfinderResetAnger(m, getBoolean(g, "c"));
                 case "UseItem" -> new PathfinderUseItem(m, fromNMS(getObject(g, "b", net.minecraft.world.item.ItemStack.class)), en -> getObject(g, "c", Predicate.class).test(toNMS(en)), fromNMS(getObject(g, "d", SoundEvent.class)));
@@ -1471,6 +1471,55 @@ final class ChipUtil1_20_R4 implements ChipUtil {
             if (name.equalsIgnoreCase("ClimbOnTopOfPowderSnowGoal")) return new PathfinderClimbPowderedSnow(m, fromNMS(getObject(g, "b", Level.class)));
             return custom(g);
         }
+    }
+
+    private Pathfinder createPathfinderTempt(Creature m, Goal g) {
+        Predicate<net.minecraft.world.item.ItemStack> predicate = getObject(g, "m", Predicate.class);
+        if (predicate instanceof ItemStackPredicateContainer container) {
+            return new PathfinderTempt(m, getDouble(g, "e"), container.items());
+        }
+        return new PathfinderTempt(m, getDouble(g, "e"), fromNMS(predicate));
+    }
+
+    /**
+     * Wraps an NMS ItemStack predicate for use with Bukkit ItemStacks
+     */
+    public record ItemStackPredicateWrapper(
+            Predicate<net.minecraft.world.item.ItemStack> predicate) implements Predicate<ItemStack> {
+
+        @Override
+        public boolean test(ItemStack item) {
+            return predicate.test(CraftItemStack.asNMSCopy(item));
+        }
+    }
+
+    /**
+     * Contains a list of items that match a predicate
+     */
+    public record ItemStackPredicateContainer(
+            Collection<ItemStack> items) implements Predicate<net.minecraft.world.item.ItemStack> {
+
+        @Override
+        public boolean test(net.minecraft.world.item.ItemStack itemStack) {
+            ItemStack bukkitItem = CraftItemStack.asBukkitCopy(itemStack);
+            for (ItemStack stack : items) {
+                if (stack.isSimilar(bukkitItem)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    public static Predicate<ItemStack> fromNMS(Predicate<net.minecraft.world.item.ItemStack> p) {
+        return new ItemStackPredicateWrapper(p);
+    }
+
+    public static Predicate<net.minecraft.world.item.ItemStack> toNMS(PathfinderTempt p) {
+        if (p.getPredicate() instanceof ItemStackPredicateWrapper wrapper) {
+            return wrapper.predicate();
+        }
+        return new ItemStackPredicateContainer(p.getItems());
     }
 
     public static ItemStack fromNMS(net.minecraft.world.item.ItemStack item) { return CraftItemStack.asBukkitCopy(item); }

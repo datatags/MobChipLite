@@ -2,6 +2,7 @@ package me.gamercoder215.mobchip.ai.goal;
 
 import com.google.common.collect.ImmutableList;
 import me.gamercoder215.mobchip.ai.SpeedModifier;
+import org.bukkit.Material;
 import org.bukkit.entity.Creature;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -9,12 +10,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Represents a Pathfinder for the logic of this Creature getting tempted to move to another entity, for when they hold a specific item.
  */
 public final class PathfinderTempt extends Pathfinder implements SpeedModifier {
-    
+    private Predicate<ItemStack> predicate;
     private Set<ItemStack> items;
     private double speedMod;
 
@@ -48,11 +50,24 @@ public final class PathfinderTempt extends Pathfinder implements SpeedModifier {
      */
     public PathfinderTempt(@NotNull Creature m, double speedMod, @NotNull Iterable<? extends ItemStack> items) throws IllegalArgumentException {
         super(m);
-        if(items == null) throw new IllegalArgumentException("items cannot be null");
         if (!items.iterator().hasNext()) throw new IllegalArgumentException("items cannot be empty");
 
         this.items = new HashSet<>(ImmutableList.copyOf(items));
         this.speedMod = speedMod;
+        this.predicate = this.items::contains;
+    }
+
+    /**
+     * Constructs a PathfinderTempt
+     * @param m Creature to use
+     * @param speedMod Speed Modifier while moving to target holding item
+     * @param predicate Predicate that matches ItemStacks to be tempted by
+     */
+    public PathfinderTempt(@NotNull Creature m, double speedMod, @NotNull Predicate<ItemStack> predicate) {
+        super(m);
+
+        this.speedMod = speedMod;
+        this.predicate = predicate;
     }
 
     /**
@@ -61,7 +76,36 @@ public final class PathfinderTempt extends Pathfinder implements SpeedModifier {
      */
     @NotNull
     public Set<ItemStack> getItems() {
+        if (this.items == null) {
+            this.items = new HashSet<>();
+            // Figure out which items are allowed
+            for (Material mat : Material.values()) {
+                ItemStack item = new ItemStack(mat);
+                if (predicate.test(item)) {
+                    this.items.add(item);
+                }
+            }
+            predicate = this.items::contains;
+        }
         return this.items;
+    }
+
+    /**
+     * Gets the Predicate for this PathfinderTempt.
+     * Accepts any items that are in getItems()
+     * @return Predicate for this PathfinderTempt
+     */
+    public Predicate<ItemStack> getPredicate() {
+        return this.predicate;
+    }
+
+    /**
+     * Sets the Predicate for this PathfinderTempt
+     * @param predicate the predicate to set it to
+     */
+    public void setPredicate(Predicate<ItemStack> predicate) {
+        this.predicate = predicate;
+        this.items = null;
     }
 
     /**
@@ -72,15 +116,14 @@ public final class PathfinderTempt extends Pathfinder implements SpeedModifier {
     public void addItems(@NotNull ItemStack... items) throws IllegalArgumentException {
         addItems(Arrays.asList(items));
     }
-    
+
     /**
      * Adds a Collection of ItemStacks to this PathfinderTempt.
      * @param items Items to add
      * @throws IllegalArgumentException if items are null
      */
     public void addItems(@NotNull Iterable<? extends ItemStack> items) throws IllegalArgumentException {
-        if (items == null) throw new IllegalArgumentException("items cannot be null");
-        this.items.addAll(ImmutableList.copyOf(items));
+        this.getItems().addAll(ImmutableList.copyOf(items));
     }
 
     /**
@@ -98,19 +141,18 @@ public final class PathfinderTempt extends Pathfinder implements SpeedModifier {
      * @throws IllegalArgumentException if items are null
      */
     public void removeItems(@NotNull Iterable<? extends ItemStack> items) throws IllegalArgumentException {
-        if (items == null) throw new IllegalArgumentException("items cannot be null");
-        ImmutableList.copyOf(items).forEach(this.items::remove);
+        ImmutableList.copyOf(items).forEach(this.getItems()::remove);
     }
-    
+
     /**
      * Sets the ItemStacks for this PathfinderTempt.
      * @param items Collection of Items to use
      * @throws IllegalArgumentException if Items are null or empty
      */
     public void setItems(@NotNull Iterable<? extends ItemStack> items) throws IllegalArgumentException {
-        if(items == null) throw new IllegalArgumentException("items cannot be null");
         if (!items.iterator().hasNext()) throw new IllegalArgumentException("items cannot be empty");
         this.items = new HashSet<>(ImmutableList.copyOf(items));
+        this.predicate = this.items::contains;
     }
 
     /**
