@@ -178,6 +178,9 @@ public interface ChipUtil {
         return types;
     }
 
+    /**
+     * @throws IllegalStateException if the server version is not supported
+     */
     static String bukkitToCraftBukkit() {
         String bukkit = Bukkit.getServer().getBukkitVersion().split("-")[0];
         switch (bukkit) {
@@ -192,10 +195,13 @@ public interface ChipUtil {
             case "1.20.6":
                 return "1_20_R4";
             case "1.21":
-            case "1.21.1": // Unsure if 1.21.1 will require significant changes
+            case "1.21.1":
                 return "1_21_R1";
+            case "1.21.2":
+            case "1.21.3":
+                return "1_21_R2";
             default:
-                throw new AssertionError("Invalid Version: " + bukkit);
+                throw new IllegalStateException("Unsupported version: " + bukkit);
         }
     }
 
