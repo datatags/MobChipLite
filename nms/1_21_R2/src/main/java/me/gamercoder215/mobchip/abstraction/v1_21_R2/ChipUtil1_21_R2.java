@@ -279,23 +279,6 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             .put(ZombieVillager.class, net.minecraft.world.entity.monster.ZombieVillager.class)
             .build();
 
-    public static final Map<Villager.Profession, VillagerProfession> VILLAGER_PROFESSION_MAP = ImmutableMap.<Villager.Profession,VillagerProfession>builder()
-            .put(FARMER, VillagerProfession.FARMER)
-            .put(FISHERMAN, VillagerProfession.FISHERMAN)
-            .put(LIBRARIAN, VillagerProfession.LIBRARIAN)
-            .put(WEAPONSMITH, VillagerProfession.WEAPONSMITH)
-            .put(TOOLSMITH, VillagerProfession.TOOLSMITH)
-            .put(BUTCHER, VillagerProfession.BUTCHER)
-            .put(FLETCHER, VillagerProfession.FLETCHER)
-            .put(MASON, VillagerProfession.MASON)
-            .put(CLERIC, VillagerProfession.CLERIC)
-            .put(ARMORER, VillagerProfession.ARMORER)
-            .put(NITWIT, VillagerProfession.NITWIT)
-            .put(SHEPHERD, VillagerProfession.SHEPHERD)
-            .put(CARTOGRAPHER, VillagerProfession.CARTOGRAPHER)
-            .put(LEATHERWORKER, VillagerProfession.LEATHERWORKER)
-            .build();
-
     public static Class<? extends net.minecraft.world.entity.LivingEntity> toNMS(Class<? extends LivingEntity> clazz) {
         if (BUKKIT_NMS_MAP.containsKey(clazz)) return BUKKIT_NMS_MAP.get(clazz);
 
@@ -1082,6 +1065,23 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     }
 
     public static VillagerProfession toNMS(Villager.Profession p) {
+        // Can't make this a field because the tests will fail. Maybe there's a better way to do this?
+        Map<Villager.Profession, VillagerProfession> VILLAGER_PROFESSION_MAP = ImmutableMap.<Villager.Profession,VillagerProfession>builder()
+                .put(FARMER, VillagerProfession.FARMER)
+                .put(FISHERMAN, VillagerProfession.FISHERMAN)
+                .put(LIBRARIAN, VillagerProfession.LIBRARIAN)
+                .put(WEAPONSMITH, VillagerProfession.WEAPONSMITH)
+                .put(TOOLSMITH, VillagerProfession.TOOLSMITH)
+                .put(BUTCHER, VillagerProfession.BUTCHER)
+                .put(FLETCHER, VillagerProfession.FLETCHER)
+                .put(MASON, VillagerProfession.MASON)
+                .put(CLERIC, VillagerProfession.CLERIC)
+                .put(ARMORER, VillagerProfession.ARMORER)
+                .put(NITWIT, VillagerProfession.NITWIT)
+                .put(SHEPHERD, VillagerProfession.SHEPHERD)
+                .put(CARTOGRAPHER, VillagerProfession.CARTOGRAPHER)
+                .put(LEATHERWORKER, VillagerProfession.LEATHERWORKER)
+                .build();
         return VILLAGER_PROFESSION_MAP.getOrDefault(p, VillagerProfession.NONE);
     }
 
