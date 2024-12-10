@@ -204,7 +204,6 @@ final class ChipUtil1_21_R3 implements ChipUtil {
             .put(Cod.class, net.minecraft.world.entity.animal.Cod.class)
             .put(Cow.class, net.minecraft.world.entity.animal.Cow.class)
             .put(Creaking.class, net.minecraft.world.entity.monster.creaking.Creaking.class)
-            .put(CreakingTransient.class, net.minecraft.world.entity.monster.creaking.CreakingTransient.class)
             .put(Creeper.class, net.minecraft.world.entity.monster.Creeper.class)
             .put(Dolphin.class, net.minecraft.world.entity.animal.Dolphin.class)
             .put(Donkey.class, net.minecraft.world.entity.animal.horse.Donkey.class)
