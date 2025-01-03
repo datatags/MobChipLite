@@ -13,12 +13,9 @@ public final class WrappedPathfinder {
     /**
      * Creates a WrappedPathfinder.
      * @param p Pathfinder to use
-     * @param priority Priority of pathfinder
-     * @throws IllegalArgumentException if priority is negative
+     * @param priority Priority of pathfinder. Lower is better. Priority &lt; 0 is nonstandard.
      */
-    public WrappedPathfinder(@Nullable Pathfinder p, int priority) throws IllegalArgumentException {
-        if (priority < 0) throw new IllegalArgumentException("Priority must be greater than 0");
-
+    public WrappedPathfinder(@Nullable Pathfinder p, int priority) {
         this.pathfinder = p;
         this.priority = priority;
     }
