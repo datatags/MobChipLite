@@ -155,15 +155,12 @@ loadScripts(document, 'script');</script>
 <h3>WrappedPathfinder</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">WrappedPathfinder</span><wbr><span class="parameters">(<a href="https://javadoc.io/doc/org.jetbrains/annotations-java5/23.0.0/org/jetbrains/annotations/Nullable.html" title="class or interface in org.jetbrains.annotations" class="external-link">@Nullable</a>
  <a href="https://javadoc.io/doc/org.jetbrains/annotations-java5/23.0.0/org/jetbrains/annotations/Nullable.html" title="class or interface in org.jetbrains.annotations" class="external-link">@Nullable</a> <a href="Pathfinder.html" title="class in me.gamercoder215.mobchip.ai.goal">Pathfinder</a>&nbsp;p,
- int&nbsp;priority)</span>
-                  throws <span class="exceptions"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></span></div>
+ int&nbsp;priority)</span></div>
 <div class="block">Creates a WrappedPathfinder.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>p</code> - Pathfinder to use</dd>
-<dd><code>priority</code> - Priority of pathfinder</dd>
-<dt>Throws:</dt>
-<dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code> - if priority is negative</dd>
+<dd><code>priority</code> - Priority of pathfinder. Lower is better. Priority &lt; 0 is nonstandard.</dd>
 </dl>
 </section>
 </li>
