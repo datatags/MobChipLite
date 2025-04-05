@@ -27,7 +27,6 @@ import me.gamercoder215.mobchip.ai.sensing.Sensor;
 import me.gamercoder215.mobchip.combat.CombatEntry;
 import me.gamercoder215.mobchip.combat.CombatLocation;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
-import me.gamercoder215.mobchip.nbt.EntityNBT;
 import net.minecraft.core.Registry;
 import net.minecraft.core.*;
 import net.minecraft.core.RegistryAccess.Frozen;
@@ -1655,11 +1654,6 @@ final class ChipUtil1_20_R3 implements ChipUtil {
     public boolean existsMemory(Memory<?> m) {
         if (m instanceof EntityMemory<?>) return true;
         return BuiltInRegistries.MEMORY_MODULE_TYPE.containsKey(new ResourceLocation(m.getKey().getNamespace(), m.getKey().getKey()));
-    }
-
-    @Override
-    public EntityNBT getNBTEditor(Mob m) {
-        return new EntityNBT1_20_R3(m);
     }
 
     public static net.minecraft.world.entity.ai.sensing.Sensor<?> toNMS(Sensor<?> s) {

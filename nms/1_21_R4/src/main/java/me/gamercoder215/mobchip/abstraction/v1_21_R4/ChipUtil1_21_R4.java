@@ -27,7 +27,6 @@ import me.gamercoder215.mobchip.ai.sensing.Sensor;
 import me.gamercoder215.mobchip.combat.CombatEntry;
 import me.gamercoder215.mobchip.combat.CombatLocation;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
-import me.gamercoder215.mobchip.nbt.EntityNBT;
 import me.gamercoder215.mobchip.util.Registration;
 import net.minecraft.core.Registry;
 import net.minecraft.core.*;
@@ -248,7 +247,7 @@ final class ChipUtil1_21_R4 implements ChipUtil {
             .put(Raider.class, net.minecraft.world.entity.raid.Raider.class)
             .put(Ravager.class, net.minecraft.world.entity.monster.Ravager.class)
             .put(Salmon.class, net.minecraft.world.entity.animal.Salmon.class)
-            .put(Sheep.class, net.minecraft.world.entity.animal.Sheep.class)
+            .put(Sheep.class, net.minecraft.world.entity.animal.sheep.Sheep.class)
             .put(Shulker.class, net.minecraft.world.entity.monster.Shulker.class)
             .put(Silverfish.class, net.minecraft.world.entity.monster.Silverfish.class)
             .put(Skeleton.class, net.minecraft.world.entity.monster.Skeleton.class)
@@ -273,7 +272,7 @@ final class ChipUtil1_21_R4 implements ChipUtil {
             .put(Witch.class, net.minecraft.world.entity.monster.Witch.class)
             .put(Wither.class, WitherBoss.class)
             .put(WitherSkeleton.class, net.minecraft.world.entity.monster.WitherSkeleton.class)
-            .put(Wolf.class, net.minecraft.world.entity.animal.Wolf.class)
+            .put(Wolf.class, net.minecraft.world.entity.animal.wolf.Wolf.class)
             .put(Zoglin.class, net.minecraft.world.entity.monster.Zoglin.class)
             .put(Zombie.class, net.minecraft.world.entity.monster.Zombie.class)
             .put(ZombieHorse.class, net.minecraft.world.entity.animal.horse.ZombieHorse.class)
@@ -331,7 +330,7 @@ final class ChipUtil1_21_R4 implements ChipUtil {
             }
             case "Beg" -> {
                 PathfinderBeg p = (PathfinderBeg) b;
-                yield new BegGoal((net.minecraft.world.entity.animal.Wolf) m, p.getRange());
+                yield new BegGoal((net.minecraft.world.entity.animal.wolf.Wolf) m, p.getRange());
             }
             case "BowShoot" -> {
                 PathfinderRangedBowAttack p = (PathfinderRangedBowAttack) b;
@@ -1066,24 +1065,7 @@ final class ChipUtil1_21_R4 implements ChipUtil {
     }
 
     public static VillagerProfession toNMS(Villager.Profession p) {
-        // Can't make this a field because the tests will fail. Maybe there's a better way to do this?
-        Map<Villager.Profession, VillagerProfession> VILLAGER_PROFESSION_MAP = ImmutableMap.<Villager.Profession,VillagerProfession>builder()
-                .put(FARMER, VillagerProfession.FARMER)
-                .put(FISHERMAN, VillagerProfession.FISHERMAN)
-                .put(LIBRARIAN, VillagerProfession.LIBRARIAN)
-                .put(WEAPONSMITH, VillagerProfession.WEAPONSMITH)
-                .put(TOOLSMITH, VillagerProfession.TOOLSMITH)
-                .put(BUTCHER, VillagerProfession.BUTCHER)
-                .put(FLETCHER, VillagerProfession.FLETCHER)
-                .put(MASON, VillagerProfession.MASON)
-                .put(CLERIC, VillagerProfession.CLERIC)
-                .put(ARMORER, VillagerProfession.ARMORER)
-                .put(NITWIT, VillagerProfession.NITWIT)
-                .put(SHEPHERD, VillagerProfession.SHEPHERD)
-                .put(CARTOGRAPHER, VillagerProfession.CARTOGRAPHER)
-                .put(LEATHERWORKER, VillagerProfession.LEATHERWORKER)
-                .build();
-        return VILLAGER_PROFESSION_MAP.getOrDefault(p, VillagerProfession.NONE);
+        return BuiltInRegistries.VILLAGER_PROFESSION.getValue(ResourceLocation.parse(p.getKeyOrThrow().toString()));
     }
 
     public static <T extends Entity> Class<? extends T> fromNMS(Class<? extends net.minecraft.world.entity.Entity> clazz, Class<T> cast) {
@@ -1701,11 +1683,6 @@ final class ChipUtil1_21_R4 implements ChipUtil {
     public boolean existsMemory(Memory<?> m) {
         if (m instanceof EntityMemory<?>) return true;
         return BuiltInRegistries.MEMORY_MODULE_TYPE.containsKey(ResourceLocation.fromNamespaceAndPath(m.getKey().getNamespace(), m.getKey().getKey()));
-    }
-
-    @Override
-    public EntityNBT getNBTEditor(Mob m) {
-        return new EntityNBT1_21_R4(m);
     }
 
     public static net.minecraft.world.entity.ai.sensing.Sensor<?> toNMS(Sensor<?> s) {

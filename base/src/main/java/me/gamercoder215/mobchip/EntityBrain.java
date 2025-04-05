@@ -12,7 +12,6 @@ import me.gamercoder215.mobchip.ai.navigation.EntityNavigation;
 import me.gamercoder215.mobchip.ai.schedule.EntityScheduleManager;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
-import me.gamercoder215.mobchip.nbt.EntityNBT;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mob;
@@ -29,7 +28,7 @@ public interface EntityBrain {
 
     /**
      * Get the Entity that this Brain relates to.
-     * @return Entity of this brain 
+     * @return Entity of this brain
      */
     @NotNull
     Mob getEntity();
@@ -91,7 +90,7 @@ public interface EntityBrain {
      * @param <T> Memory Type
      */
     <T> void setMemory(@NotNull Memory<T> memory, @Nullable T value) throws IllegalArgumentException;
-    
+
     /**
      * Sets a temporary memory into this entity's brain.
      * @param memory Memory to change
@@ -246,17 +245,10 @@ public interface EntityBrain {
     EntityCombatTracker getCombatTracker();
 
     /**
-     * Fetches this Entity's NBT Editor.
-     * @return Entity NBT Editor
-     */
-    @NotNull
-    EntityNBT getNBTEditor();
-
-    /**
      * Fetches this Entity's Senses.
      * @return Entity Senses
      */
     @NotNull
     EntitySenses getSenses();
-    
+
 }

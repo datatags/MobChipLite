@@ -19,7 +19,6 @@ import me.gamercoder215.mobchip.ai.schedule.Schedule;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
-import me.gamercoder215.mobchip.nbt.EntityNBT;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -125,8 +124,6 @@ public interface ChipUtil {
     void registerMemory(Memory<?> m);
 
     boolean existsMemory(Memory<?> m);
-
-    EntityNBT getNBTEditor(Mob m);
 
     void registerSensor(Sensor<?> s);
 
