@@ -42,11 +42,11 @@ final class EntityGossipContainer1_21_R3 implements EntityGossipContainer {
 
     @Override
     public void remove(@NotNull Entity en, @NotNull GossipType type) throws IllegalArgumentException {
-        handle.remove(en.getUniqueId(), ChipUtil1_21_R3.toNMS(type));
+        handle.remove(en.getUniqueId(), ChipUtil1_21_R3.toNMS(type), Villager.ReputationEvent.UNSPECIFIED);
     }
 
     @Override
     public void removeAll(@NotNull GossipType type) throws IllegalArgumentException {
-        handle.remove(ChipUtil1_21_R3.toNMS(type));
+        handle.remove(ChipUtil1_21_R3.toNMS(type), Villager.ReputationEvent.UNSPECIFIED);
     }
 }
