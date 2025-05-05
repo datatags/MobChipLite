@@ -1,12 +1,12 @@
-package me.gamercoder215.mobchip.abstraction.v1_21_R3;
+package me.gamercoder215.mobchip.abstraction.v1_21_R4;
 
 // Copied from PaperMC: com/destroystokyo/paper/util/set/OptimizedSmallEnumSet
 // Used for Testing Purposes
 
-public final class OptimizedSmallEnumSet1_21_R3<E extends Enum<E>> {
+public final class OptimizedSmallEnumSet1_21_R4<E extends Enum<E>> {
     private long backingSet;
 
-    public OptimizedSmallEnumSet1_21_R3(Class<E> clazz) {
+    public OptimizedSmallEnumSet1_21_R4(Class<E> clazz) {
         if (clazz == null) {
             throw new IllegalArgumentException("Null class");
         } else if (!clazz.isEnum()) {

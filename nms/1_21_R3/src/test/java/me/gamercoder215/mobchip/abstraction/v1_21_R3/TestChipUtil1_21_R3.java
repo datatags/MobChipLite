@@ -1,6 +1,5 @@
 package me.gamercoder215.mobchip.abstraction.v1_21_R3;
 
-import me.gamercoder215.mobchip.abstraction.v1_21_R3.ChipUtil1_21_R3;
 import me.gamercoder215.mobchip.ai.gossip.GossipType;
 import net.minecraft.DetectedVersion;
 import net.minecraft.SharedConstants;
