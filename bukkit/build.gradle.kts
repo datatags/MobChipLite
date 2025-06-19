@@ -15,6 +15,7 @@ val versions = mapOf(
     "1_21_R2" to 21,
     "1_21_R3" to 21,
     "1_21_R4" to 21,
+    "1_21_R5" to 21,
 )
 
 dependencies {
