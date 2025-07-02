@@ -202,6 +202,7 @@ public interface ChipUtil {
             case "1.21.5":
                 return "1_21_R4";
             case "1.21.6":
+            case "1.21.7":
                 return "1_21_R5";
             default:
                 throw new IllegalStateException("Unsupported version: " + bukkit);
