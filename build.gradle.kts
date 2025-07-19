@@ -84,7 +84,7 @@ allprojects {
                     licenses {
                         license {
                             name.set("GPL-3.0")
-                            url.set("https://github.com/$github/blob/master/LICENSE")
+                            url.set("https://github.com/$github/blob/main/LICENSE")
                             distribution.set("repo")
                         }
                     }

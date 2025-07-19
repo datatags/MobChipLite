@@ -2,9 +2,9 @@ name: Build Project
 
 on:
   push:
-    branches: [ master, ver/* ]
+    branches: [ main, ver/* ]
   pull_request:
-    branches: [ master, ver/* ]
+    branches: [ main, ver/* ]
 
   workflow_dispatch:
 
@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     name: Deploy JavaDocs
-    if: ${{ github.event_name != 'pull_request' && github.ref_name == 'master' }}
+    if: ${{ github.event_name != 'pull_request' && github.ref_name == 'main' }}
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 21
