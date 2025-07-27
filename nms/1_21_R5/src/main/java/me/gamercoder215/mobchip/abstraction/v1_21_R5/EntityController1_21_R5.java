@@ -7,6 +7,7 @@ import net.minecraft.world.entity.ai.control.JumpControl;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.phys.Vec3;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Mob;
 import org.bukkit.util.Vector;
@@ -114,4 +115,8 @@ final class EntityController1_21_R5 implements EntityController {
         nms.setDeltaMovement(vec);
     }
 
+    @Override
+    public void stop() {
+        nms.stopInPlace();
+    }
 }

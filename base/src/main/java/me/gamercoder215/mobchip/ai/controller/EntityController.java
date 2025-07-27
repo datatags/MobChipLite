@@ -12,13 +12,13 @@ import org.jetbrains.annotations.NotNull;
  * For long-term paths in movement, it is recommended to use {@link EntityNavigation}.
  */
 public interface EntityController {
-    
+
     /**
      * Forces this Entity to jump naturally.
      * @return this controller, for chaining
      */
     EntityController jump();
-    
+
     /**
      * Makes this Entity look at another entity.
      * @param en Entity to look at
@@ -73,7 +73,7 @@ public interface EntityController {
     default EntityController moveTo(@NotNull Location loc) {
         return moveTo(loc, 1);
     }
-    
+
     /**
      * Moves an Entity to the specified Location.
      * @param loc Location to move to
@@ -165,6 +165,11 @@ public interface EntityController {
     void setDeltaMovement(@NotNull Vector delta);
 
     /**
+     * Clears the navigator's current path. Use after {@code moveTo} to cancel the movement goal.
+     */
+    void stop();
+
+    /**
      * Sets the Delta Movement of this Entity.
      * @param x Δx
      * @param y ΔY
@@ -221,5 +226,5 @@ public interface EntityController {
     default void setDeltaMovementZ(double z) {
         setDeltaMovement(new Vector(getDeltaMovementX(), getDeltaMovementY(), z));
     }
-    
+
 }

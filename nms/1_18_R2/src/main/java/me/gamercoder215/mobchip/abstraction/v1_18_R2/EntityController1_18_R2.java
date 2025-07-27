@@ -115,4 +115,8 @@ final class EntityController1_18_R2 implements EntityController {
         nms.setDeltaMovement(vec);
     }
 
+    @Override
+    public void stop() {
+        nms.getNavigation().stop();
+    }
 }

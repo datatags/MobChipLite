@@ -13,7 +13,7 @@ plugins {
 }
 
 val pGroup = "me.gamercoder215"
-val pVersion = "1.10.14-SNAPSHOT"
+val pVersion = "1.10.15-SNAPSHOT"
 val pAuthor = "datatags" // Originally "gmitch215"
 
 val github = "$pAuthor/MobChipLite" // Originally "$pAuthor/MobChip"
