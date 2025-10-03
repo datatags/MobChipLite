@@ -202,6 +202,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
             .put(CaveSpider.class, net.minecraft.world.entity.monster.CaveSpider.class)
             .put(Chicken.class, net.minecraft.world.entity.animal.Chicken.class)
             .put(Cod.class, net.minecraft.world.entity.animal.Cod.class)
+            .put(CopperGolem.class, net.minecraft.world.entity.animal.coppergolem.CopperGolem.class)
             .put(Cow.class, net.minecraft.world.entity.animal.Cow.class)
             .put(Creaking.class, net.minecraft.world.entity.monster.creaking.Creaking.class)
             .put(Creeper.class, net.minecraft.world.entity.monster.Creeper.class)

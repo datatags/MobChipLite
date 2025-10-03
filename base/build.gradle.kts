@@ -17,7 +17,7 @@ tasks {
             require(this is StandardJavadocDocletOptions)
 
             links("https://hub.spigotmc.org/javadocs/spigot/")
-            links("https://javadoc.io/doc/org.jetbrains/annotations-java5/23.0.0/")
+//            links("https://javadoc.io/doc/org.jetbrains/annotations-java5/23.0.0/") // as of 2025/10/02 this randomly returns 403
         }
     }
 
