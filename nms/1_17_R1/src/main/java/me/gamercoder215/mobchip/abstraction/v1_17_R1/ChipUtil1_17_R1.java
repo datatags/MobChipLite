@@ -20,6 +20,8 @@ import me.gamercoder215.mobchip.ai.memories.MemoryStatus;
 import me.gamercoder215.mobchip.ai.memories.Unit;
 import me.gamercoder215.mobchip.ai.navigation.EntityNavigation;
 import me.gamercoder215.mobchip.ai.schedule.Activity;
+import me.gamercoder215.mobchip.ai.schedule.EntityScheduleManager;
+import me.gamercoder215.mobchip.ai.schedule.Schedule;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
 import me.gamercoder215.mobchip.combat.CombatEntry;
@@ -594,6 +596,17 @@ final class ChipUtil1_17_R1 implements ChipUtil {
         return Activity.getByKey(NamespacedKey.minecraft(key.getPath()));
     }
 
+    public static Schedule fromNMS(net.minecraft.world.entity.schedule.Schedule s) {
+        Schedule.Builder b = Schedule.builder();
+        for (int i = 0; i < 24000; i++) {
+            if (s.getActivityAt(i) == null) continue;
+            Activity a = fromNMS(s.getActivityAt(i));
+            b.addActivity(i, a);
+        }
+
+        return b.build();
+    }
+
     public static AbstractDragonPhaseInstance toNMS(CustomPhase c) {
         return new AbstractDragonPhaseInstance(toNMS(c.getDragon())) {
             @Override
@@ -633,6 +646,17 @@ final class ChipUtil1_17_R1 implements ChipUtil {
         } catch (IndexOutOfBoundsException ignored) {}
     }
 
+    public static net.minecraft.world.entity.schedule.Schedule toNMS(Schedule s) {
+        net.minecraft.world.entity.schedule.ScheduleBuilder b = new ScheduleBuilder(new net.minecraft.world.entity.schedule.Schedule());
+        for (int i = 0; i < 24000; i++) {
+            if (!s.contains(i)) continue;
+            net.minecraft.world.entity.schedule.Activity a = toNMS(s.get(i));
+            b.changeActivityAt(i, a);
+        }
+
+        return b.build();
+    }
+
     public static <T extends net.minecraft.world.entity.LivingEntity> Behavior<T> toNMS(Consumer<Mob> en) {
         return new Behavior<>(Collections.emptyMap()) {
             @Override
@@ -642,6 +666,15 @@ final class ChipUtil1_17_R1 implements ChipUtil {
             }
         };
     }
+
+    @Override
+    public Schedule getDefaultSchedule(String key) {
+        return fromNMS(Registry.SCHEDULE.get(new ResourceLocation(key)));
+    }
+
+    @Override
+    public EntityScheduleManager getManager(Mob m) { return new EntityScheduleManager1_17_R1(m); }
+
     @Override
     public EntityController getController(Mob m) {
         return new EntityController1_17_R1(m);

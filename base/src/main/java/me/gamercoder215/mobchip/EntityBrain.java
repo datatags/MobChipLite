@@ -9,6 +9,7 @@ import me.gamercoder215.mobchip.ai.memories.Memory;
 import me.gamercoder215.mobchip.ai.memories.MemoryStatus;
 import me.gamercoder215.mobchip.ai.memories.Unit;
 import me.gamercoder215.mobchip.ai.navigation.EntityNavigation;
+import me.gamercoder215.mobchip.ai.schedule.EntityScheduleManager;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
 import org.bukkit.Location;
@@ -67,6 +68,13 @@ public interface EntityBrain {
      */
     @NotNull
     EntityController getController();
+
+    /**
+     * Get the Entity's Scheduling Manager associated with this Brain.
+     * @return Schedule Manager
+     */
+    @NotNull
+    EntityScheduleManager getScheduleManager();
 
     /**
      * Get the Entity's Behavior associated with this Brain.

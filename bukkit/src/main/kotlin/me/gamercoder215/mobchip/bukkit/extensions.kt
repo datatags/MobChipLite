@@ -10,6 +10,7 @@ import me.gamercoder215.mobchip.ai.behavior.EntityBehavior
 import me.gamercoder215.mobchip.ai.behavior.VillagerBehavior
 import me.gamercoder215.mobchip.ai.controller.EntityController
 import me.gamercoder215.mobchip.ai.gossip.EntityGossipContainer
+import me.gamercoder215.mobchip.ai.schedule.EntityScheduleManager
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses
 import me.gamercoder215.mobchip.combat.EntityCombatTracker
 import org.bukkit.entity.*
@@ -79,6 +80,13 @@ inline val Mob.combatTracker: EntityCombatTracker
  */
 inline val Mob.senses: EntitySenses
     get() = this.brain.senses
+
+/**
+ * Fetches the [EntityScheduleManager] for this [Mob].
+ * @return Entity Schedule Manager
+ */
+inline val Mob.scheduleManager: EntityScheduleManager
+    get() = this.brain.scheduleManager
 
 // Behaviors
 
