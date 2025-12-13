@@ -1,4 +1,4 @@
-package me.gamercoder215.mobchip.abstraction.v1_21_R2;
+package me.gamercoder215.mobchip.abstraction.v1_21_R7;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Lifecycle;
@@ -31,8 +31,8 @@ import net.minecraft.core.*;
 import net.minecraft.core.RegistryAccess.Frozen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -61,32 +61,38 @@ import net.minecraft.world.entity.animal.*;
 import net.minecraft.world.entity.animal.allay.AllayAi;
 import net.minecraft.world.entity.animal.axolotl.AxolotlAi;
 import net.minecraft.world.entity.animal.camel.CamelAi;
+import net.minecraft.world.entity.animal.fish.AbstractFish;
+import net.minecraft.world.entity.animal.fish.AbstractSchoolingFish;
+import net.minecraft.world.entity.animal.fish.Pufferfish;
+import net.minecraft.world.entity.animal.fish.WaterAnimal;
 import net.minecraft.world.entity.animal.frog.FrogAi;
+import net.minecraft.world.entity.animal.golem.AbstractGolem;
+import net.minecraft.world.entity.animal.golem.SnowGolem;
+import net.minecraft.world.entity.animal.parrot.ShoulderRidingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.phases.*;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.RangedAttackMob;
-import net.minecraft.world.entity.monster.ZombifiedPiglin;
+import net.minecraft.world.entity.monster.illager.AbstractIllager;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.entity.monster.warden.WardenAi;
-import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.schedule.ScheduleBuilder;
+import net.minecraft.world.entity.monster.zombie.ZombifiedPiglin;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_21_R2.CraftServer;
-import org.bukkit.craftbukkit.v1_21_R2.CraftSound;
-import org.bukkit.craftbukkit.v1_21_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_21_R2.entity.*;
-import org.bukkit.craftbukkit.v1_21_R2.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_21_R2.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_21_R2.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.v1_21_R7.CraftServer;
+import org.bukkit.craftbukkit.v1_21_R7.CraftSound;
+import org.bukkit.craftbukkit.v1_21_R7.CraftWorld;
+import org.bukkit.craftbukkit.v1_21_R7.entity.*;
+import org.bukkit.craftbukkit.v1_21_R7.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_21_R7.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_21_R7.util.CraftNamespacedKey;
 import org.bukkit.entity.Bee;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Chicken;
@@ -94,6 +100,7 @@ import org.bukkit.entity.Cod;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Dolphin;
 import org.bukkit.entity.Fox;
+import org.bukkit.entity.HappyGhast;
 import org.bukkit.entity.IronGolem;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Ocelot;
@@ -126,7 +133,7 @@ import static org.bukkit.entity.Villager.Profession.*;
 import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.*;
 
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation", "UnstableApiUsage"})
-final class ChipUtil1_21_R2 implements ChipUtil {
+final class ChipUtil1_21_R7 implements ChipUtil {
 
     @Override
     public void addCustomPathfinder(CustomPathfinder p, int priority, boolean target) {
@@ -134,7 +141,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
         net.minecraft.world.entity.Mob mob = toNMS(m);
         GoalSelector s = target ? mob.targetSelector : mob.goalSelector;
         Goal g = custom(p);
-        Set<Goal.Flag> nms = ChipUtil1_21_R2.getFlags(g);
+        Set<Goal.Flag> nms = ChipUtil1_21_R7.getFlags(g);
 
         Pathfinder.PathfinderFlag[] flags = p.getFlags() == null ? new Pathfinder.PathfinderFlag[0] : p.getFlags();
         for (Pathfinder.PathfinderFlag f : flags) {
@@ -182,100 +189,106 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             .put(Tameable.class, TamableAnimal.class) // EntityTameableAnimal
 
             // Below are not in the root package (LET'S KEEP THEM ALPHABETICAL!!!)
-            .put(AbstractHorse.class, net.minecraft.world.entity.animal.horse.AbstractHorse.class)
-            .put(AbstractVillager.class, net.minecraft.world.entity.npc.AbstractVillager.class)
+            .put(AbstractHorse.class, net.minecraft.world.entity.animal.equine.AbstractHorse.class)
+            .put(AbstractVillager.class, net.minecraft.world.entity.npc.villager.AbstractVillager.class)
             .put(Animals.class, Animal.class)
             .put(Allay.class, net.minecraft.world.entity.animal.allay.Allay.class)
             .put(Ambient.class, AmbientCreature.class)
             .put(Armadillo.class, net.minecraft.world.entity.animal.armadillo.Armadillo.class)
             .put(Axolotl.class, net.minecraft.world.entity.animal.axolotl.Axolotl.class)
             .put(Bat.class, net.minecraft.world.entity.ambient.Bat.class)
-            .put(Bee.class, net.minecraft.world.entity.animal.Bee.class)
+            .put(Bee.class, net.minecraft.world.entity.animal.bee.Bee.class)
             .put(Blaze.class, net.minecraft.world.entity.monster.Blaze.class)
-            .put(Bogged.class, net.minecraft.world.entity.monster.Bogged.class)
+            .put(Bogged.class, net.minecraft.world.entity.monster.skeleton.Bogged.class)
             .put(Breeze.class, net.minecraft.world.entity.monster.breeze.Breeze.class)
-            .put(Cat.class, net.minecraft.world.entity.animal.Cat.class)
+            .put(Cat.class, net.minecraft.world.entity.animal.feline.Cat.class)
             .put(Camel.class, net.minecraft.world.entity.animal.camel.Camel.class)
-            .put(CaveSpider.class, net.minecraft.world.entity.monster.CaveSpider.class)
-            .put(Chicken.class, net.minecraft.world.entity.animal.Chicken.class)
-            .put(Cod.class, net.minecraft.world.entity.animal.Cod.class)
-            .put(Cow.class, net.minecraft.world.entity.animal.Cow.class)
+            .put(CamelHusk.class, net.minecraft.world.entity.animal.camel.CamelHusk.class)
+            .put(CaveSpider.class, net.minecraft.world.entity.monster.spider.CaveSpider.class)
+            .put(Chicken.class, net.minecraft.world.entity.animal.chicken.Chicken.class)
+            .put(Cod.class, net.minecraft.world.entity.animal.fish.Cod.class)
+            .put(CopperGolem.class, net.minecraft.world.entity.animal.golem.CopperGolem.class)
+            .put(Cow.class, net.minecraft.world.entity.animal.cow.Cow.class)
             .put(Creaking.class, net.minecraft.world.entity.monster.creaking.Creaking.class)
-            .put(CreakingTransient.class, net.minecraft.world.entity.monster.creaking.CreakingTransient.class)
             .put(Creeper.class, net.minecraft.world.entity.monster.Creeper.class)
-            .put(Dolphin.class, net.minecraft.world.entity.animal.Dolphin.class)
-            .put(Donkey.class, net.minecraft.world.entity.animal.horse.Donkey.class)
-            .put(Drowned.class, net.minecraft.world.entity.monster.Drowned.class)
+            .put(Dolphin.class, net.minecraft.world.entity.animal.dolphin.Dolphin.class)
+            .put(Donkey.class, net.minecraft.world.entity.animal.equine.Donkey.class)
+            .put(Drowned.class, net.minecraft.world.entity.monster.zombie.Drowned.class)
             .put(ElderGuardian.class, net.minecraft.world.entity.monster.ElderGuardian.class)
             .put(EnderDragon.class, net.minecraft.world.entity.boss.enderdragon.EnderDragon.class)
             .put(Enderman.class, EnderMan.class)
             .put(Endermite.class, net.minecraft.world.entity.monster.Endermite.class)
-            .put(Evoker.class, net.minecraft.world.entity.monster.Evoker.class)
+            .put(Evoker.class, net.minecraft.world.entity.monster.illager.Evoker.class)
             .put(Fish.class, AbstractFish.class)
-            .put(Fox.class, net.minecraft.world.entity.animal.Fox.class)
+            .put(Fox.class, net.minecraft.world.entity.animal.fox.Fox.class)
             .put(Frog.class, net.minecraft.world.entity.animal.frog.Frog.class)
             .put(Ghast.class, net.minecraft.world.entity.monster.Ghast.class)
             .put(Giant.class, net.minecraft.world.entity.monster.Giant.class)
+            .put(GlowSquid.class, net.minecraft.world.entity.animal.squid.GlowSquid.class)
             .put(Goat.class, net.minecraft.world.entity.animal.goat.Goat.class)
             .put(Golem.class, AbstractGolem.class)
             .put(Guardian.class, net.minecraft.world.entity.monster.Guardian.class)
+            .put(HappyGhast.class, net.minecraft.world.entity.animal.happyghast.HappyGhast.class)
             .put(Hoglin.class, net.minecraft.world.entity.monster.hoglin.Hoglin.class)
-            .put(Horse.class, net.minecraft.world.entity.animal.horse.Horse.class)
+            .put(Horse.class, net.minecraft.world.entity.animal.equine.Horse.class)
             .put(HumanEntity.class, net.minecraft.world.entity.player.Player.class)
-            .put(Husk.class, net.minecraft.world.entity.monster.Husk.class)
+            .put(Husk.class, net.minecraft.world.entity.monster.zombie.Husk.class)
             .put(Illager.class, AbstractIllager.class)
-            .put(Illusioner.class, net.minecraft.world.entity.monster.Illusioner.class)
-            .put(IronGolem.class, net.minecraft.world.entity.animal.IronGolem.class)
-            .put(Llama.class, net.minecraft.world.entity.animal.horse.Llama.class)
+            .put(Illusioner.class, net.minecraft.world.entity.monster.illager.Illusioner.class)
+            .put(IronGolem.class, net.minecraft.world.entity.animal.golem.IronGolem.class)
+            .put(Llama.class, net.minecraft.world.entity.animal.equine.Llama.class)
             .put(MagmaCube.class, net.minecraft.world.entity.monster.MagmaCube.class)
-            .put(Mule.class, net.minecraft.world.entity.animal.horse.Mule.class)
-            .put(MushroomCow.class, net.minecraft.world.entity.animal.MushroomCow.class)
-            .put(Ocelot.class, net.minecraft.world.entity.animal.Ocelot.class)
-            .put(Panda.class, net.minecraft.world.entity.animal.Panda.class)
-            .put(Parrot.class, net.minecraft.world.entity.animal.Parrot.class)
+            .put(Mule.class, net.minecraft.world.entity.animal.equine.Mule.class)
+            .put(MushroomCow.class, net.minecraft.world.entity.animal.cow.MushroomCow.class)
+            .put(Nautilus.class, net.minecraft.world.entity.animal.nautilus.Nautilus.class)
+            .put(Ocelot.class, net.minecraft.world.entity.animal.feline.Ocelot.class)
+            .put(Panda.class, net.minecraft.world.entity.animal.panda.Panda.class)
+            .put(Parched.class, net.minecraft.world.entity.monster.skeleton.Parched.class)
+            .put(Parrot.class, net.minecraft.world.entity.animal.parrot.Parrot.class)
             .put(Phantom.class, net.minecraft.world.entity.monster.Phantom.class)
-            .put(Pig.class, net.minecraft.world.entity.animal.Pig.class)
+            .put(Pig.class, net.minecraft.world.entity.animal.pig.Pig.class)
             .put(Piglin.class, net.minecraft.world.entity.monster.piglin.Piglin.class)
             .put(PiglinBrute.class, net.minecraft.world.entity.monster.piglin.PiglinBrute.class)
             .put(PigZombie.class, ZombifiedPiglin.class)
-            .put(Pillager.class, net.minecraft.world.entity.monster.Pillager.class)
+            .put(Pillager.class, net.minecraft.world.entity.monster.illager.Pillager.class)
             .put(Player.class, net.minecraft.world.entity.player.Player.class)
-            .put(PolarBear.class, net.minecraft.world.entity.animal.PolarBear.class)
+            .put(PolarBear.class, net.minecraft.world.entity.animal.polarbear.PolarBear.class)
             .put(PufferFish.class, Pufferfish.class)
-            .put(Rabbit.class, net.minecraft.world.entity.animal.Rabbit.class)
+            .put(Rabbit.class, net.minecraft.world.entity.animal.rabbit.Rabbit.class)
             .put(Raider.class, net.minecraft.world.entity.raid.Raider.class)
             .put(Ravager.class, net.minecraft.world.entity.monster.Ravager.class)
-            .put(Salmon.class, net.minecraft.world.entity.animal.Salmon.class)
-            .put(Sheep.class, net.minecraft.world.entity.animal.Sheep.class)
+            .put(Salmon.class, net.minecraft.world.entity.animal.fish.Salmon.class)
+            .put(Sheep.class, net.minecraft.world.entity.animal.sheep.Sheep.class)
             .put(Shulker.class, net.minecraft.world.entity.monster.Shulker.class)
             .put(Silverfish.class, net.minecraft.world.entity.monster.Silverfish.class)
-            .put(Skeleton.class, net.minecraft.world.entity.monster.Skeleton.class)
-            .put(SkeletonHorse.class, net.minecraft.world.entity.animal.horse.SkeletonHorse.class)
+            .put(Skeleton.class, net.minecraft.world.entity.monster.skeleton.Skeleton.class)
+            .put(SkeletonHorse.class, net.minecraft.world.entity.animal.equine.SkeletonHorse.class)
             .put(Slime.class, net.minecraft.world.entity.monster.Slime.class)
             .put(Sniffer.class, net.minecraft.world.entity.animal.sniffer.Sniffer.class)
             .put(Snowman.class, SnowGolem.class)
-            .put(Spider.class, net.minecraft.world.entity.monster.Spider.class)
-            .put(Squid.class, net.minecraft.world.entity.animal.Squid.class)
-            .put(Stray.class, net.minecraft.world.entity.monster.Stray.class)
+            .put(Spider.class, net.minecraft.world.entity.monster.spider.Spider.class)
+            .put(Squid.class, net.minecraft.world.entity.animal.squid.Squid.class)
+            .put(Stray.class, net.minecraft.world.entity.monster.skeleton.Stray.class)
             .put(Strider.class, net.minecraft.world.entity.monster.Strider.class)
             .put(Tadpole.class, net.minecraft.world.entity.animal.frog.Tadpole.class)
-            .put(TraderLlama.class, net.minecraft.world.entity.animal.horse.TraderLlama.class)
-            .put(TropicalFish.class, net.minecraft.world.entity.animal.TropicalFish.class)
-            .put(Turtle.class, net.minecraft.world.entity.animal.Turtle.class)
+            .put(TraderLlama.class, net.minecraft.world.entity.animal.equine.TraderLlama.class)
+            .put(TropicalFish.class, net.minecraft.world.entity.animal.fish.TropicalFish.class)
+            .put(Turtle.class, net.minecraft.world.entity.animal.turtle.Turtle.class)
             .put(Vex.class, net.minecraft.world.entity.monster.Vex.class)
-            .put(Villager.class, net.minecraft.world.entity.npc.Villager.class)
-            .put(Vindicator.class, net.minecraft.world.entity.monster.Vindicator.class)
-            .put(WanderingTrader.class, net.minecraft.world.entity.npc.WanderingTrader.class)
+            .put(Villager.class, net.minecraft.world.entity.npc.villager.Villager.class)
+            .put(Vindicator.class, net.minecraft.world.entity.monster.illager.Vindicator.class)
+            .put(WanderingTrader.class, net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader.class)
             .put(org.bukkit.entity.Warden.class, Warden.class)
             .put(WaterMob.class, WaterAnimal.class)
             .put(Witch.class, net.minecraft.world.entity.monster.Witch.class)
             .put(Wither.class, WitherBoss.class)
-            .put(WitherSkeleton.class, net.minecraft.world.entity.monster.WitherSkeleton.class)
-            .put(Wolf.class, net.minecraft.world.entity.animal.Wolf.class)
+            .put(WitherSkeleton.class, net.minecraft.world.entity.monster.skeleton.WitherSkeleton.class)
+            .put(Wolf.class, net.minecraft.world.entity.animal.wolf.Wolf.class)
             .put(Zoglin.class, net.minecraft.world.entity.monster.Zoglin.class)
-            .put(Zombie.class, net.minecraft.world.entity.monster.Zombie.class)
-            .put(ZombieHorse.class, net.minecraft.world.entity.animal.horse.ZombieHorse.class)
-            .put(ZombieVillager.class, net.minecraft.world.entity.monster.ZombieVillager.class)
+            .put(Zombie.class, net.minecraft.world.entity.monster.zombie.Zombie.class)
+            .put(ZombieHorse.class, net.minecraft.world.entity.animal.equine.ZombieHorse.class)
+            .put(ZombieNautilus.class, net.minecraft.world.entity.animal.nautilus.ZombieNautilus.class)
+            .put(ZombieVillager.class, net.minecraft.world.entity.monster.zombie.ZombieVillager.class)
             .build();
 
     public static Class<? extends net.minecraft.world.entity.LivingEntity> toNMS(Class<? extends LivingEntity> clazz) {
@@ -329,7 +342,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             }
             case "Beg" -> {
                 PathfinderBeg p = (PathfinderBeg) b;
-                yield new BegGoal((net.minecraft.world.entity.animal.Wolf) m, p.getRange());
+                yield new BegGoal((net.minecraft.world.entity.animal.wolf.Wolf) m, p.getRange());
             }
             case "BowShoot" -> {
                 PathfinderRangedBowAttack p = (PathfinderRangedBowAttack) b;
@@ -346,7 +359,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             }
             case "CatSitOnBed" -> {
                 PathfinderCatOnBed p = (PathfinderCatOnBed) b;
-                yield new CatLieOnBedGoal((net.minecraft.world.entity.animal.Cat) m, p.getSpeedModifier(), Math.min((int) p.getRange(), 1));
+                yield new CatLieOnBedGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier(), Math.min((int) p.getRange(), 1));
             }
             case "ClimbOnTopOfPowderSnowGoal" -> new ClimbOnTopOfPowderSnowGoal(m, toNMS(mob.getWorld()));
             case "CrossbowAttack" -> {
@@ -379,7 +392,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             }
             case "JumpOnBlock" -> {
                 PathfinderCatOnBlock p = (PathfinderCatOnBlock) b;
-                yield new CatSitOnBlockGoal((net.minecraft.world.entity.animal.Cat) m, p.getSpeedModifier());
+                yield new CatSitOnBlockGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier());
             }
             case "LeapAtTarget" -> {
                 PathfinderLeapAtTarget p = (PathfinderLeapAtTarget) b;
@@ -387,13 +400,13 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             }
             case "LlamaFollow" -> {
                 PathfinderLlamaFollowCaravan p = (PathfinderLlamaFollowCaravan) b;
-                yield new LlamaFollowCaravanGoal((net.minecraft.world.entity.animal.horse.Llama) m, p.getSpeedModifier());
+                yield new LlamaFollowCaravanGoal((net.minecraft.world.entity.animal.equine.Llama) m, p.getSpeedModifier());
             }
             case "LookAtPlayer" -> {
                 PathfinderLookAtEntity<?> p = (PathfinderLookAtEntity) b;
                 yield new LookAtPlayerGoal(m, toNMS(p.getFilter()), p.getRange(), p.getProbability(), p.isHorizontal());
             }
-            case "LookAtTradingPlayer" -> new LookAtTradingPlayerGoal((net.minecraft.world.entity.npc.AbstractVillager) m);
+            case "LookAtTradingPlayer" -> new LookAtTradingPlayerGoal((net.minecraft.world.entity.npc.villager.AbstractVillager) m);
             case "MeleeAttack" -> {
                 PathfinderMeleeAttack p = (PathfinderMeleeAttack) b;
                 yield new MeleeAttackGoal((PathfinderMob) m, p.getSpeedModifier(), p.mustSee());
@@ -415,7 +428,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
                 yield new StrollThroughVillageGoal((PathfinderMob) m, p.getInterval());
             }
             case "OcelotAttack" -> new OcelotAttackGoal(m);
-            case "OfferFlower" -> new OfferFlowerGoal((net.minecraft.world.entity.animal.IronGolem) m);
+            case "OfferFlower" -> new OfferFlowerGoal((net.minecraft.world.entity.animal.golem.IronGolem) m);
             case "Panic" -> {
                 PathfinderPanic p = (PathfinderPanic) b;
                 yield new PanicGoal((PathfinderMob) m, p.getSpeedModifier());
@@ -456,13 +469,13 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             case "Swell" -> new SwellGoal((net.minecraft.world.entity.monster.Creeper) m);
             case "Tame" -> {
                 PathfinderTameHorse p = (PathfinderTameHorse) b;
-                yield new RunAroundLikeCrazyGoal((net.minecraft.world.entity.animal.horse.AbstractHorse) m, p.getSpeedModifier());
+                yield new RunAroundLikeCrazyGoal((net.minecraft.world.entity.animal.equine.AbstractHorse) m, p.getSpeedModifier());
             }
             case "Tempt" -> {
                 PathfinderTempt p = (PathfinderTempt) b;
                 yield new TemptGoal((PathfinderMob) m, p.getSpeedModifier(), toNMS(p), true);
             }
-            case "TradeWithPlayer" -> new TradeWithPlayerGoal((net.minecraft.world.entity.npc.AbstractVillager) m);
+            case "TradeWithPlayer" -> new TradeWithPlayerGoal((net.minecraft.world.entity.npc.villager.AbstractVillager) m);
             case "UseItem" -> {
                 PathfinderUseItem p = (PathfinderUseItem) b;
                 yield new UseItemGoal<>(m, toNMS(p.getItem()), toNMS(p.getFinishSound()), e -> p.getCondition().test(fromNMS(e)));
@@ -470,21 +483,21 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             case "Water" -> new TryFindWaterGoal((PathfinderMob) m);
             case "WaterJump" -> {
                 PathfinderDolphinJump p = (PathfinderDolphinJump) b;
-                yield new DolphinJumpGoal((net.minecraft.world.entity.animal.Dolphin) m, p.getInterval());
+                yield new DolphinJumpGoal((net.minecraft.world.entity.animal.dolphin.Dolphin) m, p.getInterval());
             }
             case "ZombieAttack" -> {
                 PathfinderZombieAttack p = (PathfinderZombieAttack) b;
-                yield new ZombieAttackGoal((net.minecraft.world.entity.monster.Zombie) m, p.getSpeedModifier(), p.mustSee());
+                yield new ZombieAttackGoal((net.minecraft.world.entity.monster.zombie.Zombie) m, p.getSpeedModifier(), p.mustSee());
             }
             case "UniversalAngerReset" -> {
                 PathfinderResetAnger p = (PathfinderResetAnger) b;
                 yield new ResetUniversalAngerTargetGoal<>((net.minecraft.world.entity.Mob & NeutralMob) m, p.isAlertingOthers());
             }
-            case "RandomStandGoal" -> new RandomStandGoal((net.minecraft.world.entity.animal.horse.AbstractHorse) m);
+            case "RandomStandGoal" -> new RandomStandGoal((net.minecraft.world.entity.animal.equine.AbstractHorse) m);
 
             // Target
 
-            case "DefendVillage" -> new DefendVillageTargetGoal((net.minecraft.world.entity.animal.IronGolem) m);
+            case "DefendVillage" -> new DefendVillageTargetGoal((net.minecraft.world.entity.animal.golem.IronGolem) m);
             case "HurtByTarget" -> {
                 PathfinderHurtByTarget p = (PathfinderHurtByTarget) b;
                 List<Class<? extends net.minecraft.world.entity.LivingEntity>> classes = new ArrayList<>();
@@ -592,12 +605,12 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             if (Behavior.class.isAssignableFrom(bClass)) {
                 Constructor<?> c = bClass.getConstructor(ChipUtil.getArgTypes(args));
                 Behavior<? super net.minecraft.world.entity.LivingEntity> b = (Behavior<? super net.minecraft.world.entity.LivingEntity>) c.newInstance(args);
-                return new BehaviorResult1_21_R2(b, nms);
+                return new BehaviorResult1_21_R7(b, nms);
             } else {
                 Method create = bClass.getDeclaredMethod("a", ChipUtil.getArgTypes(args));
                 create.setAccessible(true);
                 BehaviorControl<? super net.minecraft.world.entity.LivingEntity> control = (BehaviorControl<? super net.minecraft.world.entity.LivingEntity>) create.invoke(null, args);
-                return new BehaviorResult1_21_R2(control, nms);
+                return new BehaviorResult1_21_R7(control, nms);
             }
 
 
@@ -612,15 +625,15 @@ final class ChipUtil1_21_R2 implements ChipUtil {
 
     @Override
     public Attribute getDefaultAttribute(String s) {
-        return new Attribute1_21_R2((RangedAttribute) BuiltInRegistries.ATTRIBUTE.get(ResourceLocation.parse(s)).get().value());
+        return new Attribute1_21_R7((RangedAttribute) BuiltInRegistries.ATTRIBUTE.get(Identifier.parse(s)).get().value());
     }
 
     public static net.minecraft.world.entity.schedule.Activity toNMS(Activity a) {
-        return BuiltInRegistries.ACTIVITY.get(ResourceLocation.parse(a.getKey().getKey())).get().value();
+        return BuiltInRegistries.ACTIVITY.get(Identifier.parse(a.getKey().getKey())).get().value();
     }
 
     public static Activity fromNMS(net.minecraft.world.entity.schedule.Activity a) {
-        ResourceLocation key = BuiltInRegistries.ACTIVITY.getKey(a);
+        Identifier key = BuiltInRegistries.ACTIVITY.getKey(a);
         if (key == null) return null;
         return Activity.getByKey(NamespacedKey.minecraft(key.getPath()));
     }
@@ -628,7 +641,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     public static <T extends net.minecraft.world.entity.LivingEntity> Behavior<T> toNMS(Consumer<Mob> en) {
         return new Behavior<>(Collections.emptyMap()) {
             @Override
-            protected void tick(ServerLevel var0, T m, long var2) {
+            protected void tick(ServerLevel var0, T m, long vaR3) {
                 if (!(m instanceof net.minecraft.world.entity.Mob)) return;
                 en.accept(fromNMS((net.minecraft.world.entity.Mob) m));
             }
@@ -681,7 +694,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
         try {
             Method m = net.minecraft.world.entity.boss.enderdragon.EnderDragon.class.getDeclaredMethod("a", List.class);
             m.setAccessible(true);
-            m.invoke(nmsMob, list.stream().map(ChipUtil1_21_R2::toNMS).collect(Collectors.toList()));
+            m.invoke(nmsMob, list.stream().map(ChipUtil1_21_R7::toNMS).collect(Collectors.toList()));
         } catch (Exception e) {
             ChipUtil.printStackTrace(e);
         }
@@ -689,17 +702,17 @@ final class ChipUtil1_21_R2 implements ChipUtil {
 
     @Override
     public EntityController getController(Mob m) {
-        return new EntityController1_21_R2(m);
+        return new EntityController1_21_R7(m);
     }
 
     @Override
     public EntityNavigation getNavigation(Mob m) {
-        return new EntityNavigation1_21_R2(m);
+        return new EntityNavigation1_21_R7(m);
     }
 
     @Override
     public EntityBody getBody(Mob m) {
-        return new EntityBody1_21_R2(m);
+        return new EntityBody1_21_R7(m);
     }
 
     private static DamageSource fromType(ResourceKey<DamageType> key) {
@@ -911,7 +924,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     @Override
     public void setMemory(Mob mob, String memoryKey, Object value) {
         net.minecraft.world.entity.Mob nms = toNMS(mob);
-        MemoryModuleType type = BuiltInRegistries.MEMORY_MODULE_TYPE.get(ResourceLocation.parse(memoryKey)).get().value();
+        MemoryModuleType type = BuiltInRegistries.MEMORY_MODULE_TYPE.get(Identifier.parse(memoryKey)).get().value();
         Object nmsValue = toNMS(memoryKey, value);
 
         nms.getBrain().setMemory(type, nmsValue);
@@ -982,13 +995,13 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     @Override
     public boolean isRestricted(Mob m) {
         net.minecraft.world.entity.Mob nms = toNMS(m);
-        return nms.isWithinRestriction();
+        return nms.isWithinHome();
     }
 
     @Override
     public void clearRestriction(Mob m) {
         net.minecraft.world.entity.Mob nms = toNMS(m);
-        nms.clearRestriction();
+        nms.clearHome();
     }
 
     @Override
@@ -999,26 +1012,26 @@ final class ChipUtil1_21_R2 implements ChipUtil {
         int bY = (int) y;
         int bZ = (int) z;
 
-        nms.restrictTo(new BlockPos(bX, bY, bZ), radius);
+        nms.setHomeTo(new BlockPos(bX, bY, bZ), radius);
     }
 
     @Override
     public Location getRestriction(Mob m) {
         net.minecraft.world.entity.Mob nms = toNMS(m);
-        BlockPos c = nms.getRestrictCenter();
+        BlockPos c = nms.getHomePosition();
         return new Location(m.getWorld(), c.getX(), c.getY(), c.getZ());
     }
 
     @Override
     public int getRestrictionRadius(Mob m) {
         net.minecraft.world.entity.Mob nms = toNMS(m);
-        return ((int) nms.getRestrictRadius()) < 0 ? Integer.MAX_VALUE : (int) nms.getRestrictRadius();
+        return ((int) nms.getHomeRadius()) < 0 ? Integer.MAX_VALUE : (int) nms.getHomeRadius();
     }
 
     @Override
     public boolean hasRestriction(Mob m) {
         net.minecraft.world.entity.Mob nms = toNMS(m);
-        return nms.hasRestriction();
+        return nms.hasHome();
     }
 
     @Override
@@ -1032,24 +1045,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     }
 
     public static VillagerProfession toNMS(Villager.Profession p) {
-        // Can't make this a field because the tests will fail. Maybe there's a better way to do this?
-        Map<Villager.Profession, VillagerProfession> VILLAGER_PROFESSION_MAP = ImmutableMap.<Villager.Profession,VillagerProfession>builder()
-                .put(FARMER, VillagerProfession.FARMER)
-                .put(FISHERMAN, VillagerProfession.FISHERMAN)
-                .put(LIBRARIAN, VillagerProfession.LIBRARIAN)
-                .put(WEAPONSMITH, VillagerProfession.WEAPONSMITH)
-                .put(TOOLSMITH, VillagerProfession.TOOLSMITH)
-                .put(BUTCHER, VillagerProfession.BUTCHER)
-                .put(FLETCHER, VillagerProfession.FLETCHER)
-                .put(MASON, VillagerProfession.MASON)
-                .put(CLERIC, VillagerProfession.CLERIC)
-                .put(ARMORER, VillagerProfession.ARMORER)
-                .put(NITWIT, VillagerProfession.NITWIT)
-                .put(SHEPHERD, VillagerProfession.SHEPHERD)
-                .put(CARTOGRAPHER, VillagerProfession.CARTOGRAPHER)
-                .put(LEATHERWORKER, VillagerProfession.LEATHERWORKER)
-                .build();
-        return VILLAGER_PROFESSION_MAP.getOrDefault(p, VillagerProfession.NONE);
+        return BuiltInRegistries.VILLAGER_PROFESSION.getValue(Identifier.parse(p.getKeyOrThrow().toString()));
     }
 
     public static <T extends Entity> Class<? extends T> fromNMS(Class<? extends net.minecraft.world.entity.Entity> clazz, Class<T> cast) {
@@ -1299,9 +1295,9 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     }
 
     public static Goal custom(CustomPathfinder p) {
-        CustomGoal1_21_R2 g = new CustomGoal1_21_R2(p);
+        CustomGoal1_21_R7 g = new CustomGoal1_21_R7(p);
         EnumSet<Goal.Flag> set = EnumSet.noneOf(Goal.Flag.class);
-        Arrays.stream(p.getFlags()).map(ChipUtil1_21_R2::toNMS).forEach(set::add);
+        Arrays.stream(p.getFlags()).map(ChipUtil1_21_R7::toNMS).forEach(set::add);
         g.setFlags(set);
         return g;
     }
@@ -1311,13 +1307,13 @@ final class ChipUtil1_21_R2 implements ChipUtil {
      * NMS or otherwise. (Private NMS pathfinders will be "custom.")
      */
     public static CustomPathfinder custom(Goal g) {
-        if (g instanceof CustomGoal1_21_R2) {
-            return ((CustomGoal1_21_R2) g).getPathfinder();
+        if (g instanceof CustomGoal1_21_R7) {
+            return ((CustomGoal1_21_R7) g).getPathfinder();
         }
         return new CustomPathfinder(getEntity(g)) {
             @Override
             public @NotNull PathfinderFlag[] getFlags() {
-                Set<Goal.Flag> nms = ChipUtil1_21_R2.getFlags(g);
+                Set<Goal.Flag> nms = ChipUtil1_21_R7.getFlags(g);
 
                 PathfinderFlag[] flags = new PathfinderFlag[nms.size()];
                 int i = 0;
@@ -1361,7 +1357,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     public static Location fromNMS(Position p, World w) { return new Location(w, p.x(), p.y(), p.z()); }
 
     private Pathfinder fromNMS(Goal g) {
-        if (g instanceof CustomGoal1_21_R2 custom) {
+        if (g instanceof CustomGoal1_21_R7 custom) {
             return custom.getPathfinder();
         }
 
@@ -1510,7 +1506,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
         DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
         WritableRegistry<net.minecraft.world.entity.ai.attributes.Attribute> writable = (WritableRegistry<net.minecraft.world.entity.ai.attributes.Attribute>) server.registryAccess().lookupOrThrow(Registries.ATTRIBUTE);
         ResourceKey<net.minecraft.world.entity.ai.attributes.Attribute> nmsKey = ResourceKey.create(Registries.ATTRIBUTE, toNMS(key));
-        Attribute1_21_R2 att = new Attribute1_21_R2(key, defaultV, min, max, client);
+        Attribute1_21_R7 att = new Attribute1_21_R7(key, defaultV, min, max, client);
         writable.register(nmsKey, att, registration(key));
 
         changeRegistryLock(BuiltInRegistries.ATTRIBUTE, true);
@@ -1522,7 +1518,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
         return BuiltInRegistries.ATTRIBUTE.containsKey(toNMS(key));
     }
 
-    public static ResourceLocation toNMS(NamespacedKey key) {
+    public static Identifier toNMS(NamespacedKey key) {
         return CraftNamespacedKey.toMinecraft(key);
     }
 
@@ -1530,11 +1526,11 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     public Attribute getAttribute(NamespacedKey key) {
         net.minecraft.world.entity.ai.attributes.Attribute a = BuiltInRegistries.ATTRIBUTE.get(toNMS(key)).get().value();
         if (!(a instanceof RangedAttribute)) return null;
-        return new Attribute1_21_R2((RangedAttribute) a);
+        return new Attribute1_21_R7((RangedAttribute) a);
     }
 
     @NotNull
-    private AttributeInstance1_21_R2 getOrCreateInstance(Mob m, Attribute a) {
+    private AttributeInstance1_21_R7 getOrCreateInstance(Mob m, Attribute a) {
         net.minecraft.world.entity.Mob nms = toNMS(m);
         AttributeMap map = nms.getAttributes();
         Optional<Holder.Reference<net.minecraft.world.entity.ai.attributes.Attribute>> nmsAH = BuiltInRegistries.ATTRIBUTE.get(toNMS(a.getKey()));
@@ -1542,7 +1538,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
 
         Holder<net.minecraft.world.entity.ai.attributes.Attribute> nmsA = nmsAH.get();
         net.minecraft.world.entity.ai.attributes.AttributeInstance handle = toNMS(m).getAttribute(nmsA);
-        if (handle != null) return new AttributeInstance1_21_R2(a, handle);
+        if (handle != null) return new AttributeInstance1_21_R7(a, handle);
 
         try {
             Field attributesF = AttributeMap.class.getDeclaredField("b");
@@ -1552,7 +1548,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             handle = new net.minecraft.world.entity.ai.attributes.AttributeInstance(nmsA, ignored -> {});
             attributes.put(nmsA, handle);
 
-            return new AttributeInstance1_21_R2(a, handle);
+            return new AttributeInstance1_21_R7(a, handle);
         } catch (ReflectiveOperationException e) {
             ChipUtil.printStackTrace(e);
         }
@@ -1579,7 +1575,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
 
     @Override
     public EntityGossipContainer getGossipContainer(Villager v) {
-        return new EntityGossipContainer1_21_R2(v);
+        return new EntityGossipContainer1_21_R7(v);
     }
 
     public static Entity fromNMS(net.minecraft.world.entity.Entity en) {
@@ -1595,7 +1591,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     }
 
     @Override
-    public EntityCombatTracker getCombatTracker(Mob m) { return new EntityCombatTracker1_21_R2(m); }
+    public EntityCombatTracker getCombatTracker(Mob m) { return new EntityCombatTracker1_21_R7(m); }
 
     @Override
     public BehaviorResult hearNoteblock(Creature c, Location loc) {
@@ -1631,12 +1627,12 @@ final class ChipUtil1_21_R2 implements ChipUtil {
             default -> new DragonHoverPhase(nms);
         };
 
-        return new DragonPhase1_21_R2(d, i);
+        return new DragonPhase1_21_R7(d, i);
     }
 
     @Override
     public DragonPhase getCurrentPhase(EnderDragon dragon) {
-        return new DragonPhase1_21_R2(dragon, toNMS(dragon).getPhaseManager().getCurrentPhase());
+        return new DragonPhase1_21_R7(dragon, toNMS(dragon).getPhaseManager().getCurrentPhase());
     }
 
     @Override
@@ -1650,7 +1646,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     }
 
     public static MemoryModuleType<?> toNMS(Memory<?> mem) {
-        return BuiltInRegistries.MEMORY_MODULE_TYPE.get(mem instanceof EntityMemory<?> ? ResourceLocation.parse(mem.getKey().getKey()) : ResourceLocation.fromNamespaceAndPath(mem.getKey().getNamespace(), mem.getKey().getKey())).get().value();
+        return BuiltInRegistries.MEMORY_MODULE_TYPE.get(mem instanceof EntityMemory<?> ? Identifier.parse(mem.getKey().getKey()) : Identifier.fromNamespaceAndPath(mem.getKey().getNamespace(), mem.getKey().getKey())).get().value();
     }
 
     @Override
@@ -1666,12 +1662,12 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     @Override
     public boolean existsMemory(Memory<?> m) {
         if (m instanceof EntityMemory<?>) return true;
-        return BuiltInRegistries.MEMORY_MODULE_TYPE.containsKey(ResourceLocation.fromNamespaceAndPath(m.getKey().getNamespace(), m.getKey().getKey()));
+        return BuiltInRegistries.MEMORY_MODULE_TYPE.containsKey(Identifier.fromNamespaceAndPath(m.getKey().getNamespace(), m.getKey().getKey()));
     }
 
     public static net.minecraft.world.entity.ai.sensing.Sensor<?> toNMS(Sensor<?> s) {
-        if (s instanceof SensorDefault1_21_R2) return ((SensorDefault1_21_R2) s).getHandle();
-        return new Sensor1_21_R2(s);
+        if (s instanceof SensorDefault1_21_R7) return ((SensorDefault1_21_R7) s).getHandle();
+        return new Sensor1_21_R7(s);
     }
 
     public static SensorType<?> toNMSType(Sensor<?> s) {
@@ -1691,11 +1687,11 @@ final class ChipUtil1_21_R2 implements ChipUtil {
     }
 
     public static Sensor<?> fromNMS(net.minecraft.world.entity.ai.sensing.Sensor<?> type) {
-        if (type instanceof Sensor1_21_R2) return ((Sensor1_21_R2) type).getSensor();
-        return new SensorDefault1_21_R2(type);
+        if (type instanceof Sensor1_21_R7) return ((Sensor1_21_R7) type).getSensor();
+        return new SensorDefault1_21_R7(type);
     }
 
-    public static NamespacedKey fromNMS(ResourceLocation loc) {
+    public static NamespacedKey fromNMS(Identifier loc) {
         return new NamespacedKey(loc.getNamespace(), loc.getPath());
     }
 
@@ -1715,7 +1711,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
 
     @Override
     public boolean existsSensor(NamespacedKey key) {
-        return BuiltInRegistries.SENSOR_TYPE.containsKey(ResourceLocation.fromNamespaceAndPath(key.getNamespace(), key.getKey()));
+        return BuiltInRegistries.SENSOR_TYPE.containsKey(Identifier.fromNamespaceAndPath(key.getNamespace(), key.getKey()));
     }
 
     @Override
@@ -1725,7 +1721,7 @@ final class ChipUtil1_21_R2 implements ChipUtil {
 
     @Override
     public EntitySenses getSenses(Mob m) {
-        return new EntitySenses1_21_R2(m);
+        return new EntitySenses1_21_R7(m);
     }
 
     @Override

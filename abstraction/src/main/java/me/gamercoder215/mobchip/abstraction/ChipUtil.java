@@ -14,8 +14,6 @@ import me.gamercoder215.mobchip.ai.gossip.EntityGossipContainer;
 import me.gamercoder215.mobchip.ai.memories.Memory;
 import me.gamercoder215.mobchip.ai.memories.MemoryStatus;
 import me.gamercoder215.mobchip.ai.navigation.EntityNavigation;
-import me.gamercoder215.mobchip.ai.schedule.EntityScheduleManager;
-import me.gamercoder215.mobchip.ai.schedule.Schedule;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
@@ -67,8 +65,6 @@ public interface ChipUtil {
 
     EntityBody getBody(Mob m);
 
-    EntityScheduleManager getManager(Mob m);
-
     EntityGossipContainer getGossipContainer(Villager v);
 
     EntityCombatTracker getCombatTracker(Mob m);
@@ -104,8 +100,6 @@ public interface ChipUtil {
     boolean hasRestriction(Mob m);
 
     boolean canSee(Mob m, Entity en);
-
-    Schedule getDefaultSchedule(String key);
 
     Attribute registerAttribute(NamespacedKey key, double defaultV, double min, double max, boolean client);
 
@@ -208,6 +202,8 @@ public interface ChipUtil {
             case "1.21.9":
             case "1.21.10":
                 return "1_21_R6";
+            case "1.21.11":
+                return "1_21_R7";
             default:
                 throw new IllegalStateException("Unsupported version: " + bukkit);
         }

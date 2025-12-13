@@ -13,7 +13,6 @@ import me.gamercoder215.mobchip.ai.memories.EntityMemory;
 import me.gamercoder215.mobchip.ai.memories.Memory;
 import me.gamercoder215.mobchip.ai.memories.MemoryStatus;
 import me.gamercoder215.mobchip.ai.navigation.EntityNavigation;
-import me.gamercoder215.mobchip.ai.schedule.EntityScheduleManager;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
 import me.gamercoder215.mobchip.bukkit.events.RestrictionSetEvent;
@@ -150,13 +149,6 @@ public class BukkitBrain implements EntityBrain {
 	public @NotNull EntityController getController() {
 		return w.getController(m);
 	}
-
-	/**
-	 * Gets the EntityScheduleManager associated with this Brain.
-	 * @return EntityScheduleManager
-	 */
-	@Override
-	public @NotNull EntityScheduleManager getScheduleManager() { return w.getManager(m); }
 
 	/**
 	 * Get the Entity's Scheduling Manager associated with this Brain.
