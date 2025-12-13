@@ -40,7 +40,8 @@ tasks {
             overview = "bukkit/src/main/javadoc/overview.html"
 
             links("https://hub.spigotmc.org/javadocs/spigot/")
-            links("https://javadoc.io/doc/org.jetbrains/annotations-java5/23.0.0/")
+            // javadoc.io goes down sometimes and causes the build to fail
+            //links("https://javadoc.io/doc/org.jetbrains/annotations-java5/23.0.0/")
 
             addStringOption("tag", "apiNote:a:API Note:")
         }
