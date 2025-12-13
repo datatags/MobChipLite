@@ -20,14 +20,20 @@ public interface EntityScheduleManager {
     /**
      * Fetches the current schedule that this Mob has.
      * @return Current Schedule, or null if none
+     *
+     * @deprecated Schedules no longer exist in 1.21.11+
      */
     @Nullable
+    @Deprecated
     Schedule getCurrentSchedule();
 
     /**
      * Sets the current schedule.
      * @param schedule Schedule to set
+     *
+     * @deprecated Schedules no longer exist in 1.21.11+
      */
+    @Deprecated
     void setSchedule(@NotNull Schedule schedule);
 
     /**

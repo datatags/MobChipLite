@@ -35,8 +35,6 @@ import java.util.Set;
  */
 public interface ChipUtil {
 
-    String CLASS_TAG = "==";
-
     void addCustomPathfinder(CustomPathfinder p, int priority, boolean target);
 
     Set<WrappedPathfinder> getGoals(Mob m, boolean target);
@@ -105,6 +103,10 @@ public interface ChipUtil {
 
     boolean canSee(Mob m, Entity en);
 
+    /**
+     * @deprecated Schedules no longer exist in 1.21.11+
+     */
+    @Deprecated
     Schedule getDefaultSchedule(String key);
 
     Attribute registerAttribute(NamespacedKey key, double defaultV, double min, double max, boolean client);
@@ -208,6 +210,8 @@ public interface ChipUtil {
             case "1.21.9":
             case "1.21.10":
                 return "1_21_R6";
+            case "1.21.11":
+                return "1_21_R7";
             default:
                 throw new IllegalStateException("Unsupported version: " + bukkit);
         }
