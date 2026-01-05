@@ -60,6 +60,10 @@ public abstract class Pathfinder implements PathfinderInfo {
         /**
          * Flag representing that the Pathfinder involves making the entity jump
          */
-        JUMPING
+        JUMPING,
+        /**
+         * Used to map vanilla goals, that are a behavior goal but don't have a type set...
+         */
+        UNKNOWN_BEHAVIOR,
     }
 }

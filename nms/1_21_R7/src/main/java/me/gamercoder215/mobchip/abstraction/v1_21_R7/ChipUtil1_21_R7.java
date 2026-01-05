@@ -1161,10 +1161,20 @@ final class ChipUtil1_21_R7 implements ChipUtil {
             case JUMPING -> Goal.Flag.JUMP;
             case TARGETING -> Goal.Flag.TARGET;
             case LOOKING -> Goal.Flag.LOOK;
+            case UNKNOWN_BEHAVIOR -> {
+                try {
+                    yield Goal.Flag.valueOf("UNKNOWN_BEHAVIOR");
+                } catch (IllegalArgumentException ex) {
+                    yield Goal.Flag.MOVE; // shouldn't happen
+                }
+            }
         };
     }
 
     public static Pathfinder.PathfinderFlag fromNMS(Goal.Flag f) {
+        if (f != null && f.name().equals("UNKNOWN_BEHAVIOR")) {
+            return Pathfinder.PathfinderFlag.UNKNOWN_BEHAVIOR;
+        }
         return switch (f) {
             case MOVE -> Pathfinder.PathfinderFlag.MOVEMENT;
             case JUMP -> Pathfinder.PathfinderFlag.JUMPING;
