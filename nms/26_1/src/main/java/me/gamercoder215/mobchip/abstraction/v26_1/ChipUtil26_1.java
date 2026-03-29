@@ -1414,6 +1414,7 @@ final class ChipUtil26_1 implements ChipUtil {
             case "FleeSun" -> new PathfinderFleeSun((Creature) m, speedMod(g));
             case "Float" -> new PathfinderFloat(m);
             case "FollowPlayerRiddenEntity" -> new PathfinderFollowPlayerRiddenEntity((Creature) m, getObject(g, "entityTypeToFollow", Class.class));
+            case "FollowFlockLeader" -> new PathfinderFollowFishLeader((Fish)m);
             case "FollowMob" -> new PathfinderFollowMob(m, speedMod(g), getFloat(g, "stopDistance"), getFloat(g, "areaSize"));
             case "FollowOwner" -> new PathfinderFollowOwner((Tameable) m, speedMod(g), getFloat(g, "startDistance"), getFloat(g, "stopDistance"));
             case "FollowParent" -> new PathfinderFollowParent((Animals) m, speedMod(g));
@@ -1435,7 +1436,7 @@ final class ChipUtil26_1 implements ChipUtil {
             case "Panic" -> new PathfinderPanic((Creature) m, speedMod(g)); // TODO: accepts panicCausingDamageTypes
             case "LandOnOwnersShoulder" -> new PathfinderRideShoulder((Parrot) m);
             case "RandomLookAround" -> new PathfinderRandomLook(m);
-            case "RandomStandGoal" -> new PathfinderRandomStand((AbstractHorse) m);
+            case "RandomStand" -> new PathfinderRandomStand((AbstractHorse) m);
             case "RandomStroll" -> new PathfinderRandomStroll((Creature) m, speedMod(g), getInt(g, "interval")); // TODO: checkNoActionTime
             case "WaterAvoidingRandomStroll" -> new PathfinderRandomStrollLand((Creature) m, speedMod(g), getFloat(g, "probability"));
             case "RandomSwimming" -> new PathfinderRandomSwim((Creature) m, speedMod(g), getInt(g, "interval"));

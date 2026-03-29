@@ -6,7 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
  * Represents information about a Pathfinder
  */
 public interface PathfinderInfo {
-    
+
     /**
      * Returns this Pathfinder's Name.
      * @return Pathfinder Name
@@ -16,7 +16,7 @@ public interface PathfinderInfo {
     }
 
     /**
-     * Returns the NMS Internal Name.
+     * Returns the pathfinder's internal name. This may match the actual NMS name of the pathfinder, but it may not.
      * @return Internal Name
      */
     @ApiStatus.Internal
