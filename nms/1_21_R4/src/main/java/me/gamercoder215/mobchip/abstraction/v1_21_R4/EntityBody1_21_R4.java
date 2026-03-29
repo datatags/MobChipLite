@@ -10,10 +10,8 @@ import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
-import static net.minecraft.world.InteractionResult.Success.*;
 
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.HumanoidArm;
@@ -30,6 +28,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,12 +91,13 @@ final class EntityBody1_21_R4 implements EntityBody {
     /**
      * Makes this Mob interact with a Player.
      *
-     * @param p    Player to interact with
-     * @param hand Hand to use
+     * @param p        Player to interact with
+     * @param hand     Hand to use
+     * @param location
      * @return Result of interaction
      */
     @Override
-    public InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand) {
+    public InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand, @Nullable Vector location) {
         final net.minecraft.world.InteractionHand h;
 
         if (hand == InteractionHand.OFF_HAND) h = net.minecraft.world.InteractionHand.OFF_HAND;

@@ -20,6 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +40,7 @@ final class EntityBody1_19_R3 implements EntityBody {
 
     private void update() {
         ClientboundSetEntityDataPacket packet = new ClientboundSetEntityDataPacket(nmsMob.getId(), nmsMob.getEntityData().packDirty());
-        
+
         for (Player p : m.getWorld().getPlayers())
             ((CraftPlayer) p).getHandle().connection.send(packet);
     }
@@ -82,12 +83,13 @@ final class EntityBody1_19_R3 implements EntityBody {
     /**
      * Makes this Mob interact with a Player.
      *
-     * @param p    Player to interact with
-     * @param hand Hand to use
+     * @param p        Player to interact with
+     * @param hand     Hand to use
+     * @param location
      * @return Result of interaction
      */
     @Override
-    public InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand) {
+    public InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand, @Nullable Vector location) {
         final net.minecraft.world.InteractionHand h;
 
         if (hand == InteractionHand.OFF_HAND) h = net.minecraft.world.InteractionHand.OFF_HAND;
@@ -476,7 +478,7 @@ final class EntityBody1_19_R3 implements EntityBody {
         } catch (ReflectiveOperationException e) {
             Bukkit.getLogger().severe(e.getMessage());
             for (StackTraceElement ste : e.getStackTrace()) Bukkit.getLogger().severe(ste.toString());
-        }       
+        }
     }
 
     @Override

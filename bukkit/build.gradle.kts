@@ -1,23 +1,24 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 val versions = mapOf(
-    "1_17_R1" to 17,
-    "1_18_R1" to 17,
-    "1_18_R2" to 17,
-    "1_19_R1" to 17,
-    "1_19_R2" to 17,
-    "1_19_R3" to 17,
-    "1_20_R1" to 17,
-    "1_20_R2" to 17,
-    "1_20_R3" to 17,
-    "1_20_R4" to 21,
-    "1_21_R1" to 21,
-    "1_21_R2" to 21,
-    "1_21_R3" to 21,
-    "1_21_R4" to 21,
-    "1_21_R5" to 21,
-    "1_21_R6" to 21,
-    "1_21_R7" to 21,
+    "1_17_R1" to true,
+    "1_18_R1" to true,
+    "1_18_R2" to true,
+    "1_19_R1" to true,
+    "1_19_R2" to true,
+    "1_19_R3" to true,
+    "1_20_R1" to true,
+    "1_20_R2" to true,
+    "1_20_R3" to true,
+    "1_20_R4" to true,
+    "1_21_R1" to true,
+    "1_21_R2" to true,
+    "1_21_R3" to true,
+    "1_21_R4" to true,
+    "1_21_R5" to true,
+    "1_21_R6" to true,
+    "1_21_R7" to true,
+    "26_1" to false,
 )
 
 dependencies {
@@ -46,7 +47,9 @@ sourceSets["main"].allJava.srcDir("src/main/javadoc")
 tasks {
     compileJava {
         for (version in versions) {
-            dependsOn(project(":mobchip-${version.key}").tasks["remap"])
+            if (version.value) {
+                dependsOn(project(":mobchip-${version.key}").tasks["remap"])
+            }
         }
     }
 

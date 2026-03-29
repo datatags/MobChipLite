@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id("org.sonarqube") version "4.0.0.2929"
     id("io.github.goooler.shadow") version "8.1.7" apply false
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.3.20"
 
     java
     `maven-publish`
@@ -146,6 +146,7 @@ subprojects {
     dependencies {
         testImplementation("org.mockito:mockito-core:5.12.0")
         testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
         testImplementation("org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT")
         testImplementation("net.md-5:bungeecord-chat:1.20-R0.2")

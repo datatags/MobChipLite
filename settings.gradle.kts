@@ -13,27 +13,26 @@ listOf("base", "abstraction", "bukkit").forEach {
     project(":mobchip-$it").projectDir = rootDir.resolve(it)
 }
 
-mapOf(
-    "1_17_R1" to 17,
-    "1_18_R1" to 17,
-    "1_18_R2" to 17,
-    "1_19_R1" to 17,
-    "1_19_R2" to 17,
-    "1_19_R3" to 17,
-    "1_20_R1" to 17,
-    "1_20_R2" to 17,
-    "1_20_R3" to 17,
-    "1_20_R4" to 21,
-    "1_21_R1" to 21,
-    "1_21_R2" to 21,
-    "1_21_R3" to 21,
-    "1_21_R4" to 21,
-    "1_21_R5" to 21,
-    "1_21_R6" to 21,
-    "1_21_R7" to 21,
+listOf(
+    "1_17_R1",
+    "1_18_R1",
+    "1_18_R2",
+    "1_19_R1",
+    "1_19_R2",
+    "1_19_R3",
+    "1_20_R1",
+    "1_20_R2",
+    "1_20_R3",
+    "1_20_R4",
+    "1_21_R1",
+    "1_21_R2",
+    "1_21_R3",
+    "1_21_R4",
+    "1_21_R5",
+    "1_21_R6",
+    "1_21_R7",
+    "26_1",
 ).forEach {
-    val id = it.key
-
-    include(":mobchip-$id")
-    project(":mobchip-$id").projectDir = rootDir.resolve("nms/$id")
+    include(":mobchip-$it")
+    project(":mobchip-$it").projectDir = rootDir.resolve("nms/$it")
 }

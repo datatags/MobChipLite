@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -137,11 +138,26 @@ public interface EntityBody {
 
     /**
      * Makes this Mob interact with a Player.
-     * @param p Player to interact with
-     * @param hand Hand to use
+     *
+     * @param p        Player to interact with
+     * @param hand     Hand to use
+     * @return Result of interaction
+     * @deprecated Superseded by {@link #interact(Player, InteractionHand, Vector)}
+     */
+    @Deprecated
+    default InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand) {
+        return interact(p, hand, null);
+    }
+
+    /**
+     * Makes this Mob interact with a Player.
+     *
+     * @param p        Player to interact with
+     * @param hand     Hand to use
+     * @param location Location of interaction relative to the entity
      * @return Result of interaction
      */
-    InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand);
+    InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand, @Nullable Vector location);
 
     /**
      * Whether this Entity is sensitive to water (e.g. enderman)
@@ -517,7 +533,7 @@ public interface EntityBody {
      */
     @Deprecated
     void setMaxUpStep(float maxUpStep);
-    
+
     /**
      * Fetches the last position this Entity touched {@link Material#LAVA}.
      * @return Last Lava Position

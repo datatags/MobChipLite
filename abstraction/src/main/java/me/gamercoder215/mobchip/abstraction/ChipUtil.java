@@ -212,6 +212,9 @@ public interface ChipUtil {
                 return "1_21_R6";
             case "1.21.11":
                 return "1_21_R7";
+            case "26.1":
+            case "26.2": // optimism
+                return "26_1";
             default:
                 throw new IllegalStateException("Unsupported version: " + bukkit);
         }

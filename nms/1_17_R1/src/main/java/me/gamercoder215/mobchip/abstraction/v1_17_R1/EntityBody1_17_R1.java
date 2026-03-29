@@ -3,7 +3,6 @@ package me.gamercoder215.mobchip.abstraction.v1_17_R1;
 import me.gamercoder215.mobchip.EntityBody;
 import me.gamercoder215.mobchip.ai.animation.EntityAnimation;
 import me.gamercoder215.mobchip.util.Position;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket;
@@ -20,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,12 +82,13 @@ final class EntityBody1_17_R1 implements EntityBody {
     /**
      * Makes this Mob interact with a Player.
      *
-     * @param p    Player to interact with
-     * @param hand Hand to use
+     * @param p        Player to interact with
+     * @param hand     Hand to use
+     * @param location
      * @return Result of interaction
      */
     @Override
-    public InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand) {
+    public InteractionResult interact(@NotNull Player p, @Nullable InteractionHand hand, @Nullable Vector location) {
         final net.minecraft.world.InteractionHand h;
 
         if (hand == InteractionHand.OFF_HAND) h = net.minecraft.world.InteractionHand.OFF_HAND;

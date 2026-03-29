@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.abstraction.v1_18_R1;
 
 import me.gamercoder215.mobchip.ai.gossip.GossipType;
+import me.gamercoder215.mobchip.util.OptimizedSmallEnumSet;
 import net.minecraft.DetectedVersion;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
@@ -62,7 +63,7 @@ public class TestChipUtil1_18_R1 {
     @Test
     @DisplayName("Test ChipUtil1_18_R1#getFlags")
     public void testGetFlags() {
-        OptimizedSmallEnumSet1_18_R1<Goal.Flag> set = new OptimizedSmallEnumSet1_18_R1<>(Goal.Flag.class);
+        OptimizedSmallEnumSet<Goal.Flag> set = new OptimizedSmallEnumSet<>(Goal.Flag.class);
         set.addUnchecked(Goal.Flag.MOVE);
         set.addUnchecked(Goal.Flag.LOOK);
 
@@ -73,5 +74,5 @@ public class TestChipUtil1_18_R1 {
         Assertions.assertTrue(flags.contains(Goal.Flag.MOVE));
         Assertions.assertTrue(flags.contains(Goal.Flag.LOOK));
     }
-    
+
 }
