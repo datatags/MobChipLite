@@ -8,13 +8,6 @@ on:
 
   workflow_dispatch:
 
-x-java-setup: &java-setup
-  - uses: actions/setup-java@v4
-    with:
-      distribution: temurin
-      java-version: 25
-      cache: gradle
-
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -22,7 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: gradle/wrapper-validation-action@v3
-      - *java-setup
+      - &java-setup
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: gradle
       - name: Setup Project
         run: ./gradlew project tasks :mobchip-bukkit:dependencies
 
