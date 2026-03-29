@@ -61,11 +61,11 @@ final class EntityController26_1 implements EntityController {
     public EntityController naturalMoveTo(double x, double y, double z, NaturalMoveType type) {
         Vec3 vec = new Vec3(x, y, z);
         MoverType m = switch (type) {
-            default -> MoverType.SELF;
             case PLAYER -> MoverType.PLAYER;
             case PISTON -> MoverType.PISTON;
             case SHULKER_BOX -> MoverType.SHULKER_BOX;
             case SHULKER -> MoverType.SHULKER;
+            default -> MoverType.SELF;
         };
 
         nms.move(m, vec);

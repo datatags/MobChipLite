@@ -34,9 +34,9 @@ final class EntitySenses26_1 implements EntitySenses {
         this.nmsMob = ChipUtil26_1.toNMS(m);
 
         try {
-            Field sensorsF = Brain.class.getDeclaredField("e");
+            Field sensorsF = Brain.class.getDeclaredField("sensors");
             sensorsF.setAccessible(true);
-            Map<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>> sensors = (Map<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>>) sensorsF.get(nmsMob.getBrain());
+            var sensors = (Map<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>>) sensorsF.get(nmsMob.getBrain());
 
             sensorsHandle.putAll(sensors);
         } catch (ReflectiveOperationException e) {
@@ -46,7 +46,7 @@ final class EntitySenses26_1 implements EntitySenses {
 
     private void save() {
         try {
-            Field sensorsF = Brain.class.getDeclaredField("e");
+            Field sensorsF = Brain.class.getDeclaredField("sensors");
             sensorsF.setAccessible(true);
 
             sensorsF.set(nmsMob.getBrain(), sensorsHandle);

@@ -21,6 +21,7 @@ final class NavigationPath26_1 implements NavigationPath {
     private final Mob m;
     private final Path handle;
     private double speedMod;
+    private final List<Position> nodes = new ArrayList<>();
 
     NavigationPath26_1(@NotNull Path nms, @NotNull Mob m, double speedMod) {
         this.m = m;
@@ -28,20 +29,10 @@ final class NavigationPath26_1 implements NavigationPath {
         this.handle = nms;
         this.speedMod = speedMod;
 
-        try {
-            Field points = this.handle.getClass().getDeclaredField("a");
-            points.setAccessible(true);
-            List<Node> pathPoints = (List<Node>) points.get(this.handle);
-
-            nodes.addAll(pathPoints.stream()
-                    .map(ChipUtil26_1::fromNMS)
-                    .collect(Collectors.toSet()));
-        } catch (ReflectiveOperationException e) {
-            StackTraceLogger.printStackTrace(e);
+        for (int i = 0; i < nms.getNodeCount(); i++) {
+            nodes.add(ChipUtil26_1.fromNMS(nms.getNode(i)));
         }
     }
-
-    private final List<Position> nodes = new ArrayList<>();
 
     /**
      * Advances this path.

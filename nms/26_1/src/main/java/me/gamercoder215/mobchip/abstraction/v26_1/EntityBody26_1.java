@@ -181,7 +181,7 @@ final class EntityBody26_1 implements EntityBody {
     @Override
     public boolean isInCombat() {
         try {
-            Field inCombatF = CombatTracker.class.getDeclaredField("i");
+            Field inCombatF = CombatTracker.class.getDeclaredField("inCombat");
             inCombatF.setAccessible(true);
             return inCombatF.getBoolean(nmsMob.combatTracker);
         } catch (ReflectiveOperationException e) {
@@ -272,13 +272,15 @@ final class EntityBody26_1 implements EntityBody {
             case DAMAGE -> nmsMob.animateHurt(1.0F);
             case CRITICAL_DAMAGE -> {
                 ClientboundAnimatePacket pkt = new ClientboundAnimatePacket(nmsMob, 4);
-                for (Player p : ChipUtil26_1.fromNMS(nmsMob).getWorld().getPlayers())
+                for (Player p : ChipUtil26_1.fromNMS(nmsMob).getWorld().getPlayers()) {
                     ChipUtil26_1.toNMS(p).connection.send(pkt);
+                }
             }
             case MAGICAL_CRITICAL_DAMAGE -> {
                 ClientboundAnimatePacket pkt = new ClientboundAnimatePacket(nmsMob, 5);
-                for (Player p : ChipUtil26_1.fromNMS(nmsMob).getWorld().getPlayers())
+                for (Player p : ChipUtil26_1.fromNMS(nmsMob).getWorld().getPlayers()) {
                     ChipUtil26_1.toNMS(p).connection.send(pkt);
+                }
             }
         }
     }
@@ -335,13 +337,7 @@ final class EntityBody26_1 implements EntityBody {
 
     @Override
     public boolean isPeacefulCompatible() {
-        try {
-            Method m = net.minecraft.world.entity.Mob.class.getDeclaredMethod("Q");
-            m.setAccessible(true);
-            return (boolean) m.invoke(nmsMob);
-        } catch (Exception e) {
-            return false;
-        }
+        return nmsMob.getType().isAllowedInPeaceful();
     }
 
     @Override
@@ -405,15 +401,11 @@ final class EntityBody26_1 implements EntityBody {
     public void setRiptideTicks(int ticks) {
         if (ticks < 0) throw new IllegalArgumentException("Riptide ticks cannot be negative");
         try {
-            Field f = LivingEntity.class.getDeclaredField("bC");
+            Field f = LivingEntity.class.getDeclaredField("autoSpinAttackTicks");
             f.setAccessible(true);
             f.setInt(nmsMob, ticks);
 
-            if (!nmsMob.level().isClientSide()) {
-                Method setFlags = LivingEntity.class.getDeclaredMethod("c", int.class, boolean.class);
-                setFlags.setAccessible(true);
-                setFlags.invoke(nmsMob, 4, true);
-            }
+            nmsMob.setLivingEntityFlag(4, true); // no idea what this does
         } catch (ReflectiveOperationException e) {
             StackTraceLogger.printStackTrace(e);
         }
@@ -424,7 +416,7 @@ final class EntityBody26_1 implements EntityBody {
     @Override
     public int getRiptideTicks() {
         try {
-            Field f = LivingEntity.class.getDeclaredField("bC");
+            Field f = LivingEntity.class.getDeclaredField("autoSpinAttackTicks");
             f.setAccessible(true);
             return f.getInt(nmsMob);
         } catch (ReflectiveOperationException e) {
@@ -481,10 +473,12 @@ final class EntityBody26_1 implements EntityBody {
             if (m instanceof Slime) {
                 MoveControl moveControl = nmsMob.getMoveControl();
 
-                Method setRotation = moveControl.getClass().getDeclaredMethod("a", float.class, boolean.class);
+                Method setRotation = moveControl.getClass().getDeclaredMethod("setDirection", float.class, boolean.class);
                 setRotation.setAccessible(true);
                 setRotation.invoke(moveControl, yaw, true);
-            } else m.setRotation(yaw, pitch);
+            } else {
+                m.setRotation(yaw, pitch);
+            }
         } catch (ReflectiveOperationException e) {
             StackTraceLogger.printStackTrace(e);
         }

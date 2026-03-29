@@ -667,7 +667,7 @@ final class ChipUtil26_1 implements ChipUtil {
                 Behavior<? super net.minecraft.world.entity.LivingEntity> b = (Behavior<? super net.minecraft.world.entity.LivingEntity>) c.newInstance(args);
                 return new BehaviorResult26_1(b, nms);
             } else {
-                Method create = bClass.getDeclaredMethod("a", ChipUtil.getArgTypes(args));
+                Method create = bClass.getDeclaredMethod("create", ChipUtil.getArgTypes(args));
                 create.setAccessible(true);
                 BehaviorControl<? super net.minecraft.world.entity.LivingEntity> control = (BehaviorControl<? super net.minecraft.world.entity.LivingEntity>) create.invoke(null, args);
                 return new BehaviorResult26_1(control, nms);
@@ -723,7 +723,7 @@ final class ChipUtil26_1 implements ChipUtil {
             @Override
             public EnderDragonPhase<? extends DragonPhaseInstance> getPhase() {
                 try {
-                    Method create = EnderDragonPhase.class.getDeclaredMethod("a");
+                    Method create = EnderDragonPhase.class.getDeclaredMethod("create", Class.class, String.class);
                     create.setAccessible(true);
                     return (EnderDragonPhase<? extends DragonPhaseInstance>) create.invoke(null, this.getClass(), c.getKey().getKey());
                 } catch (Exception ignored) {}
@@ -762,9 +762,9 @@ final class ChipUtil26_1 implements ChipUtil {
         net.minecraft.world.entity.boss.enderdragon.EnderDragon nmsMob = toNMS(a);
 
         try {
-            Method m = net.minecraft.world.entity.boss.enderdragon.EnderDragon.class.getDeclaredMethod("a", List.class);
+            Method m = net.minecraft.world.entity.boss.enderdragon.EnderDragon.class.getDeclaredMethod("knockBack", ServerLevel.class, List.class);
             m.setAccessible(true);
-            m.invoke(nmsMob, list.stream().map(ChipUtil26_1::toNMS).collect(Collectors.toList()));
+            m.invoke(nmsMob, (ServerLevel)nmsMob.level(), list.stream().map(ChipUtil26_1::toNMS).collect(Collectors.toList()));
         } catch (Exception e) {
             StackTraceLogger.printStackTrace(e);
         }
@@ -1293,27 +1293,26 @@ final class ChipUtil26_1 implements ChipUtil {
      * Paper removes the default Goal#getFlags method for performance reasons, causing NoSuchMethodErrors.
      */
     public static Set<Goal.Flag> getFlags(Goal g) {
+        Method getFlags;
         try {
-            Method getFlags = Goal.class.getDeclaredMethod("getFlags");
+            getFlags = Goal.class.getDeclaredMethod("getFlags");
             getFlags.setAccessible(true);
-
+        } catch (ReflectiveOperationException e) {
+            StackTraceLogger.printStackTrace(e);
+            return null;
+        }
+        if (getFlags.getReturnType() == EnumSet.class) {
+            // This is the vanilla version, safe to call the method directly
+            return g.getFlags();
+        }
+        // Otherwise, it's the modified Paper version that we have to handle carefully
+        try {
             Object optimizedSmallEnumSet = getFlags.invoke(g);
             Method backingSetM = optimizedSmallEnumSet.getClass().getDeclaredMethod("getBackingSet");
             backingSetM.setAccessible(true);
 
             long backingSet = (long) backingSetM.invoke(optimizedSmallEnumSet);
             return getFlags(backingSet);
-        } catch (NoSuchMethodException ignored) {
-            try {
-                Method obfGetFlags = Goal.class.getDeclaredMethod("j");
-                obfGetFlags.setAccessible(true);
-                return (Set<Goal.Flag>) obfGetFlags.invoke(g);
-            } catch (NoSuchMethodException e) {
-                throw new AssertionError("Could not find flags", e);
-            } catch (ReflectiveOperationException e) {
-                StackTraceLogger.printStackTrace(e);
-                return null;
-            }
         } catch (ReflectiveOperationException e) {
             StackTraceLogger.printStackTrace(e);
             return null;
@@ -1527,7 +1526,7 @@ final class ChipUtil26_1 implements ChipUtil {
         DedicatedServer srv = ((CraftServer) Bukkit.getServer()).getServer();
         MappedRegistry<T> registry = (MappedRegistry<T>) srv.registryAccess().lookupOrThrow(r.key());
         try {
-            Field frozen = registry.getClass().getDeclaredField("ca");
+            Field frozen = registry.getClass().getDeclaredField("frozen");
             frozen.setAccessible(true);
             frozen.set(registry, isLocked);
         } catch (Exception e) {
@@ -1578,9 +1577,9 @@ final class ChipUtil26_1 implements ChipUtil {
         if (handle != null) return new AttributeInstance26_1(a, handle);
 
         try {
-            Field attributesF = AttributeMap.class.getDeclaredField("b");
+            Field attributesF = AttributeMap.class.getDeclaredField("attributes");
             attributesF.setAccessible(true);
-            Map<Holder<net.minecraft.world.entity.ai.attributes.Attribute>, net.minecraft.world.entity.ai.attributes.AttributeInstance> attributes = (Map<Holder<net.minecraft.world.entity.ai.attributes.Attribute>, net.minecraft.world.entity.ai.attributes.AttributeInstance>) attributesF.get(map);
+            var attributes = (Map<Holder<net.minecraft.world.entity.ai.attributes.Attribute>, net.minecraft.world.entity.ai.attributes.AttributeInstance>) attributesF.get(map);
 
             handle = new net.minecraft.world.entity.ai.attributes.AttributeInstance(nmsA, ignored -> {});
             attributes.put(nmsA, handle);

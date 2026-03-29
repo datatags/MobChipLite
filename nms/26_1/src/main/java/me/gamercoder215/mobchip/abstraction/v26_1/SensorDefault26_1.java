@@ -37,7 +37,7 @@ final class SensorDefault26_1 implements Sensor<LivingEntity> {
     @Override
     public int getScanRate() {
         try {
-            Field scan = net.minecraft.world.entity.ai.sensing.Sensor.class.getDeclaredField("j");
+            Field scan = net.minecraft.world.entity.ai.sensing.Sensor.class.getDeclaredField("scanRate");
             scan.setAccessible(true);
             return scan.getInt(handle);
         } catch (ReflectiveOperationException e) {
@@ -55,7 +55,7 @@ final class SensorDefault26_1 implements Sensor<LivingEntity> {
     @Override
     public void run(@NotNull World w, LivingEntity entity) {
         try {
-            Method doTick = net.minecraft.world.entity.ai.sensing.Sensor.class.getDeclaredMethod("a", ServerLevel.class, net.minecraft.world.entity.LivingEntity.class);
+            Method doTick = net.minecraft.world.entity.ai.sensing.Sensor.class.getDeclaredMethod("doTick", ServerLevel.class, net.minecraft.world.entity.LivingEntity.class);
             doTick.setAccessible(true);
             doTick.invoke(handle, ChipUtil26_1.toNMS(w), ChipUtil26_1.toNMS(entity));
         } catch (ReflectiveOperationException e) {
