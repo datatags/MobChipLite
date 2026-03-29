@@ -28,6 +28,7 @@ import me.gamercoder215.mobchip.combat.CombatEntry;
 import me.gamercoder215.mobchip.combat.CombatLocation;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
 import me.gamercoder215.mobchip.util.Registration;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.*;
 import net.minecraft.core.RegistryAccess.Frozen;
@@ -125,7 +126,6 @@ import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
-import static org.bukkit.entity.Villager.Profession.*;
 import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.*;
 
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation", "UnstableApiUsage"})
@@ -606,7 +606,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
 
 
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -719,7 +719,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
             m.setAccessible(true);
             m.invoke(nmsMob, list.stream().map(ChipUtil1_21_R6::toNMS).collect(Collectors.toList()));
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
     }
 
@@ -1229,7 +1229,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
                 }
             }
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
 
         return null;
@@ -1269,7 +1269,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
             }
             return null;
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -1281,7 +1281,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
 
             return m.invoke(g, args);
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -1318,11 +1318,11 @@ final class ChipUtil1_21_R6 implements ChipUtil {
             } catch (NoSuchMethodException e) {
                 throw new AssertionError("Could not find flags", e);
             } catch (ReflectiveOperationException e) {
-                ChipUtil.printStackTrace(e);
+                StackTraceLogger.printStackTrace(e);
                 return null;
             }
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -1527,7 +1527,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
             frozen.setAccessible(true);
             frozen.set(registry, isLocked);
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
     }
 
@@ -1583,7 +1583,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
 
             return new AttributeInstance1_21_R6(a, handle);
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
 
         throw new RuntimeException("Failed to create AttributeInstance");
@@ -1712,8 +1712,7 @@ final class ChipUtil1_21_R6 implements ChipUtil {
 
             return c.newInstance(sup);
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement st : e.getStackTrace()) Bukkit.getLogger().severe(st.toString());
+            StackTraceLogger.printStackTrace(e);
         }
 
         return null;

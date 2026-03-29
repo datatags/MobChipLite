@@ -19,6 +19,7 @@ import me.gamercoder215.mobchip.ai.sensing.Sensor;
 import me.gamercoder215.mobchip.bukkit.events.RestrictionSetEvent;
 import me.gamercoder215.mobchip.bukkit.events.memory.MemoryChangeEvent;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -217,7 +218,7 @@ public class BukkitBrain implements EntityBrain {
 			return constr.newInstance(m);
 		} catch (ClassNotFoundException | NoSuchMethodException ignored) {}
 		catch (Exception e) {
-			ChipUtil.printStackTrace(e);
+			StackTraceLogger.printStackTrace(e);
 		}
 
 		if (m instanceof Villager) return new BukkitVillagerBehavior((Villager) m);

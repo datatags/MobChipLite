@@ -2,6 +2,7 @@ package me.gamercoder215.mobchip.bosses;
 
 import me.gamercoder215.mobchip.ai.attribute.AttributeInstance;
 import me.gamercoder215.mobchip.bosses.annotations.Repeatable;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -229,13 +230,8 @@ public abstract class Boss<T extends Mob> {
 
                             try {
                                 m.invoke(inst);
-                            } catch (InvocationTargetException e) {
-                                Bukkit.getLogger().severe(e.getCause().getClass().getSimpleName());
-                                Bukkit.getLogger().severe(e.getCause().getMessage());
-                                for (StackTraceElement s : e.getCause().getStackTrace()) Bukkit.getLogger().severe(s.toString());
                             } catch (Exception e) {
-                                Bukkit.getLogger().severe(e.getMessage());
-                                for (StackTraceElement s : e.getStackTrace()) Bukkit.getLogger().severe(s.toString());
+                                StackTraceLogger.printStackTrace(e);
                             }
                         }
                     }.runTaskTimer(plugin, r.delay(), r.interval());

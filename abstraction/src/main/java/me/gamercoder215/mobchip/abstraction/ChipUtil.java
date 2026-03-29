@@ -19,6 +19,7 @@ import me.gamercoder215.mobchip.ai.schedule.Schedule;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -154,8 +155,7 @@ public interface ChipUtil {
             for (Map.Entry<Integer, Pathfinder> e : goals.entrySet())
                 addPathfinder(e.getValue(), e.getKey(), target.get(e.getKey()));
         } catch (ClassCastException e) {
-            Bukkit.getLogger().severe("[MobChip] Invalid Projectile Source");
-            printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
     }
 
@@ -239,16 +239,6 @@ public interface ChipUtil {
             return constr.newInstance();
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException("Invalid Version: " + getServerVersion() + " (Could not load " + pkg + ".ChipUtil" + getServerVersion() + ")", e);
-        }
-    }
-
-    static void printStackTrace(Throwable e) {
-        Bukkit.getLogger().severe(e.getClass().getName() + ": " + e.getMessage());
-        for (StackTraceElement s : e.getStackTrace())
-            Bukkit.getLogger().severe(s.toString());
-        if (e.getCause() != null) {
-            Bukkit.getLogger().severe("Caused by:");
-            printStackTrace(e.getCause());
         }
     }
 }

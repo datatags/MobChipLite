@@ -1,8 +1,8 @@
 package me.gamercoder215.mobchip.abstraction.v26_1;
 
-import me.gamercoder215.mobchip.abstraction.ChipUtil;
 import me.gamercoder215.mobchip.ai.navigation.NavigationPath;
 import me.gamercoder215.mobchip.util.Position;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import org.bukkit.entity.Mob;
@@ -37,7 +37,7 @@ final class NavigationPath26_1 implements NavigationPath {
                     .map(ChipUtil26_1::fromNMS)
                     .collect(Collectors.toSet()));
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
     }
 

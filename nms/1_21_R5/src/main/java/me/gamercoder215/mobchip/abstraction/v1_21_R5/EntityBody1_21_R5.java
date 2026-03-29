@@ -1,9 +1,9 @@
 package me.gamercoder215.mobchip.abstraction.v1_21_R5;
 
 import me.gamercoder215.mobchip.EntityBody;
-import me.gamercoder215.mobchip.abstraction.ChipUtil;
 import me.gamercoder215.mobchip.ai.animation.EntityAnimation;
 import me.gamercoder215.mobchip.util.Position;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
@@ -193,7 +193,7 @@ final class EntityBody1_21_R5 implements EntityBody {
             inCombatF.setAccessible(true);
             return inCombatF.getBoolean(nmsMob.combatTracker);
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return false;
         }
     }
@@ -423,8 +423,7 @@ final class EntityBody1_21_R5 implements EntityBody {
                 setFlags.invoke(nmsMob, 4, true);
             }
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement ste : e.getStackTrace()) Bukkit.getLogger().severe(ste.toString());
+            StackTraceLogger.printStackTrace(e);
         }
 
         update();
@@ -495,8 +494,7 @@ final class EntityBody1_21_R5 implements EntityBody {
                 setRotation.invoke(moveControl, yaw, true);
             } else m.setRotation(yaw, pitch);
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement ste : e.getStackTrace()) Bukkit.getLogger().severe(ste.toString());
+            StackTraceLogger.printStackTrace(e);
         }
     }
 

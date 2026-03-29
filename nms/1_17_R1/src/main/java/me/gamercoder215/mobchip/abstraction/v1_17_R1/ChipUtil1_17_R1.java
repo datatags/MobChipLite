@@ -28,6 +28,7 @@ import me.gamercoder215.mobchip.combat.CombatEntry;
 import me.gamercoder215.mobchip.combat.CombatLocation;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
 import me.gamercoder215.mobchip.util.Position;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Registry;
@@ -574,7 +575,7 @@ final class ChipUtil1_17_R1 implements ChipUtil {
             Behavior<? super net.minecraft.world.entity.LivingEntity> b = (Behavior<? super net.minecraft.world.entity.LivingEntity>) c.newInstance(args);
             return new BehaviorResult1_17_R1(b, nms);
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -1171,7 +1172,7 @@ final class ChipUtil1_17_R1 implements ChipUtil {
                 }
             }
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
 
         return null;
@@ -1211,7 +1212,7 @@ final class ChipUtil1_17_R1 implements ChipUtil {
             }
             return null;
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -1223,7 +1224,7 @@ final class ChipUtil1_17_R1 implements ChipUtil {
 
             return m.invoke(g, args);
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -1259,11 +1260,11 @@ final class ChipUtil1_17_R1 implements ChipUtil {
             } catch (NoSuchMethodException e) {
                 throw new AssertionError("Could not find flags", e);
             } catch (ReflectiveOperationException e) {
-                ChipUtil.printStackTrace(e);
+                StackTraceLogger.printStackTrace(e);
                 return null;
             }
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -1455,7 +1456,7 @@ final class ChipUtil1_17_R1 implements ChipUtil {
 
             return new AttributeInstance1_17_R1(a, handle);
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
 
         throw new RuntimeException("Failed to create AttributeInstance");
@@ -1504,7 +1505,7 @@ final class ChipUtil1_17_R1 implements ChipUtil {
             m.setAccessible(true);
             m.invoke(nmsMob, list.stream().map(ChipUtil1_17_R1::toNMS).collect(Collectors.toList()));
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
     }
 
@@ -1577,8 +1578,7 @@ final class ChipUtil1_17_R1 implements ChipUtil {
 
             return (SensorType<?>) c.newInstance(sup);
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement st : e.getStackTrace()) Bukkit.getLogger().severe(st.toString());
+            StackTraceLogger.printStackTrace(e);
         }
 
         return null;

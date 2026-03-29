@@ -3,6 +3,7 @@ package me.gamercoder215.mobchip.abstraction.v1_20_R3;
 import com.google.common.collect.ImmutableList;
 import me.gamercoder215.mobchip.ai.sensing.EntitySenses;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.Brain;
@@ -39,8 +40,7 @@ final class EntitySenses1_20_R3 implements EntitySenses {
 
             sensorsHandle.putAll(sensors);
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement st : e.getStackTrace()) Bukkit.getLogger().severe(st.toString());
+            StackTraceLogger.printStackTrace(e);
         }
     }
 
@@ -51,8 +51,7 @@ final class EntitySenses1_20_R3 implements EntitySenses {
 
             sensorsF.set(nmsMob.getBrain(), sensorsHandle);
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement st : e.getStackTrace()) Bukkit.getLogger().severe(st.toString());
+            StackTraceLogger.printStackTrace(e);
         }
     }
 

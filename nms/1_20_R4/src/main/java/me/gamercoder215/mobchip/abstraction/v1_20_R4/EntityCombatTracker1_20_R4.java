@@ -1,8 +1,8 @@
 package me.gamercoder215.mobchip.abstraction.v1_20_R4;
 
-import me.gamercoder215.mobchip.abstraction.ChipUtil;
 import me.gamercoder215.mobchip.combat.CombatEntry;
 import me.gamercoder215.mobchip.combat.EntityCombatTracker;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import net.minecraft.world.damagesource.CombatTracker;
 import org.bukkit.entity.Mob;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,7 @@ final class EntityCombatTracker1_20_R4 implements EntityCombatTracker {
 
             return last == null ? null : ChipUtil1_20_R4.fromNMS(m, last);
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return null;
         }
     }
@@ -52,7 +52,7 @@ final class EntityCombatTracker1_20_R4 implements EntityCombatTracker {
             f.setAccessible(true);
             ((List<net.minecraft.world.damagesource.CombatEntry>) f.get(handle)).stream().map(en -> ChipUtil1_20_R4.fromNMS(m, en)).forEach(entries::add);
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
         return entries;
     }
@@ -68,7 +68,7 @@ final class EntityCombatTracker1_20_R4 implements EntityCombatTracker {
             Method m = List.class.getMethod("add", Object.class);
             m.invoke(entries, ChipUtil1_20_R4.toNMS(entry));
         } catch (Exception e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
         }
     }
 
@@ -84,7 +84,7 @@ final class EntityCombatTracker1_20_R4 implements EntityCombatTracker {
             takingDamageF.setAccessible(true);
             return takingDamageF.getBoolean(handle);
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return false;
         }
     }
@@ -96,7 +96,7 @@ final class EntityCombatTracker1_20_R4 implements EntityCombatTracker {
             inCombatF.setAccessible(true);
             return inCombatF.getBoolean(handle);
         } catch (ReflectiveOperationException e) {
-            ChipUtil.printStackTrace(e);
+            StackTraceLogger.printStackTrace(e);
             return false;
         }
     }

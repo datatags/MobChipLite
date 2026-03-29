@@ -2,6 +2,7 @@ package me.gamercoder215.mobchip.abstraction.v1_19_R2;
 
 import me.gamercoder215.mobchip.ai.memories.Memory;
 import me.gamercoder215.mobchip.ai.sensing.Sensor;
+import me.gamercoder215.mobchip.util.StackTraceLogger;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import org.bukkit.Bukkit;
@@ -40,8 +41,7 @@ final class SensorDefault1_19_R2 implements Sensor<LivingEntity> {
             scan.setAccessible(true);
             return scan.getInt(handle);
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement st : e.getStackTrace()) Bukkit.getLogger().severe(st.toString());
+            StackTraceLogger.printStackTrace(e);
         }
 
         return DEFAULT_SCAN_RATE;
@@ -59,8 +59,7 @@ final class SensorDefault1_19_R2 implements Sensor<LivingEntity> {
             doTick.setAccessible(true);
             doTick.invoke(handle, ChipUtil1_19_R2.toNMS(w), ChipUtil1_19_R2.toNMS(entity));
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement st : e.getStackTrace()) Bukkit.getLogger().severe(st.toString());
+            StackTraceLogger.printStackTrace(e);
         }
     }
 
