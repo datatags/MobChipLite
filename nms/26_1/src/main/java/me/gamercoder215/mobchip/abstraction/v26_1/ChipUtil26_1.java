@@ -1399,71 +1399,71 @@ final class ChipUtil26_1 implements ChipUtil {
 
         return switch (name) {
             case "AvoidEntity" -> new PathfinderAvoidEntity<>((Creature) m, fromNMS(getObject(g, "avoidClass", Class.class), LivingEntity.class), getFloat(g, "maxDist"), getDouble(g, "walkingSpeedModifier"), getDouble(g, "sprintSpeedModifier"), en -> getObject(g, "avoidPredicate", Predicate.class).test(toNMS(en)), en -> getObject(g, "predicateOnAvoidEntity", Predicate.class).test(toNMS(en)));
-            case "RangedAttack" -> new PathfinderRangedAttack(m, speedMod(g), getFloat(g, "attackRadius"), getInt(g, "attackIntervalMin"), getInt(g, "attackIntervalMax"));
             case "Beg" -> new PathfinderBeg((Wolf) m, getFloat(g, "lookDistance"));
-            case "RangedBowAttack" -> new PathfinderRangedBowAttack(m, speedMod(g), (float) Math.sqrt(getFloat(g, "attackRadiusSqr")), getInt(g, "attackIntervalMin"));
             case "BreakDoor" -> new PathfinderBreakDoor(m, getInt(g, "breakTime"), d -> getObject(g, "validDifficulties", Predicate.class).test(toNMS(d)));
             case "BreathAir" -> new PathfinderBreathAir((Creature) m);
             case "Breed" -> new PathfinderBreed((Animals) m, speedMod(g)); // TODO: accepts a partner filter
             case "CatSitOnBed" -> new PathfinderCatOnBed((Cat) m, speedMod(g), getInt(g, "searchRange"));
-            case "RangedCrossbowAttack" -> new PathfinderRangedCrossbowAttack((Pillager) m, speedMod(g), (float) Math.sqrt(getFloat(g, "attackRadiusSqr")));
-            case "OpenDoor" -> new PathfinderOpenDoor(m, getBoolean(g, "closeDoor"));
+            case "CatSitOnBlock" -> new PathfinderCatOnBlock((Cat) m, speedMod(g));
+            case "ClimbOnTopOfPowderSnow" -> new PathfinderClimbPowderedSnow(m, fromNMS(getObject(g, "level", Level.class)));
             case "DolphinJump" -> new PathfinderDolphinJump((Dolphin) m, getInt(g, "interval"));
             case "EatBlock" -> new PathfinderEatTile(m);
-            case "TryFindWater" -> new PathfinderFindWater((Creature) m);
             case "FleeSun" -> new PathfinderFleeSun((Creature) m, speedMod(g));
             case "Float" -> new PathfinderFloat(m);
-            case "FollowPlayerRiddenEntity" -> new PathfinderFollowPlayerRiddenEntity((Creature) m, getObject(g, "entityTypeToFollow", Class.class));
             case "FollowFlockLeader" -> new PathfinderFollowFishLeader((Fish)m);
             case "FollowMob" -> new PathfinderFollowMob(m, speedMod(g), getFloat(g, "stopDistance"), getFloat(g, "areaSize"));
             case "FollowOwner" -> new PathfinderFollowOwner((Tameable) m, speedMod(g), getFloat(g, "startDistance"), getFloat(g, "stopDistance"));
             case "FollowParent" -> new PathfinderFollowParent((Animals) m, speedMod(g));
-            case "SkeletonTrap" -> new PathfinderSkeletonTrap((SkeletonHorse) m);
+            case "FollowPlayerRiddenEntity" -> new PathfinderFollowPlayerRiddenEntity((Creature) m, getObject(g, "entityTypeToFollow", Class.class));
+            case "GolemRandomStrollInVillage" -> new PathfinderRandomStrollInVillage((Creature) m, speedMod(g));
+            case "LandOnOwnersShoulder" -> new PathfinderRideShoulder((Parrot) m);
             case "LeapAtTarget" -> new PathfinderLeapAtTarget(m, getFloat(g, "yd"));
-            case "CatSitOnBlock" -> new PathfinderCatOnBlock((Cat) m, speedMod(g));
             case "LlamaFollowCaravan" -> new PathfinderLlamaFollowCaravan((Llama) m, speedMod(g));
             case "LookAtPlayer" -> new PathfinderLookAtEntity<>(m, fromNMS(getObject(g, "lookAtType", Class.class), LivingEntity.class), getFloat(g, "lookDistance"), getFloat(g, "probability"), getBoolean(g, "onlyHorizontal"));
             case "LookAtTradingPlayer" -> new PathfinderLookAtTradingPlayer((AbstractVillager) m);
             case "MeleeAttack" -> new PathfinderMeleeAttack((Creature) m, speedMod(g), getBoolean(g, "followingTargetEvenIfNotSeen"));
+            case "MoveBackToVillage" -> new PathfinderRandomStrollToVillage((Creature) m, speedMod(g)); // TODO: checkNoActionTime
             case "MoveThroughVillage" -> new PathfinderMoveThroughVillage((Creature) m, getObject(g, "canDealWithDoors", BooleanSupplier.class), speedMod(g), getInt(g, "distanceToPoi"), getBoolean(g, "onlyAtNight"));
-            case "StrollThroughVillage" -> new PathfinderRandomStrollThroughVillage((Creature) m, getInt(g, "interval"));
             case "MoveToBlock" -> new PathfinderMoveToBlock((Creature) m, l -> (boolean) invoke(g, "isValidTarget", toNMS(l.getWorld()), toNMS(l)), speedMod(g), getInt(g, "searchRange"), getInt(g, "verticalSearchRange"));
-            case "PathfindToRaid" -> new PathfinderMoveToRaid((Raider) m);
             case "MoveTowardsRestriction" -> new PathfinderMoveTowardsRestriction((Creature) m, getDouble(g, "moveSpeedModifier"));
             case "MoveTowardsTarget" -> new PathfinderMoveTowardsTarget((Creature) m, speedMod(g), getFloat(g, "within"));
             case "OcelotAttack" -> new PathfinderOcelotAttack(m);
             case "OfferFlower" -> new PathfinderOfferFlower((IronGolem) m);
+            case "OpenDoor" -> new PathfinderOpenDoor(m, getBoolean(g, "closeDoor"));
             case "Panic" -> new PathfinderPanic((Creature) m, speedMod(g)); // TODO: accepts panicCausingDamageTypes
-            case "LandOnOwnersShoulder" -> new PathfinderRideShoulder((Parrot) m);
+            case "PathfindToRaid" -> new PathfinderMoveToRaid((Raider) m);
             case "RandomLookAround" -> new PathfinderRandomLook(m);
             case "RandomStand" -> new PathfinderRandomStand((AbstractHorse) m);
             case "RandomStroll" -> new PathfinderRandomStroll((Creature) m, speedMod(g), getInt(g, "interval")); // TODO: checkNoActionTime
-            case "WaterAvoidingRandomStroll" -> new PathfinderRandomStrollLand((Creature) m, speedMod(g), getFloat(g, "probability"));
             case "RandomSwimming" -> new PathfinderRandomSwim((Creature) m, speedMod(g), getInt(g, "interval"));
-            case "WaterAvoidingRandomFlying" -> new PathfinderRandomStrollFlying((Creature) m, speedMod(g));
+            case "RangedAttack" -> new PathfinderRangedAttack(m, speedMod(g), getFloat(g, "attackRadius"), getInt(g, "attackIntervalMin"), getInt(g, "attackIntervalMax"));
+            case "RangedBowAttack" -> new PathfinderRangedBowAttack(m, speedMod(g), (float) Math.sqrt(getFloat(g, "attackRadiusSqr")), getInt(g, "attackIntervalMin"));
+            case "RangedCrossbowAttack" -> new PathfinderRangedCrossbowAttack((Pillager) m, speedMod(g), (float) Math.sqrt(getFloat(g, "attackRadiusSqr")));
             case "RemoveBlock" -> new PathfinderRemoveBlock((Creature) m, CraftMagicNumbers.getMaterial(getObject(g, "g", Block.class)), speedMod(g), getInt(g, "verticalSearchRange"));
             case "RestrictSun" -> new PathfinderRestrictSun((Creature) m);
             case "SitWhenOrderedTo" -> new PathfinderSit((Tameable) m);
-            case "MoveBackToVillage" -> new PathfinderRandomStrollToVillage((Creature) m, speedMod(g)); // TODO: checkNoActionTime
-            case "GolemRandomStrollInVillage" -> new PathfinderRandomStrollInVillage((Creature) m, speedMod(g));
+            case "SkeletonTrap" -> new PathfinderSkeletonTrap((SkeletonHorse) m);
+            case "StrollThroughVillage" -> new PathfinderRandomStrollThroughVillage((Creature) m, getInt(g, "interval"));
             case "Swell" -> new PathfinderSwellCreeper((Creeper) m);
             case "RunAroundLikeCrazy" -> new PathfinderTameHorse((AbstractHorse) m, speedMod(g));
             case "Tempt" -> createPathfinderTempt((Creature) m, g);
             case "TradeWithPlayer" -> new PathfinderTradePlayer((AbstractVillager) m);
+            case "TryFindWater" -> new PathfinderFindWater((Creature) m);
             case "UseItem" -> new PathfinderUseItem(m, fromNMS(getObject(g, "item", net.minecraft.world.item.ItemStack.class)), en -> getObject(g, "canUseSelector", Predicate.class).test(toNMS(en)), fromNMS(getObject(g, "finishUsingSound", SoundEvent.class)));
+            case "WaterAvoidingRandomFlying" -> new PathfinderRandomStrollFlying((Creature) m, speedMod(g));
+            case "WaterAvoidingRandomStroll" -> new PathfinderRandomStrollLand((Creature) m, speedMod(g), getFloat(g, "probability"));
             case "ZombieAttack" -> new PathfinderZombieAttack((Zombie) m, speedMod(g), getBoolean(g, "followingTargetEvenIfNotSeen"));
-            case "ClimbOnTopOfPowderSnow" -> new PathfinderClimbPowderedSnow(m, fromNMS(getObject(g, "level", Level.class)));
 
             // Target
-            case "ResetUniversalAngerTarget" -> new PathfinderResetAnger(m, getBoolean(g, "alertOthersOfSameType"));
+            case "DefendVillageTarget" -> new PathfinderDefendVillage((IronGolem) m);
+            case "HurtByTarget" -> new PathfinderHurtByTarget((Creature) m, getEntityTypes(getObject(g, "toIgnoreDamage", Class[].class)));
             case "NearestAttackableTarget" -> new PathfinderNearestAttackableTarget<>(m, fromNMS(getObject(g, "targetType", Class.class), LivingEntity.class), getInt(g, "randomInterval"), getBoolean(g, "mustSee"), getBoolean(g, "mustReach"), l -> getObject(g, "targetConditions", TargetingConditions.class).test(toNMS(l.getWorld()), toNMS(l), toNMS(m)));
             case "NearestAttackableWitchTarget" -> new PathfinderNearestAttackableTargetRaider<>((Raider) m, fromNMS(getObject(g, "targetType", Class.class), LivingEntity.class), getInt(g, "randomInterval"), getBoolean(g, "mustSee"), getBoolean(g, "mustReach"), l -> getObject(g, "targetConditions", TargetingConditions.class).test(toNMS(l.getWorld()), toNMS(l), toNMS(m)));
             case "NearestHealableRaiderTarget" -> new PathfinderNearestHealableRaider<>((Raider) m, fromNMS(getObject(g, "targetType", Class.class), LivingEntity.class), getBoolean(g, "mustSee"), l -> getObject(g, "targetConditions", TargetingConditions.class).test(toNMS(l.getWorld()), toNMS(l), toNMS(m)));
-            case "DefendVillageTarget" -> new PathfinderDefendVillage((IronGolem) m);
-            case "HurtByTarget" -> new PathfinderHurtByTarget((Creature) m, getEntityTypes(getObject(g, "toIgnoreDamage", Class[].class)));
+            case "NonTameRandomTarget" -> new PathfinderWildTarget<>((Tameable) m, fromNMS(getObject(g, "targetType", Class.class), LivingEntity.class), getBoolean(g, "f"), l -> getObject(g, "targetConditions", TargetingConditions.class).test(toNMS(l.getWorld()), toNMS(l), toNMS(m)));
             case "OwnerHurtByTarget" -> new PathfinderOwnerHurtByTarget((Tameable) m);
             case "OwnerHurtTarget" -> new PathfinderOwnerHurtTarget((Tameable) m);
-            case "NonTameRandomTarget" -> new PathfinderWildTarget<>((Tameable) m, fromNMS(getObject(g, "targetType", Class.class), LivingEntity.class), getBoolean(g, "f"), l -> getObject(g, "targetConditions", TargetingConditions.class).test(toNMS(l.getWorld()), toNMS(l), toNMS(m)));
+            case "ResetUniversalAngerTarget" -> new PathfinderResetAnger(m, getBoolean(g, "alertOthersOfSameType"));
 
             default -> {
                 Bukkit.getLogger().warning("Warning, creating custom pathfinder for " + g.getClass().getName());
