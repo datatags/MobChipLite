@@ -8,22 +8,21 @@ on:
 
   workflow_dispatch:
 
-jobs:
+x-java-setup: &java-setup
+  - uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: 25
+      cache: gradle
 
+jobs:
   setup:
     runs-on: ubuntu-latest
     name: Gradle Setup
     steps:
       - uses: actions/checkout@v4
       - uses: gradle/wrapper-validation-action@v3
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
-      - name: Change Permissions
-        run: chmod +x ./gradlew
+      - *java-setup
       - name: Setup Project
         run: ./gradlew project tasks :mobchip-bukkit:dependencies
 
@@ -35,14 +34,7 @@ jobs:
     name: Build Java 21
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: 21
-          cache: 'gradle'
-      - name: Change Permissions
-        run: chmod +x ./gradlew
+      - *java-setup
       - name: Build with Gradle
         run: ./gradlew clean assemble publishToMavenLocal
 
@@ -54,14 +46,7 @@ jobs:
     name: Test Project
     steps:
       - uses: actions/checkout@v4
-      - name: Setup JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: 'gradle'
-      - name: Change Permissions
-        run: chmod +x ./gradlew
+      - *java-setup
       - name: Gradle Test
         run: ./gradlew test
 
@@ -73,14 +58,7 @@ jobs:
     name: Create Artifacts
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
-      - name: Change Permissions
-        run: chmod +x ./gradlew
+      - *java-setup
       - name: Build with Gradle
         run: ./gradlew clean build
       - name: Upload Artifacts
@@ -104,14 +82,7 @@ jobs:
     if: ${{ github.event_name != 'pull_request' && github.ref_name == 'main' }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '21'
-          cache: 'gradle'
-      - name: Change Permissions
-        run: chmod +x ./gradlew
+      - *java-setup
       - name: Build JavaDocs
         run: ./gradlew clean allJavadoc
       - name: Deploy JavaDoc
