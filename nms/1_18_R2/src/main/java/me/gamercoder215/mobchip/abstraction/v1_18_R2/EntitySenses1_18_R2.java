@@ -96,7 +96,7 @@ final class EntitySenses1_18_R2 implements EntitySenses {
                 break;
             }
         }
-        
+
         sensorsHandle.clear();
         sensorsHandle.putAll(ImmutableList.copyOf(it)
                 .stream()
@@ -108,7 +108,7 @@ final class EntitySenses1_18_R2 implements EntitySenses {
     @Override
     public void removeSensor(@NotNull NamespacedKey key) {
         if (!new ChipUtil1_18_R2().existsSensor(key)) throw new IllegalArgumentException("Unregistered Sensor: " + key);
-        
+
         ResourceLocation keyH = ChipUtil1_18_R2.toNMS(key);
         Iterator<Map.Entry<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>>> it = sensorsHandle.entrySet().iterator();
 
@@ -134,7 +134,7 @@ final class EntitySenses1_18_R2 implements EntitySenses {
     @Override
     public boolean hasSensor(@NotNull NamespacedKey key) {
         AtomicBoolean b = new AtomicBoolean(false);
-        
+
         for (SensorType<?> t : sensorsHandle.keySet()) {
             ResourceLocation currentKey = Registry.SENSOR_TYPE.getKey(t);
             if (ChipUtil1_18_R2.toNMS(key).equals(currentKey)) {
@@ -142,7 +142,7 @@ final class EntitySenses1_18_R2 implements EntitySenses {
                 break;
             }
         }
-        
+
         return b.get();
     }
 }

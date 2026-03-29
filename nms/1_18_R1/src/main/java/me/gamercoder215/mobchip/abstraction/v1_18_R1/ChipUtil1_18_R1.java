@@ -549,7 +549,7 @@ final class ChipUtil1_18_R1 implements ChipUtil {
     @Override
     public BehaviorResult runBehavior(Mob m, String behaviorName, String packageName, Object... args) {
         net.minecraft.world.entity.Mob nms = toNMS(m);
-        
+
         for (int i = 0; i < args.length; i++) {
             Object o = args[i];
             if (o instanceof Villager.Profession) args[i] = toNMS((Villager.Profession) o);

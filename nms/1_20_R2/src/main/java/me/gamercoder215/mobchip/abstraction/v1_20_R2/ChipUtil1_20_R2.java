@@ -744,8 +744,8 @@ final class ChipUtil1_20_R2 implements ChipUtil {
     }
 
     private static DamageSource fromType(ResourceKey<DamageType> key, net.minecraft.world.entity.Entity cause) {
-        Frozen access = ((CraftServer) Bukkit.getServer()).getHandle().getServer().registries().compositeAccess();        
-        
+        Frozen access = ((CraftServer) Bukkit.getServer()).getHandle().getServer().registries().compositeAccess();
+
         return new DamageSource(access.registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(key), cause, null);
     }
 

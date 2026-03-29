@@ -43,7 +43,9 @@ public final class PathfinderFollowOwner extends Pathfinder implements SpeedModi
      * @param startDistance How far away from owner to start walking towards
      * @param stopDistance How far away from owner to stop walking towards
      * @param fly Whether this Tamable can fly to its owner, if able at all
+     * @deprecated {@code fly} no longer exists in the underlying implementation
      */
+    @Deprecated
     public PathfinderFollowOwner(@NotNull Tameable t, double speedMod, float startDistance, float stopDistance, boolean fly) {
         super(t instanceof Mob ? (Mob) t : null);
 
@@ -88,7 +90,9 @@ public final class PathfinderFollowOwner extends Pathfinder implements SpeedModi
     /**
      * Whether this Tame bale can fly to their owner.
      * @return true if tamable can fly, else false
+     * @deprecated no longer exists in the underlying implementation
      */
+    @Deprecated
     public boolean canFly() {
         return this.canFly;
     }
@@ -96,7 +100,9 @@ public final class PathfinderFollowOwner extends Pathfinder implements SpeedModi
     /**
      * Set whether this Tamable should fly to their owner.
      * @param fly true if tamable can fly, else false
+     * @deprecated no longer exists in the underlying implementation
      */
+    @Deprecated
     public void setCanFly(boolean fly) {
         this.canFly = fly;
     }

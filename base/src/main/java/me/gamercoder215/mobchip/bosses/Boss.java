@@ -46,7 +46,7 @@ public abstract class Boss<T extends Mob> {
     private Sound spawnSound;
     private float volume;
     private float pitch;
-    
+
 	private double health = DEFAULT_HEALTH;
 	private final Map<EquipmentSlot, ItemStack> equipment = new EnumMap<>(EquipmentSlot.class);
 
@@ -138,7 +138,7 @@ public abstract class Boss<T extends Mob> {
         } catch (ClassCastException e) {
             return null;
         }
-    } 
+    }
 
 
     // Instance
@@ -183,7 +183,7 @@ public abstract class Boss<T extends Mob> {
     public final void spawn(@NotNull Location l) {
         T mob = l.getWorld().spawn(l, this.getEntityClass());
         this.mob = mob;
-        
+
         for (AttributeInstance a : attributes.keySet()) a.setBaseValue(attributes.get(a));
         for (EquipmentSlot s : equipment.keySet()) {
             switch (s) {
@@ -207,7 +207,7 @@ public abstract class Boss<T extends Mob> {
                     break;
             }
         }
-        
+
         if (spawnSound != null) l.getWorld().playSound(l, deathSound, 3F, 1F);
 
         final Boss<T> inst = this;
@@ -272,7 +272,7 @@ public abstract class Boss<T extends Mob> {
     public final Sound getSpawnSound() {
         return this.spawnSound;
     }
-    
+
     /**
      * Sets the Death Sound.
      * @param s New Death Sound, or Null to reset
@@ -280,7 +280,7 @@ public abstract class Boss<T extends Mob> {
     public final void setSpawnSound(@Nullable Sound s) {
         if (s == null) this.spawnSound = s; else this.spawnSound = Sound.ENTITY_WITHER_SPAWN;
     }
-    
+
     /**
      * Fetches the current sound pitch.
      * @return Current Sound Pitch
@@ -288,7 +288,7 @@ public abstract class Boss<T extends Mob> {
     public final float getSoundPitch() {
     	return this.pitch;
     }
-    
+
     /**
      * Fetches the current sound volume.
      * @return Current Sound Volume
@@ -296,7 +296,7 @@ public abstract class Boss<T extends Mob> {
     public final float getSoundVolume() {
     	return this.volume;
     }
-    
+
     /**
      * Sets the Sound's Pitch.
      * @param pitch Pitch to set
@@ -306,7 +306,7 @@ public abstract class Boss<T extends Mob> {
     	if (pitch < 2 || pitch > 2) throw new IllegalArgumentException("Pitch must be between -2F and 2F");
     	this.pitch = pitch;
     }
-    
+
     /**
      * Sets the Sound's Volume.
      * @param volume Volume to set
@@ -325,7 +325,7 @@ public abstract class Boss<T extends Mob> {
     public final T getMob() {
         return this.mob;
     }
-    
+
 	/**
 	 * Fetch this Entity's Attributes.
 	 * @return Entity Attributes
@@ -334,7 +334,7 @@ public abstract class Boss<T extends Mob> {
 	public final Map<AttributeInstance, Double> getAttributes() {
 		return this.attributes;
 	}
-	
+
 	/**
 	 * Get the health that this Boss will spawn with.
 	 * @return Health spawned with
@@ -342,7 +342,7 @@ public abstract class Boss<T extends Mob> {
 	public final double getHealth() {
 		return this.health;
 	}
-	
+
 	/**
 	 * Sets the health that this Boss will spawn with.
 	 * @param health Health to spawn with
@@ -350,7 +350,7 @@ public abstract class Boss<T extends Mob> {
 	public final void setHealth(double health) {
 		this.health = health;
 	}
-	
+
 	/**
 	 * Adds an Attribute that this Boss will spawn with.
 	 * @param inst Attribute Instance
@@ -359,7 +359,7 @@ public abstract class Boss<T extends Mob> {
 	public final void addAttribute(@NotNull AttributeInstance inst, double value) {
 		this.attributes.put(inst, value);
 	}
-	
+
 	/**
 	 * Removes an Attribute that this Boss will spawn with.
 	 * @param inst Attribute Instance
@@ -367,7 +367,7 @@ public abstract class Boss<T extends Mob> {
 	public final void removeAttribute(@NotNull AttributeInstance inst) {
 		this.attributes.remove(inst);
 	}
-	
+
 	/**
 	 * Fetch the Boss's Equipment.
 	 * @return Equipment that the Boss will spawn with
@@ -376,7 +376,7 @@ public abstract class Boss<T extends Mob> {
 	public final Map<EquipmentSlot, ItemStack> getEquipment() {
 		return this.equipment;
 	}
-	
+
 	/**
 	 * Sets an item on this Boss's Equipment that it will spawn with.
 	 * @param slot EquipmentSlot to spawn
@@ -386,7 +386,7 @@ public abstract class Boss<T extends Mob> {
 		if (item == null) return;
 		this.equipment.put(slot, item);
 	}
-	
+
 	/**
 	 * Sets this Boss's Helmet.
 	 * @param item Helmet Item to set, can be null
@@ -394,7 +394,7 @@ public abstract class Boss<T extends Mob> {
 	public final void setHelmet(@Nullable ItemStack item) {
 		setItem(EquipmentSlot.HEAD, item);
 	}
-	
+
 	/**
 	 * Sets this Boss's Chestplate.
 	 * @param item Chestplate Item to set, can be null
@@ -402,7 +402,7 @@ public abstract class Boss<T extends Mob> {
 	public final void setChestplate(@Nullable ItemStack item) {
 		setItem(EquipmentSlot.CHEST, item);
 	}
-	
+
 	/**
 	 * Sets this Boss's Leggings.
 	 * @param item Leggings Item to set, can be null
@@ -410,7 +410,7 @@ public abstract class Boss<T extends Mob> {
 	public final void setLeggings(@Nullable ItemStack item) {
 		setItem(EquipmentSlot.LEGS, item);
 	}
-	
+
 	/**
 	 * Sets this Boss's Boots.
 	 * @param item Boots Item to set, can be null
@@ -418,7 +418,7 @@ public abstract class Boss<T extends Mob> {
 	public final void setBoots(@Nullable ItemStack item) {
 		setItem(EquipmentSlot.FEET, item);
 	}
-	
+
 	/**
 	 * Sets this Boss's Mainhand.
 	 * @param item Mainhand Item to change, can be null
@@ -426,7 +426,7 @@ public abstract class Boss<T extends Mob> {
 	public final void setMainhand(@Nullable ItemStack item) {
 		setItem(EquipmentSlot.HAND, item);
 	}
-	
+
 	/**
 	 * Sets this Boss's Offhand.
 	 * @param item Offhand Item to change, can be null

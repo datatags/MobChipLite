@@ -423,8 +423,7 @@ final class EntityBody1_21_R6 implements EntityBody {
                 setFlags.invoke(nmsMob, 4, true);
             }
         } catch (ReflectiveOperationException e) {
-            Bukkit.getLogger().severe(e.getMessage());
-            for (StackTraceElement ste : e.getStackTrace()) Bukkit.getLogger().severe(ste.toString());
+            ChipUtil.printStackTrace(e);
         }
 
         update();
