@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
  * Represents a Pathfinder for an Entity to look at another Entity
  * @param <T> Type of LivingEntity to look at
  */
-public final class PathfinderLookAtEntity<T extends LivingEntity> extends Pathfinder implements Filtering<T>, Probable, Ranged {
+public /* final */ class PathfinderLookAtEntity<T extends LivingEntity> extends Pathfinder implements Filtering<T>, Probable, Ranged {
 
     /**
      * Default Probability to look at an Entity (0.02F)
@@ -62,7 +62,7 @@ public final class PathfinderLookAtEntity<T extends LivingEntity> extends Pathfi
      * @param horizontal Whether rotation should only be horizontal
      */
     public PathfinderLookAtEntity(@NotNull Mob m, @NotNull Class<T> filter, float lookRange, float probability, boolean horizontal) {
-        super(m); 
+        super(m);
 
         this.filterClass = filter;
         this.lookRange = lookRange;

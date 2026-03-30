@@ -379,214 +379,95 @@ final class ChipUtil26_1 implements ChipUtil {
         Mob mob = b.getEntity();
         net.minecraft.world.entity.Mob m = toNMS(mob);
 
-        String name = b.getInternalName().startsWith("PathfinderGoal") ? b.getInternalName().replace("PathfinderGoal", "") : b.getInternalName();
-
-        return switch (name) {
-            case "AvoidTarget" -> {
-                PathfinderAvoidEntity p = (PathfinderAvoidEntity) b;
+        return switch (b) {
+            case PathfinderAvoidEntity p -> {
                 Predicate<LivingEntity> avoidP = p.getAvoidPredicate() == null ?
-                        en -> true :
+                        _ -> true :
                         en -> p.getAvoidPredicate().test(en);
                 Predicate<LivingEntity> avoidingP = p.getAvoidingPredicate() == null ?
-                        en -> true :
+                        _ -> true :
                         en -> p.getAvoidingPredicate().test(en);
 
                 yield new AvoidEntityGoal<>((PathfinderMob) m, toNMS(p.getFilter()), en -> avoidP.test(fromNMS(en)), p.getMaxDistance(), p.getSpeedModifier(), p.getSprintModifier(), en -> avoidingP.test(fromNMS(en)));
             }
-            case "ArrowAttack" -> {
-                PathfinderRangedAttack p = (PathfinderRangedAttack) b;
-                yield new RangedAttackGoal((RangedAttackMob) m, p.getSpeedModifier(), p.getMinAttackInterval(), p.getMaxAttackInterval(), p.getRange());
-            }
-            case "Beg" -> {
-                PathfinderBeg p = (PathfinderBeg) b;
-                yield new BegGoal((net.minecraft.world.entity.animal.wolf.Wolf) m, p.getRange());
-            }
-            case "BowShoot" -> {
-                PathfinderRangedBowAttack p = (PathfinderRangedBowAttack) b;
-                yield new RangedBowAttackGoal((net.minecraft.world.entity.monster.Monster) m, p.getSpeedModifier(), p.getInterval(), p.getRange());
-            }
-            case "BreakDoor" -> {
-                PathfinderBreakDoor p = (PathfinderBreakDoor) b;
-                yield new BreakDoorGoal(m, p.getBreakTime(), d -> p.getCondition().test(fromNMS(d)));
-            }
-            case "Breath" -> new BreathAirGoal((PathfinderMob) m);
-            case "Breed" -> {
-                PathfinderBreed p = (PathfinderBreed) b;
-                yield new BreedGoal((Animal) m, p.getSpeedModifier());
-            }
-            case "CatSitOnBed" -> {
-                PathfinderCatOnBed p = (PathfinderCatOnBed) b;
-                yield new CatLieOnBedGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier(), Math.min((int) p.getRange(), 1));
-            }
-            case "ClimbOnTopOfPowderSnowGoal" -> new ClimbOnTopOfPowderSnowGoal(m, toNMS(mob.getWorld()));
-            case "CrossbowAttack" -> {
-                PathfinderRangedCrossbowAttack p = (PathfinderRangedCrossbowAttack) b;
-                yield new RangedCrossbowAttackGoal((net.minecraft.world.entity.monster.Monster) m, p.getSpeedModifier(), p.getRange());
-            }
-            case "DoorOpen" -> {
-                PathfinderOpenDoor p = (PathfinderOpenDoor) b;
-                yield new OpenDoorGoal(m, p.mustClose());
-            }
-            case "EatTile" -> new EatBlockGoal(m);
-            case "FishSchool" -> new FollowFlockLeaderGoal((AbstractSchoolingFish) m);
-            case "FleeSun" -> {
-                PathfinderFleeSun p = (PathfinderFleeSun) b;
-                yield new FleeSunGoal((PathfinderMob) m, p.getSpeedModifier());
-            }
-            case "Float" -> new FloatGoal(m);
-            case "FollowPlayerRiddenEntity" -> {
-                PathfinderFollowPlayerRiddenEntity p = (PathfinderFollowPlayerRiddenEntity) b;
-                yield new FollowPlayerRiddenEntityGoal((PathfinderMob) m, toNMS(p.getTypeToFollow()));
-            }
-            case "FollowEntity" -> {
-                PathfinderFollowMob p = (PathfinderFollowMob) b;
-                yield new FollowMobGoal(m, p.getSpeedModifier(), p.getStopDistance(), p.getRange());
-            }
-            case "FollowOwner" -> {
-                PathfinderFollowOwner p = (PathfinderFollowOwner) b;
-                yield new FollowOwnerGoal((TamableAnimal) m, p.getSpeedModifier(), p.getStartDistance(), p.getStopDistance());
-            }
-            case "FollowParent" -> {
-                PathfinderFollowParent p = (PathfinderFollowParent) b;
-                yield new FollowParentGoal((Animal) m, p.getSpeedModifier());
-            }
-            case "JumpOnBlock" -> {
-                PathfinderCatOnBlock p = (PathfinderCatOnBlock) b;
-                yield new CatSitOnBlockGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier());
-            }
-            case "LeapAtTarget" -> {
-                PathfinderLeapAtTarget p = (PathfinderLeapAtTarget) b;
-                yield new LeapAtTargetGoal(m, p.getHeight());
-            }
-            case "LlamaFollow" -> {
-                PathfinderLlamaFollowCaravan p = (PathfinderLlamaFollowCaravan) b;
-                yield new LlamaFollowCaravanGoal((net.minecraft.world.entity.animal.equine.Llama) m, p.getSpeedModifier());
-            }
-            case "LookAtPlayer" -> {
-                PathfinderLookAtEntity<?> p = (PathfinderLookAtEntity) b;
-                yield new LookAtPlayerGoal(m, toNMS(p.getFilter()).asSubclass(net.minecraft.world.entity.LivingEntity.class), p.getRange(), p.getProbability(), p.isHorizontal());
-            }
-            case "LookAtTradingPlayer" -> new LookAtTradingPlayerGoal((net.minecraft.world.entity.npc.villager.AbstractVillager) m);
-            case "MeleeAttack" -> {
-                PathfinderMeleeAttack p = (PathfinderMeleeAttack) b;
-                yield new MeleeAttackGoal((PathfinderMob) m, p.getSpeedModifier(), p.mustSee());
-            }
-            case "MoveThroughVillage" -> {
-                PathfinderMoveThroughVillage p = (PathfinderMoveThroughVillage) b;
-                yield new MoveThroughVillageGoal((PathfinderMob) m, p.getSpeedModifier(), p.mustBeNight(), p.getMinDistance(), p.canUseDoors());
-            }
-            case "MoveTowardsRestriction" -> {
-                PathfinderMoveTowardsRestriction p = (PathfinderMoveTowardsRestriction) b;
-                yield new MoveTowardsRestrictionGoal((PathfinderMob) m, p.getSpeedModifier());
-            }
-            case "MoveTowardsTarget" -> {
-                PathfinderMoveTowardsTarget p = (PathfinderMoveTowardsTarget) b;
-                yield new MoveTowardsTargetGoal((PathfinderMob) m, p.getSpeedModifier(), p.getRange());
-            }
-            case "NearestVillage" -> {
-                PathfinderRandomStrollThroughVillage p = (PathfinderRandomStrollThroughVillage) b;
-                yield new StrollThroughVillageGoal((PathfinderMob) m, p.getInterval());
-            }
-            case "OcelotAttack" -> new OcelotAttackGoal(m);
-            case "OfferFlower" -> new OfferFlowerGoal((net.minecraft.world.entity.animal.golem.IronGolem) m);
-            case "Panic" -> {
-                PathfinderPanic p = (PathfinderPanic) b;
-                yield new PanicGoal((PathfinderMob) m, p.getSpeedModifier());
-            }
-            case "Perch" -> new LandOnOwnersShoulderGoal((ShoulderRidingEntity) m);
-            case "Raid" -> new PathfindToRaidGoal<>((net.minecraft.world.entity.raid.Raider) m);
-            case "RandomFly" -> {
-                PathfinderRandomStrollFlying p = (PathfinderRandomStrollFlying) b;
-                yield new WaterAvoidingRandomFlyingGoal((PathfinderMob) m, p.getSpeedModifier());
-            }
-            case "RandomLookaround" -> new RandomLookAroundGoal(m);
-            case "RandomStroll" -> {
-                PathfinderRandomStroll p = (PathfinderRandomStroll) b;
-                yield new RandomStrollGoal((PathfinderMob) m, p.getSpeedModifier(), p.getInterval());
-            }
-            case "RandomStrollLand" -> {
-                PathfinderRandomStrollLand p = (PathfinderRandomStrollLand) b;
-                yield new WaterAvoidingRandomStrollGoal((PathfinderMob) m, p.getSpeedModifier(), p.getProbability());
-            }
-            case "RandomSwim" -> {
-                PathfinderRandomSwim p = (PathfinderRandomSwim) b;
-                yield new RandomSwimmingGoal((PathfinderMob) m, p.getSpeedModifier(), p.getInterval());
-            }
-            case "RemoveBlock" -> {
-                PathfinderRemoveBlock p = (PathfinderRemoveBlock) b;
-                yield new RemoveBlockGoal(CraftMagicNumbers.getBlock(p.getBlock()), (PathfinderMob) m, p.getSpeedModifier(), p.getVerticalSearchRange());
-            }
-            case "RestrictSun" -> new RestrictSunGoal((PathfinderMob) m);
-            case "Sit" -> new SitWhenOrderedToGoal((TamableAnimal) m);
-            case "StrollVillage" -> {
-                PathfinderRandomStrollToVillage p = (PathfinderRandomStrollToVillage) b;
-                yield new MoveBackToVillageGoal((PathfinderMob) m, p.getSpeedModifier(), true);
-            }
-            case "StrollVillageGolem" -> {
-                PathfinderRandomStrollInVillage p = (PathfinderRandomStrollInVillage) b;
-                yield new GolemRandomStrollInVillageGoal((PathfinderMob) m, p.getSpeedModifier());
-            }
-            case "Swell" -> new SwellGoal((net.minecraft.world.entity.monster.Creeper) m);
-            case "Tame" -> {
-                PathfinderTameHorse p = (PathfinderTameHorse) b;
-                yield new RunAroundLikeCrazyGoal((net.minecraft.world.entity.animal.equine.AbstractHorse) m, p.getSpeedModifier());
-            }
-            case "Tempt" -> {
-                PathfinderTempt p = (PathfinderTempt) b;
-                yield new TemptGoal((PathfinderMob) m, p.getSpeedModifier(), toNMS(p), true);
-            }
-            case "TradeWithPlayer" -> new TradeWithPlayerGoal((net.minecraft.world.entity.npc.villager.AbstractVillager) m);
-            case "UseItem" -> {
-                PathfinderUseItem p = (PathfinderUseItem) b;
-                yield new UseItemGoal<>(m, toNMS(p.getItem()), toNMS(p.getFinishSound()), e -> p.getCondition().test(fromNMS(e)));
-            }
-            case "Water" -> new TryFindWaterGoal((PathfinderMob) m);
-            case "WaterJump" -> {
-                PathfinderDolphinJump p = (PathfinderDolphinJump) b;
-                yield new DolphinJumpGoal((net.minecraft.world.entity.animal.dolphin.Dolphin) m, p.getInterval());
-            }
-            case "ZombieAttack" -> {
-                PathfinderZombieAttack p = (PathfinderZombieAttack) b;
-                yield new ZombieAttackGoal((net.minecraft.world.entity.monster.zombie.Zombie) m, p.getSpeedModifier(), p.mustSee());
-            }
-            case "UniversalAngerReset" -> {
-                PathfinderResetAnger p = (PathfinderResetAnger) b;
-                yield new ResetUniversalAngerTargetGoal<>((net.minecraft.world.entity.Mob & NeutralMob) m, p.isAlertingOthers());
-            }
-            case "RandomStandGoal" -> new RandomStandGoal((net.minecraft.world.entity.animal.equine.AbstractHorse) m);
+            case PathfinderBeg p -> new BegGoal((net.minecraft.world.entity.animal.wolf.Wolf) m, p.getRange());
+            case PathfinderBreakDoor p -> new BreakDoorGoal(m, p.getBreakTime(), d -> p.getCondition().test(fromNMS(d)));
+            case PathfinderBreathAir _ -> new BreathAirGoal((PathfinderMob) m);
+            case PathfinderBreed p -> new BreedGoal((Animal) m, p.getSpeedModifier());
+            case PathfinderCatOnBed p -> new CatLieOnBedGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier(), Math.min((int) p.getRange(), 1));
+            case PathfinderCatOnBlock p -> new CatSitOnBlockGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier());
+            case PathfinderClimbPowderedSnow _ -> new ClimbOnTopOfPowderSnowGoal(m, toNMS(mob.getWorld()));
+            case PathfinderDolphinJump p -> new DolphinJumpGoal((net.minecraft.world.entity.animal.dolphin.Dolphin) m, p.getInterval());
+            case PathfinderEatTile _ -> new EatBlockGoal(m);
+            case PathfinderFindWater _ -> new TryFindWaterGoal((PathfinderMob) m);
+            case PathfinderFleeSun p -> new FleeSunGoal((PathfinderMob) m, p.getSpeedModifier());
+            case PathfinderFloat _ -> new FloatGoal(m);
+            case PathfinderFollowFishLeader _ -> new FollowFlockLeaderGoal((AbstractSchoolingFish) m);
+            case PathfinderFollowMob p -> new FollowMobGoal(m, p.getSpeedModifier(), p.getStopDistance(), p.getRange());
+            case PathfinderFollowOwner p -> new FollowOwnerGoal((TamableAnimal) m, p.getSpeedModifier(), p.getStartDistance(), p.getStopDistance());
+            case PathfinderFollowParent p -> new FollowParentGoal((Animal) m, p.getSpeedModifier());
+            case PathfinderFollowPlayerRiddenEntity p -> new FollowPlayerRiddenEntityGoal((PathfinderMob) m, toNMS(p.getTypeToFollow()));
+            case PathfinderLeapAtTarget p -> new LeapAtTargetGoal(m, p.getHeight());
+            case PathfinderLlamaFollowCaravan p -> new LlamaFollowCaravanGoal((net.minecraft.world.entity.animal.equine.Llama) m, p.getSpeedModifier());
+            case PathfinderLookAtEntity p -> new LookAtPlayerGoal(m, toNMS(p.getFilter()).asSubclass(net.minecraft.world.entity.LivingEntity.class), p.getRange(), p.getProbability(), p.isHorizontal());
+            case PathfinderLookAtTradingPlayer _ -> new LookAtTradingPlayerGoal((net.minecraft.world.entity.npc.villager.AbstractVillager) m);
+            case PathfinderMoveThroughVillage p -> new MoveThroughVillageGoal((PathfinderMob) m, p.getSpeedModifier(), p.mustBeNight(), p.getMinDistance(), p.canUseDoors());
+            case PathfinderMoveToRaid _ -> new PathfindToRaidGoal<>((net.minecraft.world.entity.raid.Raider) m);
+            case PathfinderMoveTowardsRestriction p -> new MoveTowardsRestrictionGoal((PathfinderMob) m, p.getSpeedModifier());
+            case PathfinderMoveTowardsTarget p -> new MoveTowardsTargetGoal((PathfinderMob) m, p.getSpeedModifier(), p.getRange());
+            case PathfinderOcelotAttack _ -> new OcelotAttackGoal(m);
+            case PathfinderOfferFlower _ -> new OfferFlowerGoal((net.minecraft.world.entity.animal.golem.IronGolem) m);
+            case PathfinderOpenDoor p -> new OpenDoorGoal(m, p.mustClose());
+            case PathfinderPanic p -> new PanicGoal((PathfinderMob) m, p.getSpeedModifier());
+            case PathfinderRandomLook _ -> new RandomLookAroundGoal(m);
+            case PathfinderRandomStrollFlying p -> new WaterAvoidingRandomFlyingGoal((PathfinderMob) m, p.getSpeedModifier());
+            case PathfinderRandomStrollLand p -> new WaterAvoidingRandomStrollGoal((PathfinderMob) m, p.getSpeedModifier(), p.getProbability());
+            case PathfinderRandomStrollThroughVillage p -> new StrollThroughVillageGoal((PathfinderMob) m, p.getInterval());
+            case PathfinderRandomSwim p -> new RandomSwimmingGoal((PathfinderMob) m, p.getSpeedModifier(), p.getInterval());
+            case PathfinderRemoveBlock p -> new RemoveBlockGoal(CraftMagicNumbers.getBlock(p.getBlock()), (PathfinderMob) m, p.getSpeedModifier(), p.getVerticalSearchRange());
+            case PathfinderRestrictSun _ -> new RestrictSunGoal((PathfinderMob) m);
+            case PathfinderRideShoulder _ -> new LandOnOwnersShoulderGoal((ShoulderRidingEntity) m);
+            case PathfinderSit _ -> new SitWhenOrderedToGoal((TamableAnimal) m);
+            case PathfinderRandomStand _ -> new RandomStandGoal((net.minecraft.world.entity.animal.equine.AbstractHorse) m);
+            case PathfinderRandomStrollInVillage p -> new GolemRandomStrollInVillageGoal((PathfinderMob) m, p.getSpeedModifier());
+            case PathfinderRandomStrollToVillage p -> new MoveBackToVillageGoal((PathfinderMob) m, p.getSpeedModifier(), true);
+            case PathfinderRangedAttack p -> new RangedAttackGoal((RangedAttackMob) m, p.getSpeedModifier(), p.getMinAttackInterval(), p.getMaxAttackInterval(), p.getRange());
+            case PathfinderRangedBowAttack p -> new RangedBowAttackGoal((net.minecraft.world.entity.monster.Monster) m, p.getSpeedModifier(), p.getInterval(), p.getRange());
+            case PathfinderRangedCrossbowAttack p -> new RangedCrossbowAttackGoal((net.minecraft.world.entity.monster.Monster) m, p.getSpeedModifier(), p.getRange());
+            case PathfinderResetAnger p -> new ResetUniversalAngerTargetGoal<>((net.minecraft.world.entity.Mob & NeutralMob) m, p.isAlertingOthers());
+            case PathfinderSwellCreeper _ -> new SwellGoal((net.minecraft.world.entity.monster.Creeper) m);
+            case PathfinderTameHorse p -> new RunAroundLikeCrazyGoal((net.minecraft.world.entity.animal.equine.AbstractHorse) m, p.getSpeedModifier());
+            case PathfinderTempt p -> new TemptGoal((PathfinderMob) m, p.getSpeedModifier(), toNMS(p), true);
+            case PathfinderTradePlayer _ -> new TradeWithPlayerGoal((net.minecraft.world.entity.npc.villager.AbstractVillager) m);
+            case PathfinderUseItem p -> new UseItemGoal<>(m, toNMS(p.getItem()), toNMS(p.getFinishSound()), e -> p.getCondition().test(fromNMS(e)));
+            case PathfinderSpearUse p -> new SpearUseGoal<>((net.minecraft.world.entity.monster.Monster)m, p.getSpeedModifierWhenCharging(), p.getSpeedModifierWhenRepositioning(), p.getApproachDistance(), p.getTargetInRangeRadius());
+            case PathfinderZombieAttack p -> new ZombieAttackGoal((net.minecraft.world.entity.monster.zombie.Zombie) m, p.getSpeedModifier(), p.mustSee());
+
+            // Moved to end to avoid shadowing other cases due to inheritance
+            case PathfinderMeleeAttack p -> new MeleeAttackGoal((PathfinderMob) m, p.getSpeedModifier(), p.mustSee());
+            case PathfinderRandomStroll p -> new RandomStrollGoal((PathfinderMob) m, p.getSpeedModifier(), p.getInterval());
 
             // Target
-
-            case "DefendVillage" -> new DefendVillageTargetGoal((net.minecraft.world.entity.animal.golem.IronGolem) m);
-            case "HurtByTarget" -> {
-                PathfinderHurtByTarget p = (PathfinderHurtByTarget) b;
+            case PathfinderDefendVillage _ -> new DefendVillageTargetGoal((net.minecraft.world.entity.animal.golem.IronGolem) m);
+            case PathfinderHurtByTarget p -> {
                 List<Class<? extends net.minecraft.world.entity.LivingEntity>> classes = new ArrayList<>();
                 p.getIgnoring().stream().map(EntityType::getEntityClass).forEach(c -> classes.add(toNMS(c).asSubclass(net.minecraft.world.entity.LivingEntity.class)));
 
                 yield new HurtByTargetGoal((PathfinderMob) m, classes.toArray(new Class[0]));
             }
-            case "NearestAttackableTarget" -> {
-                PathfinderNearestAttackableTarget p = (PathfinderNearestAttackableTarget) b;
-                yield new NearestAttackableTargetGoal<>(m, toNMS(p.getFilter()), p.getInterval(), p.mustSee(), p.mustReach(), (t, l) -> p.getCondition().test(fromNMS(t)));
-            }
-            case "NearestAttackableTargetWitch" -> {
-                PathfinderNearestAttackableTargetRaider p = (PathfinderNearestAttackableTargetRaider) b;
-                yield new NearestAttackableWitchTargetGoal<>((net.minecraft.world.entity.raid.Raider) m, toNMS(p.getFilter()), p.getInterval(), p.mustSee(), p.mustReach(), (t, l) -> p.getCondition().test(fromNMS(t)));
-            }
-            case "NearestHealableRaider" -> {
-                PathfinderNearestHealableRaider p = (PathfinderNearestHealableRaider) b;
-                yield new NearestHealableRaiderTargetGoal<>((net.minecraft.world.entity.raid.Raider) m, toNMS(p.getFilter()), p.mustSee(), (t, l) -> p.getCondition().test(fromNMS(t)));
-            }
-            case "OwnerHurtByTarget" -> new OwnerHurtByTargetGoal((TamableAnimal) m);
-            case "OwnerHurtTarget" -> new OwnerHurtTargetGoal((TamableAnimal) m);
-            case "RandomTargetNonTamed" -> {
-                PathfinderWildTarget p = (PathfinderWildTarget) b;
-                yield new NonTameRandomTargetGoal<>((TamableAnimal) m, toNMS(p.getFilter()), p.mustSee(), (t, l) -> p.getCondition().test(fromNMS(t)));
-            }
+            case PathfinderNearestAttackableTargetRaider p -> new NearestAttackableWitchTargetGoal<>((net.minecraft.world.entity.raid.Raider) m, toNMS(p.getFilter()), p.getInterval(), p.mustSee(), p.mustReach(), (t, _) -> p.getCondition().test(fromNMS(t)));
+            case PathfinderNearestHealableRaider p -> new NearestHealableRaiderTargetGoal<>((net.minecraft.world.entity.raid.Raider) m, toNMS(p.getFilter()), p.mustSee(), (t, _) -> p.getCondition().test(fromNMS(t)));
+            case PathfinderOwnerHurtByTarget _ -> new OwnerHurtByTargetGoal((TamableAnimal) m);
+            case PathfinderOwnerHurtTarget _ -> new OwnerHurtTargetGoal((TamableAnimal) m);
+            case PathfinderWildTarget p -> new NonTameRandomTargetGoal<>((TamableAnimal) m, toNMS(p.getFilter()), p.mustSee(), (t, _) -> p.getCondition().test(fromNMS(t)));
 
+            // Moved to end to avoid shadowing other cases due to inheritance
+            case PathfinderNearestAttackableTarget p -> new NearestAttackableTargetGoal<>(m, toNMS(p.getFilter()), p.getInterval(), p.mustSee(), p.mustReach(), (t, _) -> p.getCondition().test(fromNMS(t)));
+
+            case CustomPathfinder p -> custom(p);
             default -> {
-                if (b instanceof CustomPathfinder p) yield custom(p);
-                else yield null;
+                Bukkit.getLogger().warning("Conversion to NMS failed for pathfinder " + b.getClass().getName());
+                yield null;
             }
         };
     }
@@ -618,7 +499,7 @@ final class ChipUtil26_1 implements ChipUtil {
         net.minecraft.world.entity.Mob m = toNMS(mob);
         GoalSelector s = target ? m.targetSelector : m.goalSelector;
 
-        s.removeAllGoals(g -> true);
+        s.removeAllGoals(_ -> true);
     }
 
     public static BehaviorResult.Status fromNMS(Behavior.Status status) {
@@ -1403,7 +1284,7 @@ final class ChipUtil26_1 implements ChipUtil {
             case "BreakDoor" -> new PathfinderBreakDoor(m, getInt(g, "breakTime"), d -> getObject(g, "validDifficulties", Predicate.class).test(toNMS(d)));
             case "BreathAir" -> new PathfinderBreathAir((Creature) m);
             case "Breed" -> new PathfinderBreed((Animals) m, speedMod(g)); // TODO: accepts a partner filter
-            case "CatSitOnBed" -> new PathfinderCatOnBed((Cat) m, speedMod(g), getInt(g, "searchRange"));
+            case "CatLieOnBed" -> new PathfinderCatOnBed((Cat) m, speedMod(g), getInt(g, "searchRange"));
             case "CatSitOnBlock" -> new PathfinderCatOnBlock((Cat) m, speedMod(g));
             case "ClimbOnTopOfPowderSnow" -> new PathfinderClimbPowderedSnow(m, fromNMS(getObject(g, "level", Level.class)));
             case "DolphinJump" -> new PathfinderDolphinJump((Dolphin) m, getInt(g, "interval"));
@@ -1416,6 +1297,7 @@ final class ChipUtil26_1 implements ChipUtil {
             case "FollowParent" -> new PathfinderFollowParent((Animals) m, speedMod(g));
             case "FollowPlayerRiddenEntity" -> new PathfinderFollowPlayerRiddenEntity((Creature) m, getObject(g, "entityTypeToFollow", Class.class));
             case "GolemRandomStrollInVillage" -> new PathfinderRandomStrollInVillage((Creature) m, speedMod(g));
+            case "Interact" -> new PathfinderInteract<>(m, fromNMS(getObject(g, "lookAtType", Class.class), LivingEntity.class), getFloat(g, "lookDistance"), getFloat(g, "probability"));
             case "LandOnOwnersShoulder" -> new PathfinderRideShoulder((Parrot) m);
             case "LeapAtTarget" -> new PathfinderLeapAtTarget(m, getFloat(g, "yd"));
             case "LlamaFollowCaravan" -> new PathfinderLlamaFollowCaravan((Llama) m, speedMod(g));
@@ -1441,11 +1323,12 @@ final class ChipUtil26_1 implements ChipUtil {
             case "RangedCrossbowAttack" -> new PathfinderRangedCrossbowAttack((Pillager) m, speedMod(g), (float) Math.sqrt(getFloat(g, "attackRadiusSqr")));
             case "RemoveBlock" -> new PathfinderRemoveBlock((Creature) m, CraftMagicNumbers.getMaterial(getObject(g, "g", Block.class)), speedMod(g), getInt(g, "verticalSearchRange"));
             case "RestrictSun" -> new PathfinderRestrictSun((Creature) m);
+            case "RunAroundLikeCrazy" -> new PathfinderTameHorse((AbstractHorse) m, speedMod(g));
             case "SitWhenOrderedTo" -> new PathfinderSit((Tameable) m);
             case "SkeletonTrap" -> new PathfinderSkeletonTrap((SkeletonHorse) m);
+            case "SpearUse" -> new PathfinderSpearUse(m, getDouble(g, "speedModifierWhenCharging"), getDouble(g, "speedModifierWhenRepositioning"), (float)Math.sqrt(getFloat(g, "approachDistanceSq")), (float)Math.sqrt(getFloat(g, "targetInRangeRadiusSq")));
             case "StrollThroughVillage" -> new PathfinderRandomStrollThroughVillage((Creature) m, getInt(g, "interval"));
             case "Swell" -> new PathfinderSwellCreeper((Creeper) m);
-            case "RunAroundLikeCrazy" -> new PathfinderTameHorse((AbstractHorse) m, speedMod(g));
             case "Tempt" -> createPathfinderTempt((Creature) m, g);
             case "TradeWithPlayer" -> new PathfinderTradePlayer((AbstractVillager) m);
             case "TryFindWater" -> new PathfinderFindWater((Creature) m);
@@ -1466,7 +1349,7 @@ final class ChipUtil26_1 implements ChipUtil {
             case "ResetUniversalAngerTarget" -> new PathfinderResetAnger(m, getBoolean(g, "alertOthersOfSameType"));
 
             default -> {
-                Bukkit.getLogger().warning("Warning, creating custom pathfinder for " + g.getClass().getName());
+                Bukkit.getLogger().warning("Warning, creating oingo boingo pathfinder for " + g.getClass().getName());
                 yield custom(g);
             }
         };
