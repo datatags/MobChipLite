@@ -466,7 +466,7 @@ final class ChipUtil26_1 implements ChipUtil {
 
             case CustomPathfinder p -> custom(p);
             default -> {
-                Bukkit.getLogger().warning("Conversion to NMS failed for pathfinder " + b.getClass().getName());
+                // Bukkit.getLogger().warning("Conversion to NMS failed for pathfinder " + b.getClass().getName());
                 yield null;
             }
         };
@@ -1349,7 +1349,7 @@ final class ChipUtil26_1 implements ChipUtil {
             case "ResetUniversalAngerTarget" -> new PathfinderResetAnger(m, getBoolean(g, "alertOthersOfSameType"));
 
             default -> {
-                Bukkit.getLogger().warning("Warning, creating oingo boingo pathfinder for " + g.getClass().getName());
+                // Bukkit.getLogger().warning("Warning, creating custom pathfinder for " + g.getClass().getName());
                 yield custom(g);
             }
         };
