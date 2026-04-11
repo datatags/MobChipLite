@@ -182,42 +182,56 @@ public interface ChipUtil {
      */
     static String bukkitToCraftBukkit() {
         String bukkit = Bukkit.getServer().getBukkitVersion().split("-")[0];
-        switch (bukkit) {
-            case "1.20.1":
-                return "1_20_R1";
-            case "1.20.2":
-                return "1_20_R2";
-            case "1.20.3":
-            case "1.20.4":
-                return "1_20_R3";
-            case "1.20.5":
-            case "1.20.6":
-                return "1_20_R4";
-            case "1.21":
-            case "1.21.1":
-                return "1_21_R1";
-            case "1.21.2":
-            case "1.21.3":
-                return "1_21_R2";
-            case "1.21.4":
-                return "1_21_R3";
-            case "1.21.5":
-                return "1_21_R4";
-            case "1.21.6":
-            case "1.21.7":
-            case "1.21.8":
-                return "1_21_R5";
-            case "1.21.9":
-            case "1.21.10":
-                return "1_21_R6";
-            case "1.21.11":
-                return "1_21_R7";
-            case "26.1":
-            case "26.2": // optimism
-                return "26_1";
-            default:
-                throw new IllegalStateException("Unsupported version: " + bukkit);
+        if (bukkit.startsWith("1.")) {
+            bukkit = bukkit.substring(2);
         }
+        String[] parts = bukkit.split("\\.");
+        int major = Integer.parseInt(parts[0]);
+        int minor = 0;
+        if (parts.length > 1) {
+            minor = Integer.parseInt(parts[1]);
+        }
+        if (major == 20) {
+            switch (minor) {
+                case 0:
+                case 1:
+                    return "1_20_R1";
+                case 2:
+                    return "1_20_R2";
+                case 3:
+                case 4:
+                    return "1_20_R3";
+                case 5:
+                case 6:
+                    return "1_20_R4";
+            }
+        } else if (major == 21) {
+            switch (minor) {
+                case 0:
+                case 1:
+                    return "1_21_R1";
+                case 2:
+                case 3:
+                    return "1_21_R2";
+                case 4:
+                    return "1_21_R3";
+                case 5:
+                    return "1_21_R4";
+                case 6:
+                case 7:
+                case 8:
+                    return "1_21_R5";
+                case 9:
+                case 10:
+                    return "1_21_R6";
+                case 11:
+                    return "1_21_R7";
+            }
+        } else if (major >= 26) {
+            // optimism
+            return "26_1";
+        }
+        throw new IllegalStateException("Unsupported version: " + bukkit);
     }
 
     static String getServerVersion() {
