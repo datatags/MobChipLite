@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.ai.enderdragon;
 
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import org.bukkit.entity.EnderDragon;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
  * Utility Class for Ender Dragon Phases
  */
 public final class DragonPhases {
+    private static final ChipUtil w = ChipUtilFactory.getChipUtil();
 
     private final EnderDragon d;
 
@@ -18,7 +20,6 @@ public final class DragonPhases {
      * @throws IllegalArgumentException if dragon is null
      */
     public DragonPhases(@NotNull EnderDragon d) {
-        if (d == null) throw new IllegalArgumentException("Dragon cannot be null");
         this.d = d;
     }
 
@@ -88,8 +89,6 @@ public final class DragonPhases {
      */
     public final DragonPhase STRAFING = fromBukkit(EnderDragon.Phase.STRAFING);
 
-    private static final ChipUtil w = ChipUtil.getWrapper();
-
     /**
      * Converts a Bukkit Phase to a MobChip Phase.
      * @param dragon The Dragon this phase is using
@@ -98,7 +97,6 @@ public final class DragonPhases {
      * @throws IllegalArgumentException if dragon is null
      */
     public static DragonPhase fromBukkit(@NotNull EnderDragon dragon, @Nullable EnderDragon.Phase phase) throws IllegalArgumentException {
-        if (dragon == null) throw new IllegalArgumentException("dragon cannot be null");
         if (phase == null) return null;
         return w.fromBukkit(dragon, phase);
     }

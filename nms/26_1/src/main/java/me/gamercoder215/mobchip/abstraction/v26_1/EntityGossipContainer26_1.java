@@ -11,7 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
-final class EntityGossipContainer26_1 implements EntityGossipContainer {
+public class EntityGossipContainer26_1 implements EntityGossipContainer {
+    protected final ChipUtil26_1 wrapper = ChipUtil26_1.instance();
     private final GossipContainer handle;
     private final Villager entity;
 
@@ -32,21 +33,21 @@ final class EntityGossipContainer26_1 implements EntityGossipContainer {
 
     @Override
     public int getReputation(@NotNull Entity en, @Nullable GossipType... types) throws IllegalArgumentException {
-        return handle.getReputation(en.getUniqueId(), g -> Arrays.asList(types).contains(ChipUtil26_1.fromNMS(g)));
+        return handle.getReputation(en.getUniqueId(), g -> Arrays.asList(types).contains(wrapper.fromNMS(g)));
     }
 
     @Override
     public void put(@NotNull Entity en, @NotNull GossipType type, int maxCap) throws IllegalArgumentException {
-        handle.add(en.getUniqueId(), ChipUtil26_1.toNMS(type), maxCap, Villager.ReputationEvent.UNSPECIFIED);
+        handle.add(en.getUniqueId(), wrapper.toNMS(type), maxCap, Villager.ReputationEvent.UNSPECIFIED);
     }
 
     @Override
     public void remove(@NotNull Entity en, @NotNull GossipType type) throws IllegalArgumentException {
-        handle.remove(en.getUniqueId(), ChipUtil26_1.toNMS(type), Villager.ReputationEvent.UNSPECIFIED);
+        handle.remove(en.getUniqueId(), wrapper.toNMS(type), Villager.ReputationEvent.UNSPECIFIED);
     }
 
     @Override
     public void removeAll(@NotNull GossipType type) throws IllegalArgumentException {
-        handle.remove(ChipUtil26_1.toNMS(type), Villager.ReputationEvent.UNSPECIFIED);
+        handle.remove(wrapper.toNMS(type), Villager.ReputationEvent.UNSPECIFIED);
     }
 }

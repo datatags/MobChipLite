@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableBiMap;
 import com.mojang.serialization.Lifecycle;
 import me.gamercoder215.mobchip.EntityBody;
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import me.gamercoder215.mobchip.ai.attribute.Attribute;
 import me.gamercoder215.mobchip.ai.attribute.AttributeInstance;
 import me.gamercoder215.mobchip.ai.behavior.BehaviorResult;
@@ -20,6 +21,7 @@ import me.gamercoder215.mobchip.ai.memories.Memory;
 import me.gamercoder215.mobchip.ai.memories.MemoryStatus;
 import me.gamercoder215.mobchip.ai.memories.Unit;
 import me.gamercoder215.mobchip.ai.navigation.EntityNavigation;
+import me.gamercoder215.mobchip.ai.navigation.NavigationPath;
 import me.gamercoder215.mobchip.ai.schedule.Activity;
 import me.gamercoder215.mobchip.ai.schedule.EntityScheduleManager;
 import me.gamercoder215.mobchip.ai.schedule.Schedule;
@@ -110,6 +112,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.CraftServer;
@@ -138,7 +141,269 @@ import java.util.stream.Collectors;
 import static org.bukkit.event.entity.EntityDamageEvent.DamageCause.*;
 
 @SuppressWarnings({"rawtypes", "unchecked", "deprecation", "UnstableApiUsage"})
-final class ChipUtil26_1 implements ChipUtil {
+public class ChipUtil26_1 implements ChipUtil {
+
+    public final BiMap<Class<? extends Entity>, Class<? extends net.minecraft.world.entity.Entity>> BUKKIT_NMS_MAP;
+
+    public static ChipUtil26_1 instance() {
+        return (ChipUtil26_1) ChipUtilFactory.getChipUtil();
+    }
+
+    protected <T> T createHelper(String name, Object... args) {
+        // Idea here is that all versions after 26_1 will inherit from the 26_1 classes, so we'll look up the
+        // inheritance chain until we find a class with a matching name.
+        Class<?> utilClass = getClass();
+        try {
+            while (utilClass != Object.class) {
+                try {
+                    String version = utilClass.getSimpleName().substring("ChipUtil".length());
+                    Class<?> clazz = Class.forName(getClass().getPackageName() + "." + name + version);
+                    Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+                    for (Constructor<?> constructor : constructors) {
+                        if (constructor.getParameterTypes().length == args.length) {
+                            return (T) constructor.newInstance(args);
+                        }
+                    }
+                } catch (ClassNotFoundException e) {
+                    utilClass = utilClass.getSuperclass();
+                }
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+        throw new RuntimeException("Couldn't find any matching class for " + name);
+    }
+
+    protected Attribute attribute(RangedAttribute a) {
+        return createHelper("Attribute", a);
+    }
+
+    protected Attribute26_1 attribute(NamespacedKey key, double defaultV, double min, double max, boolean clientSide) {
+        return createHelper("Attribute", key, defaultV, min, max, clientSide);
+    }
+
+    protected AttributeInstance26_1 attributeInstance(Attribute a, net.minecraft.world.entity.ai.attributes.AttributeInstance handle) {
+        return createHelper("AttributeInstance", a, handle);
+    }
+
+    protected <T extends net.minecraft.world.entity.LivingEntity> BehaviorResult26_1 behaviorResult(BehaviorControl<T> b, T mob) {
+        return createHelper("BehaviorResult", b, mob);
+    }
+
+    protected CustomGoal26_1 customGoal(CustomPathfinder p) {
+        return createHelper("CustomGoal", p);
+    }
+
+    protected DragonPhase dragonPhase(EnderDragon dragon, DragonPhaseInstance handle) {
+        return createHelper("DragonPhase", dragon, handle);
+    }
+
+    protected EntityBody entityBody(Mob m) {
+        return createHelper("EntityBody", m);
+    }
+
+    protected EntityCombatTracker entityCombatTracker(Mob m) {
+        return createHelper("EntityCombatTracker", m);
+    }
+
+    protected EntityController entityController(Mob m) {
+        return createHelper("EntityController", m);
+    }
+
+    protected EntityGossipContainer entityGossipContainer(Mob m) {
+        return createHelper("EntityGossipContainer", m);
+    }
+
+    protected EntityNavigation entityNavigation(Mob m) {
+        return createHelper("EntityNavigation", m);
+    }
+
+    protected EntityScheduleManager entityScheduleManager(Mob m) {
+        return createHelper("EntityScheduleManager", m);
+    }
+
+    protected EntitySenses entitySenses(Mob m) {
+        return createHelper("EntitySenses", m);
+    }
+
+    protected NavigationPath navigationPath(@NotNull Path nms, @NotNull Mob m, double speedMod) {
+        return createHelper("NavigationPath", nms, m, speedMod);
+    }
+
+    protected Sensor26_1 sensor(me.gamercoder215.mobchip.ai.sensing.Sensor<?> s) {
+        return createHelper("Sensor", s);
+    }
+
+    protected Sensor<LivingEntity> sensorDefault(net.minecraft.world.entity.ai.sensing.Sensor<?> handle) {
+        return createHelper("SensorDefault", handle);
+    }
+
+    protected ChipUtil26_1(ImmutableBiMap.Builder<Class<? extends Entity>, Class<? extends net.minecraft.world.entity.Entity>> entityMap) {
+        BUKKIT_NMS_MAP = entityMap
+                .put(Entity.class, net.minecraft.world.entity.Entity.class)
+                .put(LivingEntity.class, net.minecraft.world.entity.LivingEntity.class)
+                .put(Mob.class, net.minecraft.world.entity.Mob.class)
+                .put(Tameable.class, TamableAnimal.class)
+
+                // Below are not in the root package (LET'S KEEP THEM ALPHABETICAL!!!)
+                .put(AbstractHorse.class, net.minecraft.world.entity.animal.equine.AbstractHorse.class)
+                .put(PiglinAbstract.class, net.minecraft.world.entity.monster.piglin.AbstractPiglin.class)
+                .put(AbstractSkeleton.class, net.minecraft.world.entity.monster.skeleton.AbstractSkeleton.class)
+                .put(AbstractVillager.class, net.minecraft.world.entity.npc.villager.AbstractVillager.class)
+                .put(Animals.class, Animal.class)
+                .put(Allay.class, net.minecraft.world.entity.animal.allay.Allay.class)
+                .put(Ambient.class, AmbientCreature.class)
+                .put(AreaEffectCloud.class, net.minecraft.world.entity.AreaEffectCloud.class)
+                .put(Armadillo.class, net.minecraft.world.entity.animal.armadillo.Armadillo.class)
+                .put(ArmorStand.class, net.minecraft.world.entity.decoration.ArmorStand.class)
+                .put(Arrow.class, net.minecraft.world.entity.projectile.arrow.Arrow.class)
+                .put(Axolotl.class, net.minecraft.world.entity.animal.axolotl.Axolotl.class)
+                .put(BambooChestRaft.class, ChestRaft.class)
+                .put(BambooRaft.class, Raft.class)
+                .put(Bat.class, net.minecraft.world.entity.ambient.Bat.class)
+                .put(Bee.class, net.minecraft.world.entity.animal.bee.Bee.class)
+                .put(Blaze.class, net.minecraft.world.entity.monster.Blaze.class)
+                .put(BlockDisplay.class, net.minecraft.world.entity.Display.BlockDisplay.class)
+                .put(Boat.class, net.minecraft.world.entity.vehicle.boat.Boat.class)
+                .put(Bogged.class, net.minecraft.world.entity.monster.skeleton.Bogged.class)
+                .put(Breeze.class, net.minecraft.world.entity.monster.breeze.Breeze.class)
+                .put(BreezeWindCharge.class, net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.BreezeWindCharge.class)
+                .put(Cat.class, net.minecraft.world.entity.animal.feline.Cat.class)
+                .put(Camel.class, net.minecraft.world.entity.animal.camel.Camel.class)
+                .put(CamelHusk.class, net.minecraft.world.entity.animal.camel.CamelHusk.class)
+                .put(CaveSpider.class, net.minecraft.world.entity.monster.spider.CaveSpider.class)
+                .put(ChestBoat.class, net.minecraft.world.entity.vehicle.boat.ChestBoat.class)
+                .put(Chicken.class, net.minecraft.world.entity.animal.chicken.Chicken.class)
+                .put(Cod.class, net.minecraft.world.entity.animal.fish.Cod.class)
+                .put(CommandMinecart.class, MinecartCommandBlock.class)
+                .put(CopperGolem.class, net.minecraft.world.entity.animal.golem.CopperGolem.class)
+                .put(Cow.class, net.minecraft.world.entity.animal.cow.Cow.class)
+                .put(Creaking.class, net.minecraft.world.entity.monster.creaking.Creaking.class)
+                .put(Creeper.class, net.minecraft.world.entity.monster.Creeper.class)
+                .put(Dolphin.class, net.minecraft.world.entity.animal.dolphin.Dolphin.class)
+                .put(Donkey.class, net.minecraft.world.entity.animal.equine.Donkey.class)
+                .put(DragonFireball.class, net.minecraft.world.entity.projectile.hurtingprojectile.DragonFireball.class)
+                .put(Drowned.class, net.minecraft.world.entity.monster.zombie.Drowned.class)
+                .put(Egg.class, ThrownEgg.class)
+                .put(ElderGuardian.class, net.minecraft.world.entity.monster.ElderGuardian.class)
+                .put(EnderCrystal.class, EndCrystal.class)
+                .put(EnderDragon.class, net.minecraft.world.entity.boss.enderdragon.EnderDragon.class)
+                .put(EnderPearl.class, ThrownEnderpearl.class)
+                .put(EnderSignal.class, EyeOfEnder.class)
+                .put(Enderman.class, EnderMan.class)
+                .put(Endermite.class, net.minecraft.world.entity.monster.Endermite.class)
+                .put(Evoker.class, net.minecraft.world.entity.monster.illager.Evoker.class)
+                .put(EvokerFangs.class, net.minecraft.world.entity.projectile.EvokerFangs.class)
+                .put(ExperienceOrb.class, net.minecraft.world.entity.ExperienceOrb.class)
+                .put(ExplosiveMinecart.class, MinecartTNT.class)
+                .put(FallingBlock.class, FallingBlockEntity.class)
+                .put(Firework.class, FireworkRocketEntity.class)
+                .put(Fish.class, AbstractFish.class)
+                .put(FishHook.class, FishingHook.class)
+                .put(Fox.class, net.minecraft.world.entity.animal.fox.Fox.class)
+                .put(Frog.class, net.minecraft.world.entity.animal.frog.Frog.class)
+                .put(Ghast.class, net.minecraft.world.entity.monster.Ghast.class)
+                .put(Giant.class, net.minecraft.world.entity.monster.Giant.class)
+                .put(GlowItemFrame.class, net.minecraft.world.entity.decoration.GlowItemFrame.class)
+                .put(GlowSquid.class, net.minecraft.world.entity.animal.squid.GlowSquid.class)
+                .put(Goat.class, net.minecraft.world.entity.animal.goat.Goat.class)
+                .put(Golem.class, AbstractGolem.class)
+                .put(Guardian.class, net.minecraft.world.entity.monster.Guardian.class)
+                .put(HappyGhast.class, net.minecraft.world.entity.animal.happyghast.HappyGhast.class)
+                .put(Hoglin.class, net.minecraft.world.entity.monster.hoglin.Hoglin.class)
+                .put(HopperMinecart.class, MinecartHopper.class)
+                .put(Horse.class, net.minecraft.world.entity.animal.equine.Horse.class)
+                .put(Husk.class, net.minecraft.world.entity.monster.zombie.Husk.class)
+                .put(Illager.class, AbstractIllager.class)
+                .put(Illusioner.class, net.minecraft.world.entity.monster.illager.Illusioner.class)
+                .put(IronGolem.class, net.minecraft.world.entity.animal.golem.IronGolem.class)
+                .put(Interaction.class, net.minecraft.world.entity.Interaction.class)
+                .put(Item.class, ItemEntity.class)
+                .put(ItemDisplay.class, net.minecraft.world.entity.Display.ItemDisplay.class)
+                .put(ItemFrame.class, net.minecraft.world.entity.decoration.ItemFrame.class)
+                .put(LargeFireball.class, net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball.class)
+                .put(LeashHitch.class, LeashFenceKnotEntity.class)
+                .put(LightningStrike.class, LightningBolt.class)
+                .put(LingeringPotion.class, ThrownLingeringPotion.class)
+                .put(Llama.class, net.minecraft.world.entity.animal.equine.Llama.class)
+                .put(LlamaSpit.class, net.minecraft.world.entity.projectile.LlamaSpit.class)
+                .put(MagmaCube.class, net.minecraft.world.entity.monster.MagmaCube.class)
+                .put(Mannequin.class, net.minecraft.world.entity.decoration.Mannequin.class)
+                .put(Marker.class, net.minecraft.world.entity.Marker.class)
+                .put(Mule.class, net.minecraft.world.entity.animal.equine.Mule.class)
+                .put(MushroomCow.class, net.minecraft.world.entity.animal.cow.MushroomCow.class)
+                .put(Nautilus.class, net.minecraft.world.entity.animal.nautilus.Nautilus.class)
+                .put(Ocelot.class, net.minecraft.world.entity.animal.feline.Ocelot.class)
+                .put(OminousItemSpawner.class, net.minecraft.world.entity.OminousItemSpawner.class)
+                .put(Painting.class, net.minecraft.world.entity.decoration.painting.Painting.class)
+                .put(Panda.class, net.minecraft.world.entity.animal.panda.Panda.class)
+                .put(Parched.class, net.minecraft.world.entity.monster.skeleton.Parched.class)
+                .put(Parrot.class, net.minecraft.world.entity.animal.parrot.Parrot.class)
+                .put(Phantom.class, net.minecraft.world.entity.monster.Phantom.class)
+                .put(Pig.class, net.minecraft.world.entity.animal.pig.Pig.class)
+                .put(Piglin.class, net.minecraft.world.entity.monster.piglin.Piglin.class)
+                .put(PiglinBrute.class, net.minecraft.world.entity.monster.piglin.PiglinBrute.class)
+                .put(PigZombie.class, ZombifiedPiglin.class)
+                .put(Pillager.class, net.minecraft.world.entity.monster.illager.Pillager.class)
+                .put(Player.class, net.minecraft.world.entity.player.Player.class)
+                .put(PolarBear.class, net.minecraft.world.entity.animal.polarbear.PolarBear.class)
+                .put(PoweredMinecart.class, MinecartFurnace.class)
+                .put(PufferFish.class, Pufferfish.class)
+                .put(Rabbit.class, net.minecraft.world.entity.animal.rabbit.Rabbit.class)
+                .put(Raider.class, net.minecraft.world.entity.raid.Raider.class)
+                .put(Ravager.class, net.minecraft.world.entity.monster.Ravager.class)
+                .put(RideableMinecart.class, Minecart.class)
+                .put(Salmon.class, net.minecraft.world.entity.animal.fish.Salmon.class)
+                .put(Sheep.class, net.minecraft.world.entity.animal.sheep.Sheep.class)
+                .put(Shulker.class, net.minecraft.world.entity.monster.Shulker.class)
+                .put(ShulkerBullet.class, net.minecraft.world.entity.projectile.ShulkerBullet.class)
+                .put(Silverfish.class, net.minecraft.world.entity.monster.Silverfish.class)
+                .put(Skeleton.class, net.minecraft.world.entity.monster.skeleton.Skeleton.class)
+                .put(SkeletonHorse.class, net.minecraft.world.entity.animal.equine.SkeletonHorse.class)
+                .put(Slime.class, net.minecraft.world.entity.monster.Slime.class)
+                .put(SmallFireball.class, net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball.class)
+                .put(Sniffer.class, net.minecraft.world.entity.animal.sniffer.Sniffer.class)
+                .put(Snowball.class, net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball.class)
+                .put(Snowman.class, SnowGolem.class)
+                .put(SpawnerMinecart.class, MinecartSpawner.class)
+                .put(SpectralArrow.class, net.minecraft.world.entity.projectile.arrow.SpectralArrow.class)
+                .put(Spider.class, net.minecraft.world.entity.monster.spider.Spider.class)
+                .put(SplashPotion.class, ThrownSplashPotion.class)
+                .put(Squid.class, net.minecraft.world.entity.animal.squid.Squid.class)
+                .put(Stray.class, net.minecraft.world.entity.monster.skeleton.Stray.class)
+                .put(StorageMinecart.class, MinecartChest.class)
+                .put(Strider.class, net.minecraft.world.entity.monster.Strider.class)
+                .put(Tadpole.class, net.minecraft.world.entity.animal.frog.Tadpole.class)
+                .put(TextDisplay.class, net.minecraft.world.entity.Display.TextDisplay.class)
+                .put(ThrownExpBottle.class, ThrownExperienceBottle.class)
+                .put(TNTPrimed.class, PrimedTnt.class)
+                .put(TraderLlama.class, net.minecraft.world.entity.animal.equine.TraderLlama.class)
+                .put(Trident.class, ThrownTrident.class)
+                .put(TropicalFish.class, net.minecraft.world.entity.animal.fish.TropicalFish.class)
+                .put(Turtle.class, net.minecraft.world.entity.animal.turtle.Turtle.class)
+                .put(Vex.class, net.minecraft.world.entity.monster.Vex.class)
+                .put(Villager.class, net.minecraft.world.entity.npc.villager.Villager.class)
+                .put(Vindicator.class, net.minecraft.world.entity.monster.illager.Vindicator.class)
+                .put(WanderingTrader.class, net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader.class)
+                .put(org.bukkit.entity.Warden.class, Warden.class)
+                .put(WaterMob.class, WaterAnimal.class)
+                .put(WindCharge.class, net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.WindCharge.class)
+                .put(Witch.class, net.minecraft.world.entity.monster.Witch.class)
+                .put(Wither.class, WitherBoss.class)
+                .put(WitherSkeleton.class, net.minecraft.world.entity.monster.skeleton.WitherSkeleton.class)
+                .put(WitherSkull.class, net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull.class)
+                .put(Wolf.class, net.minecraft.world.entity.animal.wolf.Wolf.class)
+                .put(Zoglin.class, net.minecraft.world.entity.monster.Zoglin.class)
+                .put(Zombie.class, net.minecraft.world.entity.monster.zombie.Zombie.class)
+                .put(ZombieHorse.class, net.minecraft.world.entity.animal.equine.ZombieHorse.class)
+                .put(ZombieNautilus.class, net.minecraft.world.entity.animal.nautilus.ZombieNautilus.class)
+                .put(ZombieVillager.class, net.minecraft.world.entity.monster.zombie.ZombieVillager.class)
+                .build();
+    }
+
+    public ChipUtil26_1() {
+        this(ImmutableBiMap.builder());
+    }
 
     @Override
     public void addCustomPathfinder(CustomPathfinder p, int priority, boolean target) {
@@ -146,7 +411,7 @@ final class ChipUtil26_1 implements ChipUtil {
         net.minecraft.world.entity.Mob mob = toNMS(m);
         GoalSelector s = target ? mob.targetSelector : mob.goalSelector;
         Goal g = custom(p);
-        Set<Goal.Flag> nms = ChipUtil26_1.getFlags(g);
+        Set<Goal.Flag> nms = this.getFlags(g);
 
         Pathfinder.PathfinderFlag[] flags = p.getFlags() == null ? new Pathfinder.PathfinderFlag[0] : p.getFlags();
         for (Pathfinder.PathfinderFlag f : flags) {
@@ -188,168 +453,7 @@ final class ChipUtil26_1 implements ChipUtil {
         if (value) s.enableControlFlag(toNMS(flag)); else s.disableControlFlag(toNMS(flag));
     }
 
-    public static final BiMap<Class<? extends Entity>, Class<? extends net.minecraft.world.entity.Entity>> BUKKIT_NMS_MAP = ImmutableBiMap.<Class<? extends Entity>, Class<? extends net.minecraft.world.entity.Entity>>builder()
-            .put(Entity.class, net.minecraft.world.entity.Entity.class)
-            .put(LivingEntity.class, net.minecraft.world.entity.LivingEntity.class)
-            .put(Mob.class, net.minecraft.world.entity.Mob.class)
-            .put(Tameable.class, TamableAnimal.class)
-
-            // Below are not in the root package (LET'S KEEP THEM ALPHABETICAL!!!)
-            .put(AbstractHorse.class, net.minecraft.world.entity.animal.equine.AbstractHorse.class)
-            .put(PiglinAbstract.class, net.minecraft.world.entity.monster.piglin.AbstractPiglin.class)
-            .put(AbstractSkeleton.class, net.minecraft.world.entity.monster.skeleton.AbstractSkeleton.class)
-            .put(AbstractVillager.class, net.minecraft.world.entity.npc.villager.AbstractVillager.class)
-            .put(Animals.class, Animal.class)
-            .put(Allay.class, net.minecraft.world.entity.animal.allay.Allay.class)
-            .put(Ambient.class, AmbientCreature.class)
-            .put(AreaEffectCloud.class, net.minecraft.world.entity.AreaEffectCloud.class)
-            .put(Armadillo.class, net.minecraft.world.entity.animal.armadillo.Armadillo.class)
-            .put(ArmorStand.class, net.minecraft.world.entity.decoration.ArmorStand.class)
-            .put(Arrow.class, net.minecraft.world.entity.projectile.arrow.Arrow.class)
-            .put(Axolotl.class, net.minecraft.world.entity.animal.axolotl.Axolotl.class)
-            .put(BambooChestRaft.class, ChestRaft.class)
-            .put(BambooRaft.class, Raft.class)
-            .put(Bat.class, net.minecraft.world.entity.ambient.Bat.class)
-            .put(Bee.class, net.minecraft.world.entity.animal.bee.Bee.class)
-            .put(Blaze.class, net.minecraft.world.entity.monster.Blaze.class)
-            .put(BlockDisplay.class, net.minecraft.world.entity.Display.BlockDisplay.class)
-            .put(Boat.class, net.minecraft.world.entity.vehicle.boat.Boat.class)
-            .put(Bogged.class, net.minecraft.world.entity.monster.skeleton.Bogged.class)
-            .put(Breeze.class, net.minecraft.world.entity.monster.breeze.Breeze.class)
-            .put(BreezeWindCharge.class, net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.BreezeWindCharge.class)
-            .put(Cat.class, net.minecraft.world.entity.animal.feline.Cat.class)
-            .put(Camel.class, net.minecraft.world.entity.animal.camel.Camel.class)
-            .put(CamelHusk.class, net.minecraft.world.entity.animal.camel.CamelHusk.class)
-            .put(CaveSpider.class, net.minecraft.world.entity.monster.spider.CaveSpider.class)
-            .put(ChestBoat.class, net.minecraft.world.entity.vehicle.boat.ChestBoat.class)
-            .put(Chicken.class, net.minecraft.world.entity.animal.chicken.Chicken.class)
-            .put(Cod.class, net.minecraft.world.entity.animal.fish.Cod.class)
-            .put(CommandMinecart.class, MinecartCommandBlock.class)
-            .put(CopperGolem.class, net.minecraft.world.entity.animal.golem.CopperGolem.class)
-            .put(Cow.class, net.minecraft.world.entity.animal.cow.Cow.class)
-            .put(Creaking.class, net.minecraft.world.entity.monster.creaking.Creaking.class)
-            .put(Creeper.class, net.minecraft.world.entity.monster.Creeper.class)
-            .put(Dolphin.class, net.minecraft.world.entity.animal.dolphin.Dolphin.class)
-            .put(Donkey.class, net.minecraft.world.entity.animal.equine.Donkey.class)
-            .put(DragonFireball.class, net.minecraft.world.entity.projectile.hurtingprojectile.DragonFireball.class)
-            .put(Drowned.class, net.minecraft.world.entity.monster.zombie.Drowned.class)
-            .put(Egg.class, ThrownEgg.class)
-            .put(ElderGuardian.class, net.minecraft.world.entity.monster.ElderGuardian.class)
-            .put(EnderCrystal.class, EndCrystal.class)
-            .put(EnderDragon.class, net.minecraft.world.entity.boss.enderdragon.EnderDragon.class)
-            .put(EnderPearl.class, ThrownEnderpearl.class)
-            .put(EnderSignal.class, EyeOfEnder.class)
-            .put(Enderman.class, EnderMan.class)
-            .put(Endermite.class, net.minecraft.world.entity.monster.Endermite.class)
-            .put(Evoker.class, net.minecraft.world.entity.monster.illager.Evoker.class)
-            .put(EvokerFangs.class, net.minecraft.world.entity.projectile.EvokerFangs.class)
-            .put(ExperienceOrb.class, net.minecraft.world.entity.ExperienceOrb.class)
-            .put(ExplosiveMinecart.class, MinecartTNT.class)
-            .put(FallingBlock.class, FallingBlockEntity.class)
-            .put(Firework.class, FireworkRocketEntity.class)
-            .put(Fish.class, AbstractFish.class)
-            .put(FishHook.class, FishingHook.class)
-            .put(Fox.class, net.minecraft.world.entity.animal.fox.Fox.class)
-            .put(Frog.class, net.minecraft.world.entity.animal.frog.Frog.class)
-            .put(Ghast.class, net.minecraft.world.entity.monster.Ghast.class)
-            .put(Giant.class, net.minecraft.world.entity.monster.Giant.class)
-            .put(GlowItemFrame.class, net.minecraft.world.entity.decoration.GlowItemFrame.class)
-            .put(GlowSquid.class, net.minecraft.world.entity.animal.squid.GlowSquid.class)
-            .put(Goat.class, net.minecraft.world.entity.animal.goat.Goat.class)
-            .put(Golem.class, AbstractGolem.class)
-            .put(Guardian.class, net.minecraft.world.entity.monster.Guardian.class)
-            .put(HappyGhast.class, net.minecraft.world.entity.animal.happyghast.HappyGhast.class)
-            .put(Hoglin.class, net.minecraft.world.entity.monster.hoglin.Hoglin.class)
-            .put(HopperMinecart.class, MinecartHopper.class)
-            .put(Horse.class, net.minecraft.world.entity.animal.equine.Horse.class)
-            .put(Husk.class, net.minecraft.world.entity.monster.zombie.Husk.class)
-            .put(Illager.class, AbstractIllager.class)
-            .put(Illusioner.class, net.minecraft.world.entity.monster.illager.Illusioner.class)
-            .put(IronGolem.class, net.minecraft.world.entity.animal.golem.IronGolem.class)
-            .put(Interaction.class, net.minecraft.world.entity.Interaction.class)
-            .put(Item.class, ItemEntity.class)
-            .put(ItemDisplay.class, net.minecraft.world.entity.Display.ItemDisplay.class)
-            .put(ItemFrame.class, net.minecraft.world.entity.decoration.ItemFrame.class)
-            .put(LargeFireball.class, net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball.class)
-            .put(LeashHitch.class, LeashFenceKnotEntity.class)
-            .put(LightningStrike.class, LightningBolt.class)
-            .put(LingeringPotion.class, ThrownLingeringPotion.class)
-            .put(Llama.class, net.minecraft.world.entity.animal.equine.Llama.class)
-            .put(LlamaSpit.class, net.minecraft.world.entity.projectile.LlamaSpit.class)
-            .put(MagmaCube.class, net.minecraft.world.entity.monster.MagmaCube.class)
-            .put(Mannequin.class, net.minecraft.world.entity.decoration.Mannequin.class)
-            .put(Marker.class, net.minecraft.world.entity.Marker.class)
-            .put(Mule.class, net.minecraft.world.entity.animal.equine.Mule.class)
-            .put(MushroomCow.class, net.minecraft.world.entity.animal.cow.MushroomCow.class)
-            .put(Nautilus.class, net.minecraft.world.entity.animal.nautilus.Nautilus.class)
-            .put(Ocelot.class, net.minecraft.world.entity.animal.feline.Ocelot.class)
-            .put(OminousItemSpawner.class, net.minecraft.world.entity.OminousItemSpawner.class)
-            .put(Painting.class, net.minecraft.world.entity.decoration.painting.Painting.class)
-            .put(Panda.class, net.minecraft.world.entity.animal.panda.Panda.class)
-            .put(Parched.class, net.minecraft.world.entity.monster.skeleton.Parched.class)
-            .put(Parrot.class, net.minecraft.world.entity.animal.parrot.Parrot.class)
-            .put(Phantom.class, net.minecraft.world.entity.monster.Phantom.class)
-            .put(Pig.class, net.minecraft.world.entity.animal.pig.Pig.class)
-            .put(Piglin.class, net.minecraft.world.entity.monster.piglin.Piglin.class)
-            .put(PiglinBrute.class, net.minecraft.world.entity.monster.piglin.PiglinBrute.class)
-            .put(PigZombie.class, ZombifiedPiglin.class)
-            .put(Pillager.class, net.minecraft.world.entity.monster.illager.Pillager.class)
-            .put(Player.class, net.minecraft.world.entity.player.Player.class)
-            .put(PolarBear.class, net.minecraft.world.entity.animal.polarbear.PolarBear.class)
-            .put(PoweredMinecart.class, MinecartFurnace.class)
-            .put(PufferFish.class, Pufferfish.class)
-            .put(Rabbit.class, net.minecraft.world.entity.animal.rabbit.Rabbit.class)
-            .put(Raider.class, net.minecraft.world.entity.raid.Raider.class)
-            .put(Ravager.class, net.minecraft.world.entity.monster.Ravager.class)
-            .put(RideableMinecart.class, Minecart.class)
-            .put(Salmon.class, net.minecraft.world.entity.animal.fish.Salmon.class)
-            .put(Sheep.class, net.minecraft.world.entity.animal.sheep.Sheep.class)
-            .put(Shulker.class, net.minecraft.world.entity.monster.Shulker.class)
-            .put(ShulkerBullet.class, net.minecraft.world.entity.projectile.ShulkerBullet.class)
-            .put(Silverfish.class, net.minecraft.world.entity.monster.Silverfish.class)
-            .put(Skeleton.class, net.minecraft.world.entity.monster.skeleton.Skeleton.class)
-            .put(SkeletonHorse.class, net.minecraft.world.entity.animal.equine.SkeletonHorse.class)
-            .put(Slime.class, net.minecraft.world.entity.monster.Slime.class)
-            .put(SmallFireball.class, net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball.class)
-            .put(Sniffer.class, net.minecraft.world.entity.animal.sniffer.Sniffer.class)
-            .put(Snowball.class, net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball.class)
-            .put(Snowman.class, SnowGolem.class)
-            .put(SpawnerMinecart.class, MinecartSpawner.class)
-            .put(SpectralArrow.class, net.minecraft.world.entity.projectile.arrow.SpectralArrow.class)
-            .put(Spider.class, net.minecraft.world.entity.monster.spider.Spider.class)
-            .put(SplashPotion.class, ThrownSplashPotion.class)
-            .put(Squid.class, net.minecraft.world.entity.animal.squid.Squid.class)
-            .put(Stray.class, net.minecraft.world.entity.monster.skeleton.Stray.class)
-            .put(StorageMinecart.class, MinecartChest.class)
-            .put(Strider.class, net.minecraft.world.entity.monster.Strider.class)
-            .put(Tadpole.class, net.minecraft.world.entity.animal.frog.Tadpole.class)
-            .put(TextDisplay.class, net.minecraft.world.entity.Display.TextDisplay.class)
-            .put(ThrownExpBottle.class, ThrownExperienceBottle.class)
-            .put(TNTPrimed.class, PrimedTnt.class)
-            .put(TraderLlama.class, net.minecraft.world.entity.animal.equine.TraderLlama.class)
-            .put(Trident.class, ThrownTrident.class)
-            .put(TropicalFish.class, net.minecraft.world.entity.animal.fish.TropicalFish.class)
-            .put(Turtle.class, net.minecraft.world.entity.animal.turtle.Turtle.class)
-            .put(Vex.class, net.minecraft.world.entity.monster.Vex.class)
-            .put(Villager.class, net.minecraft.world.entity.npc.villager.Villager.class)
-            .put(Vindicator.class, net.minecraft.world.entity.monster.illager.Vindicator.class)
-            .put(WanderingTrader.class, net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader.class)
-            .put(org.bukkit.entity.Warden.class, Warden.class)
-            .put(WaterMob.class, WaterAnimal.class)
-            .put(WindCharge.class, net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.WindCharge.class)
-            .put(Witch.class, net.minecraft.world.entity.monster.Witch.class)
-            .put(Wither.class, WitherBoss.class)
-            .put(WitherSkeleton.class, net.minecraft.world.entity.monster.skeleton.WitherSkeleton.class)
-            .put(WitherSkull.class, net.minecraft.world.entity.projectile.hurtingprojectile.WitherSkull.class)
-            .put(Wolf.class, net.minecraft.world.entity.animal.wolf.Wolf.class)
-            .put(Zoglin.class, net.minecraft.world.entity.monster.Zoglin.class)
-            .put(Zombie.class, net.minecraft.world.entity.monster.zombie.Zombie.class)
-            .put(ZombieHorse.class, net.minecraft.world.entity.animal.equine.ZombieHorse.class)
-            .put(ZombieNautilus.class, net.minecraft.world.entity.animal.nautilus.ZombieNautilus.class)
-            .put(ZombieVillager.class, net.minecraft.world.entity.monster.zombie.ZombieVillager.class)
-            .build();
-
-    public static Class<? extends net.minecraft.world.entity.Entity> toNMS(Class<? extends Entity> clazz) {
+    public Class<? extends net.minecraft.world.entity.Entity> toNMS(Class<? extends Entity> clazz) {
         // Special case to avoid duplicate values in our BiMap
         if (clazz == HumanEntity.class) {
             return net.minecraft.world.entity.player.Player.class;
@@ -367,15 +471,15 @@ final class ChipUtil26_1 implements ChipUtil {
         throw new AssertionError("Could not convert " + clazz.getName() + " to NMS class");
     }
 
-    public static net.minecraft.world.item.ItemStack toNMS(ItemStack i) {
+    public net.minecraft.world.item.ItemStack toNMS(ItemStack i) {
         return CraftItemStack.asNMSCopy(i);
     }
 
-    public static SoundEvent toNMS(Sound s) {
+    public SoundEvent toNMS(Sound s) {
         return CraftSound.bukkitToMinecraft(s);
     }
 
-    public static Goal toNMS(Pathfinder b) {
+    public Goal toNMS(Pathfinder b) {
         Mob mob = b.getEntity();
         net.minecraft.world.entity.Mob m = toNMS(mob);
 
@@ -502,12 +606,12 @@ final class ChipUtil26_1 implements ChipUtil {
         s.removeAllGoals(g -> true);
     }
 
-    public static BehaviorResult.Status fromNMS(Behavior.Status status) {
+    public BehaviorResult.Status fromNMS(Behavior.Status status) {
         if (status == Behavior.Status.STOPPED) return BehaviorResult.Status.STOPPED;
         return BehaviorResult.Status.RUNNING;
     }
 
-    public static LivingEntity fromNMS(net.minecraft.world.entity.LivingEntity l) {
+    public LivingEntity fromNMS(net.minecraft.world.entity.LivingEntity l) {
         return (LivingEntity) l.getBukkitEntity();
     }
 
@@ -546,12 +650,12 @@ final class ChipUtil26_1 implements ChipUtil {
             if (Behavior.class.isAssignableFrom(bClass)) {
                 Constructor<?> c = bClass.getConstructor(ChipUtil.getArgTypes(args));
                 Behavior<? super net.minecraft.world.entity.LivingEntity> b = (Behavior<? super net.minecraft.world.entity.LivingEntity>) c.newInstance(args);
-                return new BehaviorResult26_1(b, nms);
+                return behaviorResult(b, nms);
             } else {
                 Method create = bClass.getDeclaredMethod("create", ChipUtil.getArgTypes(args));
                 create.setAccessible(true);
                 BehaviorControl<? super net.minecraft.world.entity.LivingEntity> control = (BehaviorControl<? super net.minecraft.world.entity.LivingEntity>) create.invoke(null, args);
-                return new BehaviorResult26_1(control, nms);
+                return behaviorResult(control, nms);
             }
 
 
@@ -562,24 +666,24 @@ final class ChipUtil26_1 implements ChipUtil {
     }
 
 
-    public static ServerPlayer toNMS(Player p) { return ((CraftPlayer) p).getHandle(); }
+    public ServerPlayer toNMS(Player p) { return ((CraftPlayer) p).getHandle(); }
 
     @Override
     public Attribute getDefaultAttribute(String s) {
-        return new Attribute26_1((RangedAttribute) BuiltInRegistries.ATTRIBUTE.get(Identifier.parse(s)).get().value());
+        return attribute((RangedAttribute) BuiltInRegistries.ATTRIBUTE.get(Identifier.parse(s)).get().value());
     }
 
-    public static net.minecraft.world.entity.schedule.Activity toNMS(Activity a) {
+    public net.minecraft.world.entity.schedule.Activity toNMS(Activity a) {
         return BuiltInRegistries.ACTIVITY.get(Identifier.parse(a.getKey().getKey())).get().value();
     }
 
-    public static Activity fromNMS(net.minecraft.world.entity.schedule.Activity a) {
+    public Activity fromNMS(net.minecraft.world.entity.schedule.Activity a) {
         Identifier key = BuiltInRegistries.ACTIVITY.getKey(a);
         if (key == null) return null;
         return Activity.getByKey(NamespacedKey.minecraft(key.getPath()));
     }
 
-    public static <T extends net.minecraft.world.entity.LivingEntity> Behavior<T> toNMS(Consumer<Mob> en) {
+    public <T extends net.minecraft.world.entity.LivingEntity> Behavior<T> toNMS(Consumer<Mob> en) {
         return new Behavior<>(Collections.emptyMap()) {
             @Override
             protected void tick(ServerLevel var0, T m, long vaR3) {
@@ -596,10 +700,10 @@ final class ChipUtil26_1 implements ChipUtil {
 
     @Override
     public EntityScheduleManager getManager(Mob m) {
-        return new EntityScheduleManager26_1(m);
+        return entityScheduleManager(m);
     }
 
-    public static AbstractDragonPhaseInstance toNMS(CustomPhase c) {
+    public AbstractDragonPhaseInstance toNMS(CustomPhase c) {
         return new AbstractDragonPhaseInstance(toNMS(c.getDragon())) {
             @Override
             public EnderDragonPhase<? extends DragonPhaseInstance> getPhase() {
@@ -645,7 +749,7 @@ final class ChipUtil26_1 implements ChipUtil {
         try {
             Method m = net.minecraft.world.entity.boss.enderdragon.EnderDragon.class.getDeclaredMethod("knockBack", ServerLevel.class, List.class);
             m.setAccessible(true);
-            m.invoke(nmsMob, (ServerLevel)nmsMob.level(), list.stream().map(ChipUtil26_1::toNMS).collect(Collectors.toList()));
+            m.invoke(nmsMob, (ServerLevel)nmsMob.level(), list.stream().map(this::toNMS).collect(Collectors.toList()));
         } catch (Exception e) {
             StackTraceLogger.printStackTrace(e);
         }
@@ -653,30 +757,30 @@ final class ChipUtil26_1 implements ChipUtil {
 
     @Override
     public EntityController getController(Mob m) {
-        return new EntityController26_1(m);
+        return entityController(m);
     }
 
     @Override
     public EntityNavigation getNavigation(Mob m) {
-        return new EntityNavigation26_1(m);
+        return entityNavigation(m);
     }
 
     @Override
     public EntityBody getBody(Mob m) {
-        return new EntityBody26_1(m);
+        return entityBody(m);
     }
 
-    private static DamageSource fromType(ResourceKey<DamageType> key) {
+    public DamageSource fromType(ResourceKey<DamageType> key) {
         return fromType(key, null);
     }
 
-    private static DamageSource fromType(ResourceKey<DamageType> key, net.minecraft.world.entity.Entity cause) {
+    public DamageSource fromType(ResourceKey<DamageType> key, net.minecraft.world.entity.Entity cause) {
         Frozen access = ((CraftServer) Bukkit.getServer()).getHandle().getServer().registries().compositeAccess();
 
         return new DamageSource(access.lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(key), cause, null);
     }
 
-    public static DamageSource toNMS(EntityDamageEvent.DamageCause c, Entity en) {
+    public DamageSource toNMS(EntityDamageEvent.DamageCause c, Entity en) {
         if (en != null) {
             net.minecraft.world.entity.Entity nmsEntity = toNMS(en);
 
@@ -707,15 +811,15 @@ final class ChipUtil26_1 implements ChipUtil {
         };
     }
 
-    public static ItemEntity toNMS(Item i) {
+    public ItemEntity toNMS(Item i) {
         return ((CraftItem) i).getHandle();
     }
 
-    public static net.minecraft.world.entity.LivingEntity toNMS(LivingEntity en) {
+    public net.minecraft.world.entity.LivingEntity toNMS(LivingEntity en) {
         return ((CraftLivingEntity) en).getHandle();
     }
 
-    public static Object toNMS(String key, Object value) {
+    public Object toNMS(String key, Object value) {
         final Object nmsValue;
 
         switch (value) {
@@ -779,7 +883,7 @@ final class ChipUtil26_1 implements ChipUtil {
         return nmsValue;
     }
 
-    public static Object fromNMS(Mob m, String key, Object nmsValue) {
+    public Object fromNMS(Mob m, String key, Object nmsValue) {
         Object value = nmsValue;
 
         if (nmsValue instanceof GlobalPos l) {
@@ -836,7 +940,7 @@ final class ChipUtil26_1 implements ChipUtil {
         return value;
     }
 
-    public static EntityDamageEvent.DamageCause fromNMS(DamageSource c) {
+    public EntityDamageEvent.DamageCause fromNMS(DamageSource c) {
         return switch (c.getMsgId()) {
             case "inFire" -> FIRE;
             case "lightningBolt" -> LIGHTNING;
@@ -991,24 +1095,24 @@ final class ChipUtil26_1 implements ChipUtil {
         return nms.getSensing().hasLineOfSight(toNMS(en));
     }
 
-    public static net.minecraft.world.entity.Entity toNMS(Entity en) {
+    public net.minecraft.world.entity.Entity toNMS(Entity en) {
         return ((CraftEntity) en).getHandle();
     }
 
-    public static VillagerProfession toNMS(Villager.Profession p) {
+    public VillagerProfession toNMS(Villager.Profession p) {
         return BuiltInRegistries.VILLAGER_PROFESSION.getValue(Identifier.parse(p.getKeyOrThrow().toString()));
     }
 
-    public static <T extends Entity> Class<? extends T> fromNMS(Class<? extends net.minecraft.world.entity.Entity> clazz, Class<T> cast) {
+    public <T extends Entity> Class<? extends T> fromNMS(Class<? extends net.minecraft.world.entity.Entity> clazz, Class<T> cast) {
         if (BUKKIT_NMS_MAP.inverse().containsKey(clazz)) {
             return BUKKIT_NMS_MAP.inverse().get(clazz).asSubclass(cast);
         }
         throw new AssertionError("Could not convert " + clazz.getName() + " to Bukkit class");
     }
 
-    public static net.minecraft.world.entity.Mob toNMS(Mob m) { return ((CraftMob) m).getHandle(); }
+    public net.minecraft.world.entity.Mob toNMS(Mob m) { return ((CraftMob) m).getHandle(); }
 
-    public static EntityType[] getEntityTypes(Class<?>... nms) {
+    public EntityType[] getEntityTypes(Class<?>... nms) {
         List<EntityType> types = new ArrayList<>();
         for (Class<?> c : nms) {
 
@@ -1020,7 +1124,7 @@ final class ChipUtil26_1 implements ChipUtil {
         return types.toArray(new EntityType[0]);
     }
 
-    public static Difficulty toNMS(org.bukkit.Difficulty d) {
+    public Difficulty toNMS(org.bukkit.Difficulty d) {
         return switch (d) {
             case PEACEFUL -> Difficulty.PEACEFUL;
             case EASY -> Difficulty.EASY;
@@ -1029,7 +1133,7 @@ final class ChipUtil26_1 implements ChipUtil {
         };
     }
 
-    public static org.bukkit.Difficulty fromNMS(Difficulty d) {
+    public org.bukkit.Difficulty fromNMS(Difficulty d) {
         return switch (d) {
             case PEACEFUL -> org.bukkit.Difficulty.PEACEFUL;
             case EASY -> org.bukkit.Difficulty.EASY;
@@ -1038,9 +1142,9 @@ final class ChipUtil26_1 implements ChipUtil {
         };
     }
 
-    public static PathfinderMob toNMS(Creature c) { return ((CraftCreature) c).getHandle();}
+    public PathfinderMob toNMS(Creature c) { return ((CraftCreature) c).getHandle();}
 
-    public static Goal.Flag toNMS(Pathfinder.PathfinderFlag f) {
+    public Goal.Flag toNMS(Pathfinder.PathfinderFlag f) {
         return switch (f) {
             case MOVEMENT -> Goal.Flag.MOVE;
             case JUMPING -> Goal.Flag.JUMP;
@@ -1056,7 +1160,7 @@ final class ChipUtil26_1 implements ChipUtil {
         };
     }
 
-    public static Pathfinder.PathfinderFlag fromNMS(Goal.Flag f) {
+    public Pathfinder.PathfinderFlag fromNMS(Goal.Flag f) {
         if (f != null && f.name().equals("UNKNOWN_BEHAVIOR")) {
             return Pathfinder.PathfinderFlag.UNKNOWN_BEHAVIOR;
         }
@@ -1068,27 +1172,27 @@ final class ChipUtil26_1 implements ChipUtil {
         };
     }
 
-    public static float getFloat(Goal o, String name) {
+    public float getFloat(Goal o, String name) {
         Float obj = getObject(o, name, Float.class);
         return obj == null ? 0 : obj;
     }
 
-    public static double getDouble(Goal o, String name) {
+    public double getDouble(Goal o, String name) {
         Double obj = getObject(o, name, Double.class);
         return obj == null ? 0 : obj;
     }
 
-    public static boolean getBoolean(Goal o, String name) {
+    public boolean getBoolean(Goal o, String name) {
         Boolean obj = getObject(o, name, Boolean.class);
         return obj != null && obj;
     }
 
-    public static int getInt(Goal o, String name) {
+    public int getInt(Goal o, String name) {
         Integer obj = getObject(o, name, Integer.class);
         return obj == null ? 0 : obj;
     }
 
-    public static <T> T getObject(Goal o, String name, Class<T> cast) {
+    public <T> T getObject(Goal o, String name, Class<T> cast) {
         try {
             Class<? extends Goal> clazz = o.getClass();
 
@@ -1109,19 +1213,19 @@ final class ChipUtil26_1 implements ChipUtil {
         return null;
     }
 
-    public static Mob fromNMS(net.minecraft.world.entity.Mob m) { return (Mob) m.getBukkitEntity(); }
+    public Mob fromNMS(net.minecraft.world.entity.Mob m) { return (Mob) m.getBukkitEntity(); }
 
-    public static World fromNMS(Level l) { return l.getWorld(); }
+    public World fromNMS(Level l) { return l.getWorld(); }
 
-    public static ServerLevel toNMS(World w) { return ((CraftWorld) w).getHandle(); }
+    public ServerLevel toNMS(World w) { return ((CraftWorld) w).getHandle(); }
 
-    public static BlockPos toNMS(Location l) { return new BlockPos(l.getBlockX(), l.getBlockY(), l.getBlockZ()); }
+    public BlockPos toNMS(Location l) { return new BlockPos(l.getBlockX(), l.getBlockY(), l.getBlockZ()); }
 
-    public static List<ItemStack> fromNMS(Ingredient in) { return in.itemStacks().stream().map(CraftItemStack::asBukkitCopy).collect(Collectors.toList()); }
+    public List<ItemStack> fromNMS(Ingredient in) { return in.itemStacks().stream().map(CraftItemStack::asBukkitCopy).collect(Collectors.toList()); }
 
-    public static Sound fromNMS(SoundEvent s) { return CraftSound.minecraftToBukkit(s); }
+    public Sound fromNMS(SoundEvent s) { return CraftSound.minecraftToBukkit(s); }
 
-    public static Mob getEntity(Goal g) {
+    public Mob getEntity(Goal g) {
         // For no discernible reason, the Mob field in DoorInteractGoal
         // is not final, unlike the mob fields in every other pathfinder.
         // Since DoorInteractGoal and subclasses each only have one mob field,
@@ -1148,7 +1252,7 @@ final class ChipUtil26_1 implements ChipUtil {
         }
     }
 
-    public static Object invoke(Goal g, String method, Object... args) {
+    public Object invoke(Goal g, String method, Object... args) {
         try {
             Method m = g.getClass().getDeclaredMethod(method);
             m.setAccessible(true);
@@ -1160,7 +1264,7 @@ final class ChipUtil26_1 implements ChipUtil {
         }
     }
 
-    public static Set<Goal.Flag> getFlags(long backingSet) {
+    public Set<Goal.Flag> getFlags(long backingSet) {
         Set<Goal.Flag> flags = new HashSet<>();
 
         for (Goal.Flag flag : Goal.Flag.values())
@@ -1173,7 +1277,7 @@ final class ChipUtil26_1 implements ChipUtil {
     /**
      * Paper removes the default Goal#getFlags method for performance reasons, causing NoSuchMethodErrors.
      */
-    public static Set<Goal.Flag> getFlags(Goal g) {
+    public Set<Goal.Flag> getFlags(Goal g) {
         Method getFlags;
         try {
             getFlags = Goal.class.getDeclaredMethod("getFlags");
@@ -1200,10 +1304,10 @@ final class ChipUtil26_1 implements ChipUtil {
         }
     }
 
-    public static Goal custom(CustomPathfinder p) {
-        CustomGoal26_1 g = new CustomGoal26_1(p);
+    public Goal custom(CustomPathfinder p) {
+        CustomGoal26_1 g = customGoal(p);
         EnumSet<Goal.Flag> set = EnumSet.noneOf(Goal.Flag.class);
-        Arrays.stream(p.getFlags()).map(ChipUtil26_1::toNMS).forEach(set::add);
+        Arrays.stream(p.getFlags()).map(this::toNMS).forEach(set::add);
         g.setFlags(set);
         return g;
     }
@@ -1212,14 +1316,14 @@ final class ChipUtil26_1 implements ChipUtil {
      * A "custom" pathfinder is one not known to MobChip,
      * NMS or otherwise. (Private NMS pathfinders will be "custom.")
      */
-    public static CustomPathfinder custom(Goal g) {
+    public CustomPathfinder custom(Goal g) {
         if (g instanceof CustomGoal26_1) {
             return ((CustomGoal26_1) g).getPathfinder();
         }
         return new CustomPathfinder(getEntity(g)) {
             @Override
             public @NotNull PathfinderFlag[] getFlags() {
-                Set<Goal.Flag> nms = ChipUtil26_1.getFlags(g);
+                Set<Goal.Flag> nms = ChipUtil26_1.this.getFlags(g);
 
                 PathfinderFlag[] flags = new PathfinderFlag[nms.size()];
                 int i = 0;
@@ -1258,9 +1362,9 @@ final class ChipUtil26_1 implements ChipUtil {
         };
     }
 
-    public static Location fromNMS(BlockPos p, World w) { return new Location(w, p.getX(), p.getY(), p.getZ()); }
+    public Location fromNMS(BlockPos p, World w) { return new Location(w, p.getX(), p.getY(), p.getZ()); }
 
-    public static Location fromNMS(Position p, World w) { return new Location(w, p.x(), p.y(), p.z()); }
+    public Location fromNMS(Position p, World w) { return new Location(w, p.x(), p.y(), p.z()); }
 
     private double speedMod(Goal g) {
         // convenience
@@ -1393,20 +1497,20 @@ final class ChipUtil26_1 implements ChipUtil {
         }
     }
 
-    public static Predicate<ItemStack> fromNMS(Predicate<net.minecraft.world.item.ItemStack> p) {
+    public Predicate<ItemStack> fromNMS(Predicate<net.minecraft.world.item.ItemStack> p) {
         return new ItemStackPredicateWrapper(p);
     }
 
-    public static Predicate<net.minecraft.world.item.ItemStack> toNMS(PathfinderTempt p) {
+    public Predicate<net.minecraft.world.item.ItemStack> toNMS(PathfinderTempt p) {
         if (p.getPredicate() instanceof ItemStackPredicateWrapper wrapper) {
             return wrapper.predicate();
         }
         return new ItemStackPredicateContainer(p.getItems());
     }
 
-    public static ItemStack fromNMS(net.minecraft.world.item.ItemStack item) { return CraftItemStack.asBukkitCopy(item); }
+    public ItemStack fromNMS(net.minecraft.world.item.ItemStack item) { return CraftItemStack.asBukkitCopy(item); }
 
-    public static <T> void changeRegistryLock(Registry<T> r, boolean isLocked) {
+    public <T> void changeRegistryLock(Registry<T> r, boolean isLocked) {
         DedicatedServer srv = ((CraftServer) Bukkit.getServer()).getServer();
         MappedRegistry<T> registry = (MappedRegistry<T>) srv.registryAccess().lookupOrThrow(r.key());
         try {
@@ -1426,7 +1530,7 @@ final class ChipUtil26_1 implements ChipUtil {
         DedicatedServer server = ((CraftServer) Bukkit.getServer()).getServer();
         WritableRegistry<net.minecraft.world.entity.ai.attributes.Attribute> writable = (WritableRegistry<net.minecraft.world.entity.ai.attributes.Attribute>) server.registryAccess().lookupOrThrow(Registries.ATTRIBUTE);
         ResourceKey<net.minecraft.world.entity.ai.attributes.Attribute> nmsKey = ResourceKey.create(Registries.ATTRIBUTE, toNMS(key));
-        Attribute26_1 att = new Attribute26_1(key, defaultV, min, max, client);
+        Attribute26_1 att = attribute(key, defaultV, min, max, client);
         writable.register(nmsKey, att, registration(key));
 
         changeRegistryLock(BuiltInRegistries.ATTRIBUTE, true);
@@ -1438,7 +1542,7 @@ final class ChipUtil26_1 implements ChipUtil {
         return BuiltInRegistries.ATTRIBUTE.containsKey(toNMS(key));
     }
 
-    public static Identifier toNMS(NamespacedKey key) {
+    public Identifier toNMS(NamespacedKey key) {
         return CraftNamespacedKey.toMinecraft(key);
     }
 
@@ -1446,7 +1550,7 @@ final class ChipUtil26_1 implements ChipUtil {
     public Attribute getAttribute(NamespacedKey key) {
         net.minecraft.world.entity.ai.attributes.Attribute a = BuiltInRegistries.ATTRIBUTE.get(toNMS(key)).get().value();
         if (!(a instanceof RangedAttribute)) return null;
-        return new Attribute26_1((RangedAttribute) a);
+        return attribute((RangedAttribute) a);
     }
 
     @NotNull
@@ -1458,7 +1562,7 @@ final class ChipUtil26_1 implements ChipUtil {
 
         Holder<net.minecraft.world.entity.ai.attributes.Attribute> nmsA = nmsAH.get();
         net.minecraft.world.entity.ai.attributes.AttributeInstance handle = toNMS(m).getAttribute(nmsA);
-        if (handle != null) return new AttributeInstance26_1(a, handle);
+        if (handle != null) return attributeInstance(a, handle);
 
         try {
             Field attributesF = AttributeMap.class.getDeclaredField("attributes");
@@ -1468,7 +1572,7 @@ final class ChipUtil26_1 implements ChipUtil {
             handle = new net.minecraft.world.entity.ai.attributes.AttributeInstance(nmsA, ignored -> {});
             attributes.put(nmsA, handle);
 
-            return new AttributeInstance26_1(a, handle);
+            return attributeInstance(a, handle);
         } catch (ReflectiveOperationException e) {
             StackTraceLogger.printStackTrace(e);
         }
@@ -1481,7 +1585,7 @@ final class ChipUtil26_1 implements ChipUtil {
         return getOrCreateInstance(m, a);
     }
 
-    public static net.minecraft.world.entity.ai.gossip.GossipType toNMS(GossipType t) {
+    public net.minecraft.world.entity.ai.gossip.GossipType toNMS(GossipType t) {
         for (net.minecraft.world.entity.ai.gossip.GossipType nms : net.minecraft.world.entity.ai.gossip.GossipType.values()) {
             if (nms.id.equalsIgnoreCase(t.getKey().getKey())) return nms;
         }
@@ -1489,29 +1593,29 @@ final class ChipUtil26_1 implements ChipUtil {
         throw new AssertionError("Missing GossipType: " + t.getKey() + "\"");
     }
 
-    public static GossipType fromNMS(net.minecraft.world.entity.ai.gossip.GossipType t) {
+    public GossipType fromNMS(net.minecraft.world.entity.ai.gossip.GossipType t) {
         return GossipType.getByKey(NamespacedKey.minecraft(t.id));
     }
 
     @Override
     public EntityGossipContainer getGossipContainer(Villager v) {
-        return new EntityGossipContainer26_1(v);
+        return entityGossipContainer(v);
     }
 
-    public static Entity fromNMS(net.minecraft.world.entity.Entity en) {
+    public Entity fromNMS(net.minecraft.world.entity.Entity en) {
         return en.getBukkitEntity();
     }
 
-    public static CombatEntry fromNMS(Mob m, net.minecraft.world.damagesource.CombatEntry en) {
+    public CombatEntry fromNMS(Mob m, net.minecraft.world.damagesource.CombatEntry en) {
         return new CombatEntry(m, fromNMS(en.source()), 0, 0, en.damage(), en.fallDistance(), en.fallLocation() == null ? null : CombatLocation.getByKey(NamespacedKey.minecraft(en.fallLocation().id())));
     }
 
-    public static net.minecraft.world.damagesource.CombatEntry toNMS(CombatEntry en) {
+    public net.minecraft.world.damagesource.CombatEntry toNMS(CombatEntry en) {
         return new net.minecraft.world.damagesource.CombatEntry(toNMS(en.getCause(), en.getAttacker()), en.getDamage(), new FallLocation(en.getLocation().getKey().getKey().toLowerCase()), en.getFallDistance());
     }
 
     @Override
-    public EntityCombatTracker getCombatTracker(Mob m) { return new EntityCombatTracker26_1(m); }
+    public EntityCombatTracker getCombatTracker(Mob m) { return entityCombatTracker(m); }
 
     @Override
     public BehaviorResult hearNoteblock(Creature c, Location loc) {
@@ -1526,7 +1630,7 @@ final class ChipUtil26_1 implements ChipUtil {
         return ChipUtil.super.setDisturbanceLocation(c, loc);
     }
 
-    public static net.minecraft.world.entity.boss.enderdragon.EnderDragon toNMS(EnderDragon dragon) {
+    public net.minecraft.world.entity.boss.enderdragon.EnderDragon toNMS(EnderDragon dragon) {
         return ((CraftEnderDragon) dragon).getHandle();
     }
 
@@ -1547,12 +1651,12 @@ final class ChipUtil26_1 implements ChipUtil {
             default -> new DragonHoverPhase(nms);
         };
 
-        return new DragonPhase26_1(d, i);
+        return dragonPhase(d, i);
     }
 
     @Override
     public DragonPhase getCurrentPhase(EnderDragon dragon) {
-        return new DragonPhase26_1(dragon, toNMS(dragon).getPhaseManager().getCurrentPhase());
+        return dragonPhase(dragon, toNMS(dragon).getPhaseManager().getCurrentPhase());
     }
 
     @Override
@@ -1565,7 +1669,7 @@ final class ChipUtil26_1 implements ChipUtil {
         else if (c instanceof Camel) CamelAi.updateActivity((net.minecraft.world.entity.animal.camel.Camel) nms);
     }
 
-    public static MemoryModuleType<?> toNMS(Memory<?> mem) {
+    public MemoryModuleType<?> toNMS(Memory<?> mem) {
         return BuiltInRegistries.MEMORY_MODULE_TYPE.get(mem instanceof EntityMemory<?> ? Identifier.parse(mem.getKey().getKey()) : Identifier.fromNamespaceAndPath(mem.getKey().getNamespace(), mem.getKey().getKey())).get().value();
     }
 
@@ -1585,12 +1689,12 @@ final class ChipUtil26_1 implements ChipUtil {
         return BuiltInRegistries.MEMORY_MODULE_TYPE.containsKey(Identifier.fromNamespaceAndPath(m.getKey().getNamespace(), m.getKey().getKey()));
     }
 
-    public static net.minecraft.world.entity.ai.sensing.Sensor<?> toNMS(Sensor<?> s) {
+    public net.minecraft.world.entity.ai.sensing.Sensor<?> toNMS(Sensor<?> s) {
         if (s instanceof SensorDefault26_1) return ((SensorDefault26_1) s).getHandle();
-        return new Sensor26_1(s);
+        return sensor(s);
     }
 
-    public static SensorType<?> toNMSType(Sensor<?> s) {
+    public SensorType<?> toNMSType(Sensor<?> s) {
         try {
             Constructor<SensorType> c = SensorType.class.getDeclaredConstructor(Supplier.class);
             c.setAccessible(true);
@@ -1605,16 +1709,16 @@ final class ChipUtil26_1 implements ChipUtil {
         return null;
     }
 
-    public static Sensor<?> fromNMS(net.minecraft.world.entity.ai.sensing.Sensor<?> type) {
+    public Sensor<?> fromNMS(net.minecraft.world.entity.ai.sensing.Sensor<?> type) {
         if (type instanceof Sensor26_1) return ((Sensor26_1) type).getSensor();
-        return new SensorDefault26_1(type);
+        return sensorDefault(type);
     }
 
-    public static NamespacedKey fromNMS(Identifier loc) {
+    public NamespacedKey fromNMS(Identifier loc) {
         return new NamespacedKey(loc.getNamespace(), loc.getPath());
     }
 
-    public static Memory<?> fromNMS(MemoryModuleType<?> memory) {
+    public Memory<?> fromNMS(MemoryModuleType<?> memory) {
         return EntityMemory.getByKey(fromNMS(BuiltInRegistries.MEMORY_MODULE_TYPE.getKey(memory)));
     }
 
@@ -1640,7 +1744,7 @@ final class ChipUtil26_1 implements ChipUtil {
 
     @Override
     public EntitySenses getSenses(Mob m) {
-        return new EntitySenses26_1(m);
+        return entitySenses(m);
     }
 
     @Override
@@ -1650,22 +1754,22 @@ final class ChipUtil26_1 implements ChipUtil {
         return (EnderCrystal) nms.nearestCrystal.getBukkitEntity();
     }
 
-    public static RegistrationInfo registration(NamespacedKey key) {
+    public RegistrationInfo registration(NamespacedKey key) {
         return new RegistrationInfo(Optional.of(new KnownPack(key.getNamespace(), key.getKey(), Registration.getVersion())), Lifecycle.stable());
     }
 
-    public static me.gamercoder215.mobchip.util.Position fromNMS(Node point) {
+    public me.gamercoder215.mobchip.util.Position fromNMS(Node point) {
         return new me.gamercoder215.mobchip.util.Position(point.x, point.y, point.z);
     }
 
-    public static Vec3 toNMS(org.bukkit.util.Vector vec) {
+    public Vec3 toNMS(org.bukkit.util.Vector vec) {
         if (vec == null) {
             return null;
         }
         return new Vec3(vec.getX(), vec.getY(), vec.getZ());
     }
 
-    public static org.bukkit.util.Vector fromNMS(Vec3 vec) {
+    public org.bukkit.util.Vector fromNMS(Vec3 vec) {
         if (vec == null) {
             return null;
         }

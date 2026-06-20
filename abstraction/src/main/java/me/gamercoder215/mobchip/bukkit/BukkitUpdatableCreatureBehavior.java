@@ -1,5 +1,6 @@
 package me.gamercoder215.mobchip.bukkit;
 
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import me.gamercoder215.mobchip.ai.schedule.Updatable;
 import org.bukkit.entity.Creature;
 

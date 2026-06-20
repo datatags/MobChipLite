@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-final class NavigationPath26_1 implements NavigationPath {
+public class NavigationPath26_1 implements NavigationPath {
     private String name;
     private final Mob m;
     private final Path handle;
@@ -30,7 +30,7 @@ final class NavigationPath26_1 implements NavigationPath {
         this.speedMod = speedMod;
 
         for (int i = 0; i < nms.getNodeCount(); i++) {
-            nodes.add(ChipUtil26_1.fromNMS(nms.getNode(i)));
+            nodes.add(ChipUtil26_1.instance().fromNMS(nms.getNode(i)));
         }
     }
 

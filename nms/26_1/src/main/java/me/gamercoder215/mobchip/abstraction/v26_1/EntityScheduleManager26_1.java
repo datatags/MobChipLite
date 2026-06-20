@@ -16,12 +16,12 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("deprecation")
-final class EntityScheduleManager26_1 implements EntityScheduleManager {
-
+public class EntityScheduleManager26_1 implements EntityScheduleManager {
+    protected final ChipUtil26_1 wrapper = ChipUtil26_1.instance();
     private final net.minecraft.world.entity.Mob nmsMob;
 
     public EntityScheduleManager26_1(Mob m) {
-        this.nmsMob = ChipUtil26_1.toNMS(m);
+        this.nmsMob = wrapper.toNMS(m);
     }
 
 
@@ -36,12 +36,12 @@ final class EntityScheduleManager26_1 implements EntityScheduleManager {
 
     @Override
     public @NotNull Set<Activity> getActiveActivities() {
-        return nmsMob.getBrain().getActiveActivities().stream().map(ChipUtil26_1::fromNMS).collect(Collectors.toSet());
+        return nmsMob.getBrain().getActiveActivities().stream().map(wrapper::fromNMS).collect(Collectors.toSet());
     }
 
     @Override
     public void setDefaultActivity(@NotNull Activity a) {
-        nmsMob.getBrain().setDefaultActivity(ChipUtil26_1.toNMS(a));
+        nmsMob.getBrain().setDefaultActivity(wrapper.toNMS(a));
     }
 
     @Override
@@ -51,17 +51,17 @@ final class EntityScheduleManager26_1 implements EntityScheduleManager {
 
     @Override
     public void setRunningActivity(@NotNull Activity a) {
-        nmsMob.getBrain().setActiveActivityIfPossible(ChipUtil26_1.toNMS(a));
+        nmsMob.getBrain().setActiveActivityIfPossible(wrapper.toNMS(a));
     }
 
     @Override
     public @Nullable Activity getRunningActivity() {
-        return nmsMob.getBrain().getActiveNonCoreActivity().isPresent() ? ChipUtil26_1.fromNMS(nmsMob.getBrain().getActiveNonCoreActivity().get()) : null;
+        return nmsMob.getBrain().getActiveNonCoreActivity().isPresent() ? wrapper.fromNMS(nmsMob.getBrain().getActiveNonCoreActivity().get()) : null;
     }
 
     @Override
     public boolean isRunning(@NotNull Activity a) {
-        return nmsMob.getBrain().isActive(ChipUtil26_1.toNMS(a));
+        return nmsMob.getBrain().isActive(wrapper.toNMS(a));
     }
 
     @Override
@@ -77,7 +77,7 @@ final class EntityScheduleManager26_1 implements EntityScheduleManager {
     @Nullable
     @Override
     public Consumer<Mob> put(@NotNull Activity key, Consumer<Mob> value) {
-        nmsMob.getBrain().addActivity(ChipUtil26_1.toNMS(key), ImmutableList.of(Pair.of(0, ChipUtil26_1.toNMS(value))), Collections.emptySet(), Collections.emptySet());
+        nmsMob.getBrain().addActivity(wrapper.toNMS(key), ImmutableList.of(Pair.of(0, wrapper.toNMS(value))), Collections.emptySet(), Collections.emptySet());
         return value;
     }
 

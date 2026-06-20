@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import static org.bukkit.craftbukkit.attribute.CraftAttributeInstance.convert;
 
-final class AttributeInstance26_1 implements AttributeInstance {
+public class AttributeInstance26_1 implements AttributeInstance {
 
     private final net.minecraft.world.entity.ai.attributes.AttributeInstance handle;
     private final Attribute a;
@@ -45,13 +45,11 @@ final class AttributeInstance26_1 implements AttributeInstance {
 
     @Override
     public void addModifier(@NotNull AttributeModifier mod) {
-        Preconditions.checkArgument(mod != null, "modifier");
         handle.addPermanentModifier(convert(mod));
     }
 
     @Override
     public void removeModifier(@NotNull AttributeModifier mod) {
-        Preconditions.checkArgument(mod != null, "modifier");
         handle.removeModifier(convert(mod));
     }
 

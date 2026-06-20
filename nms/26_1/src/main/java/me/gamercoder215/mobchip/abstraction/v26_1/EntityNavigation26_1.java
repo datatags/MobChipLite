@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-final class EntityNavigation26_1 implements EntityNavigation {
+public class EntityNavigation26_1 implements EntityNavigation {
 
     private final PathNavigation handle;
 
@@ -23,7 +23,7 @@ final class EntityNavigation26_1 implements EntityNavigation {
     private final Mob m;
 
     public EntityNavigation26_1(Mob m) {
-        this.handle = ChipUtil26_1.toNMS(m).getNavigation();
+        this.handle = ChipUtil26_1.instance().toNMS(m).getNavigation();
         this.points = new ArrayList<>();
 
         this.speedMod = 1;

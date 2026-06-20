@@ -8,8 +8,8 @@ import net.minecraft.world.entity.ai.sensing.Sensor;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-final class Sensor26_1 extends Sensor<LivingEntity> {
-
+public class Sensor26_1 extends Sensor<LivingEntity> {
+    protected final ChipUtil26_1 wrapper = ChipUtil26_1.instance();
     private final me.gamercoder215.mobchip.ai.sensing.Sensor<?> s;
 
     public Sensor26_1(me.gamercoder215.mobchip.ai.sensing.Sensor<?> s) {
@@ -18,12 +18,12 @@ final class Sensor26_1 extends Sensor<LivingEntity> {
 
     @Override
     protected void doTick(ServerLevel level, LivingEntity en) {
-        s.run(ChipUtil26_1.fromNMS(level), ChipUtil26_1.fromNMS(en));
+        s.run(wrapper.fromNMS(level), wrapper.fromNMS(en));
     }
 
     @Override
     public Set<MemoryModuleType<?>> requires() {
-        return s.required().stream().map(ChipUtil26_1::toNMS).collect(Collectors.toSet());
+        return s.required().stream().map(wrapper::toNMS).collect(Collectors.toSet());
     }
 
     public me.gamercoder215.mobchip.ai.sensing.Sensor<?> getSensor() {

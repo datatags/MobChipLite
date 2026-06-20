@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.bukkit;
 
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import me.gamercoder215.mobchip.ai.EntityAI;
 import me.gamercoder215.mobchip.ai.goal.Pathfinder;
 import me.gamercoder215.mobchip.ai.goal.WrappedPathfinder;
@@ -16,10 +17,9 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static me.gamercoder215.mobchip.abstraction.ChipUtil.getWrapper;
-
 final class BukkitAI implements EntityAI {
-	
+    private static final ChipUtil wrapper = ChipUtilFactory.getChipUtil();
+
 	private final Set<WrappedPathfinder> goals = new HashSet<>();
 	private final boolean target;
 
@@ -35,8 +35,6 @@ final class BukkitAI implements EntityAI {
 		goals.clear();
 		goals.addAll(wrapper.getGoals(m, target));
 	}
-
-	private static final ChipUtil wrapper = getWrapper();
 
 	private void updateAI() {
 		wrapper.clearPathfinders(m, target);

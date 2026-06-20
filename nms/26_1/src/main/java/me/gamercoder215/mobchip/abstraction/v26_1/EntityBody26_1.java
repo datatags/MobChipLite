@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.abstraction.v26_1;
 
 import me.gamercoder215.mobchip.EntityBody;
+import me.gamercoder215.mobchip.abstraction.ChipUtil;
 import me.gamercoder215.mobchip.ai.animation.EntityAnimation;
 import me.gamercoder215.mobchip.util.Position;
 import me.gamercoder215.mobchip.util.StackTraceLogger;
@@ -37,13 +38,14 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-final class EntityBody26_1 implements EntityBody {
+public class EntityBody26_1 implements EntityBody {
+    protected final ChipUtil26_1 wrapper = ChipUtil26_1.instance();
     private final net.minecraft.world.entity.Mob nmsMob;
     private final Mob m;
 
     public EntityBody26_1(Mob m) {
         this.m = m;
-        this.nmsMob = ChipUtil26_1.toNMS(m);
+        this.nmsMob = wrapper.toNMS(m);
     }
 
     private void update() {
@@ -94,7 +96,7 @@ final class EntityBody26_1 implements EntityBody {
 
         if (hand == InteractionHand.OFF_HAND) h = net.minecraft.world.InteractionHand.OFF_HAND;
         else h = net.minecraft.world.InteractionHand.MAIN_HAND;
-        net.minecraft.world.InteractionResult result = nmsMob.interact(ChipUtil26_1.toNMS(p), h, ChipUtil26_1.toNMS(location));
+        net.minecraft.world.InteractionResult result = nmsMob.interact(wrapper.toNMS(p), h, wrapper.toNMS(location));
         if (result == net.minecraft.world.InteractionResult.FAIL) {
             return InteractionResult.FAIL;
         } else if (result == net.minecraft.world.InteractionResult.CONSUME) {
@@ -159,7 +161,7 @@ final class EntityBody26_1 implements EntityBody {
 
     @Override
     public boolean isInvisibleTo(@Nullable Player p) {
-        return nmsMob.isInvisibleTo(ChipUtil26_1.toNMS(p));
+        return nmsMob.isInvisibleTo(wrapper.toNMS(p));
     }
 
     @Override
@@ -272,14 +274,14 @@ final class EntityBody26_1 implements EntityBody {
             case DAMAGE -> nmsMob.animateHurt(1.0F);
             case CRITICAL_DAMAGE -> {
                 ClientboundAnimatePacket pkt = new ClientboundAnimatePacket(nmsMob, 4);
-                for (Player p : ChipUtil26_1.fromNMS(nmsMob).getWorld().getPlayers()) {
-                    ChipUtil26_1.toNMS(p).connection.send(pkt);
+                for (Player p : wrapper.fromNMS(nmsMob).getWorld().getPlayers()) {
+                    wrapper.toNMS(p).connection.send(pkt);
                 }
             }
             case MAGICAL_CRITICAL_DAMAGE -> {
                 ClientboundAnimatePacket pkt = new ClientboundAnimatePacket(nmsMob, 5);
-                for (Player p : ChipUtil26_1.fromNMS(nmsMob).getWorld().getPlayers()) {
-                    ChipUtil26_1.toNMS(p).connection.send(pkt);
+                for (Player p : wrapper.fromNMS(nmsMob).getWorld().getPlayers()) {
+                    wrapper.toNMS(p).connection.send(pkt);
                 }
             }
         }
@@ -347,7 +349,7 @@ final class EntityBody26_1 implements EntityBody {
 
     @Override
     public boolean isInvulnerableTo(EntityDamageEvent.@Nullable DamageCause cause) {
-        return nmsMob.isInvulnerableTo(nmsMob.level().getMinecraftWorld(), ChipUtil26_1.toNMS(cause, m));
+        return nmsMob.isInvulnerableTo(nmsMob.level().getMinecraftWorld(), wrapper.toNMS(cause, m));
     }
 
     @Override
@@ -357,7 +359,7 @@ final class EntityBody26_1 implements EntityBody {
 
     @Override
     public boolean isPushableBy(@Nullable Entity entity) {
-        return EntitySelector.pushableBy(ChipUtil26_1.toNMS(entity)).test(ChipUtil26_1.toNMS(entity));
+        return EntitySelector.pushableBy(wrapper.toNMS(entity)).test(wrapper.toNMS(entity));
     }
 
     @Override

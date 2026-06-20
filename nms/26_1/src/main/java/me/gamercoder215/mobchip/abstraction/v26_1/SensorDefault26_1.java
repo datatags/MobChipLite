@@ -17,8 +17,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-final class SensorDefault26_1 implements Sensor<LivingEntity> {
-
+public class SensorDefault26_1 implements Sensor<LivingEntity> {
+    protected final ChipUtil26_1 wrapper = ChipUtil26_1.instance();
     private final net.minecraft.world.entity.ai.sensing.Sensor<?> handle;
 
     public SensorDefault26_1(net.minecraft.world.entity.ai.sensing.Sensor<?> handle) {
@@ -31,7 +31,7 @@ final class SensorDefault26_1 implements Sensor<LivingEntity> {
 
     @Override
     public @NotNull List<Memory<?>> required() {
-        return handle.requires().stream().map(ChipUtil26_1::fromNMS).collect(Collectors.toList());
+        return handle.requires().stream().map(wrapper::fromNMS).collect(Collectors.toList());
     }
 
     @Override
@@ -57,7 +57,7 @@ final class SensorDefault26_1 implements Sensor<LivingEntity> {
         try {
             Method doTick = net.minecraft.world.entity.ai.sensing.Sensor.class.getDeclaredMethod("doTick", ServerLevel.class, net.minecraft.world.entity.LivingEntity.class);
             doTick.setAccessible(true);
-            doTick.invoke(handle, ChipUtil26_1.toNMS(w), ChipUtil26_1.toNMS(entity));
+            doTick.invoke(handle, wrapper.toNMS(w), wrapper.toNMS(entity));
         } catch (ReflectiveOperationException e) {
             StackTraceLogger.printStackTrace(e);
         }
@@ -71,7 +71,7 @@ final class SensorDefault26_1 implements Sensor<LivingEntity> {
         BuiltInRegistries.SENSOR_TYPE.stream()
                 .filter(s -> s.create().equals(handle))
                 .findFirst()
-                .ifPresent(s -> key.set(ChipUtil26_1.fromNMS(BuiltInRegistries.SENSOR_TYPE.getKey(s))));
+                .ifPresent(s -> key.set(wrapper.fromNMS(BuiltInRegistries.SENSOR_TYPE.getKey(s))));
 
         return key.get();
     }

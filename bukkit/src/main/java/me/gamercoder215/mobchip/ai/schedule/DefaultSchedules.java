@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.ai.schedule;
 
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,10 +9,9 @@ import org.jetbrains.annotations.Nullable;
  * Represents Built-In MC Schedules
  */
 public final class DefaultSchedules {
+    private static final ChipUtil wrapper = ChipUtilFactory.getChipUtil();
 
     private DefaultSchedules() {}
-
-    private static final ChipUtil wrapper = ChipUtil.getWrapper();
 
     /**
      * Represents an Empty Schedule

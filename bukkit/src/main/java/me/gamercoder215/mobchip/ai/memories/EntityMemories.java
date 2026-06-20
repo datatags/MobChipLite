@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.ai.memories;
 
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class EntityMemories {
 
-    private static final ChipUtil w = ChipUtil.getWrapper();
+    private static final ChipUtil w = ChipUtilFactory.getChipUtil();
 
     private EntityMemories() { throw new UnsupportedOperationException(); }
 

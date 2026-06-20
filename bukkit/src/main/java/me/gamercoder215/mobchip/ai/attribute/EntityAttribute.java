@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.ai.attribute;
 
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +14,7 @@ import java.lang.reflect.Modifier;
  */
 public final class EntityAttribute implements Attribute {
 
-    private static final ChipUtil wrapper = ChipUtil.getWrapper();
+    private static final ChipUtil wrapper = ChipUtilFactory.getChipUtil();
 
     /**
      * Represents {@link org.bukkit.attribute.Attribute#GENERIC_MAX_HEALTH}

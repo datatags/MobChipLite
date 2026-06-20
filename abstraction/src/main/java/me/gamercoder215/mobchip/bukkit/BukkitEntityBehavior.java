@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.bukkit;
 
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import me.gamercoder215.mobchip.ai.behavior.BehaviorResult;
 import me.gamercoder215.mobchip.ai.behavior.EntityBehavior;
 import me.gamercoder215.mobchip.ai.memories.Memory;
@@ -9,26 +10,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
-import static me.gamercoder215.mobchip.abstraction.ChipUtil.getWrapper;
-
 class BukkitEntityBehavior implements EntityBehavior {
+    protected static final ChipUtil wrapper = ChipUtilFactory.getChipUtil();
 
     private final Mob m;
 
-    BukkitEntityBehavior(Mob m) {
+    protected BukkitEntityBehavior(Mob m) {
         this.m = m;
     }
 
-    static final ChipUtil wrapper = getWrapper();
-    
-    static void notNull(Object o, String message) {
+    protected static void notNull(Object o, String message) {
         if (o == null) throw new IllegalArgumentException(message);
     }
-    
-    BehaviorResult run(String behaviorName, Object... args) {
+
+    protected BehaviorResult run(String behaviorName, Object... args) {
         return wrapper.runBehavior(m, behaviorName, args);
     }
-    
+
     @Override
     public @NotNull BehaviorResult backupIfClose(int min, float speedMod) {
         return run("BehaviorRetreat", min, speedMod);

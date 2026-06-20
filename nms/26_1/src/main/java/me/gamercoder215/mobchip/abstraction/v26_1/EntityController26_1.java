@@ -13,7 +13,7 @@ import org.bukkit.entity.Mob;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-final class EntityController26_1 implements EntityController {
+public class EntityController26_1 implements EntityController {
 
     private final JumpControl jumpC;
     private final MoveControl moveC;
@@ -24,7 +24,7 @@ final class EntityController26_1 implements EntityController {
     private final net.minecraft.world.entity.Mob nms;
 
     public EntityController26_1(Mob m) {
-        net.minecraft.world.entity.Mob nms = ChipUtil26_1.toNMS(m);
+        net.minecraft.world.entity.Mob nms = ChipUtil26_1.instance().toNMS(m);
         this.lookC = nms.getLookControl();
         this.moveC = nms.getMoveControl();
         this.jumpC = nms.getJumpControl();

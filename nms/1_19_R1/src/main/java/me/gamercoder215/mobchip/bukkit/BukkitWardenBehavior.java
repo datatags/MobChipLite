@@ -17,7 +17,7 @@ class BukkitWardenBehavior extends BukkitUpdatableCreatureBehavior implements Wa
         this.m = m;
     }
 
-    BehaviorResult run(String behaviorName, Object... args) {
+    protected BehaviorResult run(String behaviorName, Object... args) {
         return wrapper.runBehavior(m, behaviorName, "net.minecraft.world.entity.ai.behavior.warden", args);
     }
 

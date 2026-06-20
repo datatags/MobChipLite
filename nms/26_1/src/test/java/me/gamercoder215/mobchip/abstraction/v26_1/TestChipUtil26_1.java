@@ -30,25 +30,27 @@ public class TestChipUtil26_1 {
     @Test
     @DisplayName("Test Bukkit-NMS Conversion")
     public void testNMSConversion() {
+        ChipUtil26_1 wrapper = new ChipUtil26_1();
         // Entities
         for (EntityType t : EntityType.values()) {
             if (t.getEntityClass() == null) {
                 continue;
             }
-            Assertions.assertNotNull(ChipUtil26_1.toNMS(t.getEntityClass()));
+            Assertions.assertNotNull(wrapper.toNMS(t.getEntityClass()));
         }
 
         // Other
-        for (Difficulty d : Difficulty.values()) Assertions.assertNotNull(ChipUtil26_1.toNMS(d));
-        for (GossipType t : GossipType.values()) Assertions.assertNotNull(ChipUtil26_1.toNMS(t));
+        for (Difficulty d : Difficulty.values()) Assertions.assertNotNull(wrapper.toNMS(d));
+        for (GossipType t : GossipType.values()) Assertions.assertNotNull(wrapper.toNMS(t));
 
-        Assertions.assertNotNull(ChipUtil26_1.toNMS(m -> m.damage(2)));
+        Assertions.assertNotNull(wrapper.toNMS(m -> m.damage(2)));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     @DisplayName("Test NMS-Bukkit Conversion")
     public void testBukkitConversion() {
+        ChipUtil26_1 wrapper = new ChipUtil26_1();
         // For some reason if we read the registry directly, the type arguments are not available, but if we iterate
         // over the fields directly, they are.
         for (Field field : net.minecraft.world.entity.EntityType.class.getDeclaredFields()) {
@@ -56,12 +58,12 @@ public class TestChipUtil26_1 {
                 continue;
             }
             ParameterizedType type = (ParameterizedType) field.getGenericType();
-            Assertions.assertNotNull(ChipUtil26_1.fromNMS((Class<? extends Entity>)type.getActualTypeArguments()[0], org.bukkit.entity.Entity.class));
+            Assertions.assertNotNull(wrapper.fromNMS((Class<? extends Entity>)type.getActualTypeArguments()[0], org.bukkit.entity.Entity.class));
         }
 
         // Other
-        for (net.minecraft.world.Difficulty d : net.minecraft.world.Difficulty.values()) Assertions.assertNotNull(ChipUtil26_1.fromNMS(d));
-        for (net.minecraft.world.entity.ai.gossip.GossipType t : net.minecraft.world.entity.ai.gossip.GossipType.values()) Assertions.assertNotNull(ChipUtil26_1.fromNMS(t));
+        for (net.minecraft.world.Difficulty d : net.minecraft.world.Difficulty.values()) Assertions.assertNotNull(wrapper.fromNMS(d));
+        for (net.minecraft.world.entity.ai.gossip.GossipType t : net.minecraft.world.entity.ai.gossip.GossipType.values()) Assertions.assertNotNull(wrapper.fromNMS(t));
     }
 
     @Test
@@ -74,7 +76,7 @@ public class TestChipUtil26_1 {
         Assertions.assertTrue(set.hasElement(Goal.Flag.MOVE));
         Assertions.assertTrue(set.hasElement(Goal.Flag.LOOK));
 
-        Set<Goal.Flag> flags = ChipUtil26_1.getFlags(set.getBackingSet());
+        Set<Goal.Flag> flags = new ChipUtil26_1().getFlags(set.getBackingSet());
         Assertions.assertTrue(flags.contains(Goal.Flag.MOVE));
         Assertions.assertTrue(flags.contains(Goal.Flag.LOOK));
     }

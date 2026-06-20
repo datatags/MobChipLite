@@ -14,14 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SuppressWarnings("unchecked")
-final class EntityCombatTracker26_1 implements EntityCombatTracker {
-
+public class EntityCombatTracker26_1 implements EntityCombatTracker {
+    protected final ChipUtil26_1 wrapper = ChipUtil26_1.instance();
     private final CombatTracker handle;
     private final Mob m;
 
     public EntityCombatTracker26_1(Mob m) {
         this.m = m;
-        this.handle = ChipUtil26_1.toNMS(m).getCombatTracker();
+        this.handle = wrapper.toNMS(m).getCombatTracker();
     }
 
     @Override
@@ -43,20 +43,19 @@ final class EntityCombatTracker26_1 implements EntityCombatTracker {
     @Override
     public @Nullable CombatEntry getLatestEntry() {
         var entries = getEntriesNMS();
-        return entries.isEmpty() ? null : ChipUtil26_1.fromNMS(m, entries.getLast());
+        return entries.isEmpty() ? null : wrapper.fromNMS(m, entries.getLast());
     }
 
     @Override
     public @NotNull List<CombatEntry> getCombatEntries() {
         List<CombatEntry> entries = new ArrayList<>();
-        getEntriesNMS().stream().map(en -> ChipUtil26_1.fromNMS(m, en)).forEach(entries::add);
+        getEntriesNMS().stream().map(en -> wrapper.fromNMS(m, en)).forEach(entries::add);
         return entries;
     }
 
     @Override
     public void recordEntry(@NotNull CombatEntry entry) {
-        if (entry == null) return;
-        getEntriesNMS().add(ChipUtil26_1.toNMS(entry));
+        getEntriesNMS().add(wrapper.toNMS(entry));
     }
 
     @Override
@@ -90,6 +89,6 @@ final class EntityCombatTracker26_1 implements EntityCombatTracker {
 
     @Override
     public boolean hasLastDamageCancelled() {
-        return ChipUtil26_1.toNMS(m).lastDamageCancelled;
+        return wrapper.toNMS(m).lastDamageCancelled;
     }
 }

@@ -4,6 +4,7 @@ import me.gamercoder215.mobchip.DragonBrain;
 import me.gamercoder215.mobchip.EntityBody;
 import me.gamercoder215.mobchip.EntityBrain;
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import me.gamercoder215.mobchip.ai.EntityAI;
 import me.gamercoder215.mobchip.ai.attribute.Attribute;
 import me.gamercoder215.mobchip.ai.attribute.AttributeInstance;
@@ -34,15 +35,13 @@ import java.lang.reflect.Constructor;
  * @see EntityBrain
  */
 public class BukkitBrain implements EntityBrain {
-
+    protected static final ChipUtil w = ChipUtilFactory.getChipUtil();
 	private static final String BUKKIT_PACKAGE = BukkitBrain.class.getPackage().getName() + ".";
 	final Mob m;
 
 	BukkitBrain(@NotNull Mob m) {
 		this.m = m;
 	}
-
-	static final ChipUtil w = ChipUtil.getWrapper();
 
 	/**
 	 * Get the EntityBrain of this Mob.

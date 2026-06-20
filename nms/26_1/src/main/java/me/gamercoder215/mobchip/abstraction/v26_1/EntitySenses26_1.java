@@ -22,8 +22,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
-final class EntitySenses26_1 implements EntitySenses {
-
+public class EntitySenses26_1 implements EntitySenses {
+    protected final ChipUtil26_1 wrapper = ChipUtil26_1.instance();
     private final Mob m;
     private final net.minecraft.world.entity.Mob nmsMob;
 
@@ -31,7 +31,7 @@ final class EntitySenses26_1 implements EntitySenses {
 
     public EntitySenses26_1(Mob m) {
         this.m = m;
-        this.nmsMob = ChipUtil26_1.toNMS(m);
+        this.nmsMob = wrapper.toNMS(m);
 
         try {
             Field sensorsF = Brain.class.getDeclaredField("sensors");
@@ -64,29 +64,29 @@ final class EntitySenses26_1 implements EntitySenses {
     public @NotNull List<Sensor<?>> getSensors() {
         return sensorsHandle.values()
                 .stream()
-                .map(ChipUtil26_1::fromNMS)
+                .map(wrapper::fromNMS)
                 .collect(Collectors.toList());
     }
 
     @Override
     public void addSensor(@NotNull Sensor<?> sensor) throws IllegalArgumentException {
-        if (!new ChipUtil26_1().existsSensor(sensor.getKey())) throw new IllegalArgumentException("Unregistered Sensor: " + sensor.getKey());
+        if (!wrapper.existsSensor(sensor.getKey())) throw new IllegalArgumentException("Unregistered Sensor: " + sensor.getKey());
 
-        sensorsHandle.put(ChipUtil26_1.toNMSType(sensor), ChipUtil26_1.toNMS(sensor));
+        sensorsHandle.put(wrapper.toNMSType(sensor), wrapper.toNMS(sensor));
         save();
     }
 
     @Override
     public void removeSensor(@NotNull Sensor<?> sensor) {
-        if (!new ChipUtil26_1().existsSensor(sensor.getKey())) throw new IllegalArgumentException("Unregistered Sensor: " + sensor.getKey());
+        if (!wrapper.existsSensor(sensor.getKey())) throw new IllegalArgumentException("Unregistered Sensor: " + sensor.getKey());
         removeSensor(sensor.getKey());
     }
 
     @Override
     public void removeSensor(@NotNull NamespacedKey key) {
-        if (!new ChipUtil26_1().existsSensor(key)) throw new IllegalArgumentException("Unregistered Sensor: " + key);
+        if (!wrapper.existsSensor(key)) throw new IllegalArgumentException("Unregistered Sensor: " + key);
 
-        Identifier keyH = ChipUtil26_1.toNMS(key);
+        Identifier keyH = wrapper.toNMS(key);
         Iterator<Map.Entry<SensorType<?>, net.minecraft.world.entity.ai.sensing.Sensor<?>>> it = sensorsHandle.entrySet().iterator();
 
         while (it.hasNext()) {
@@ -114,7 +114,7 @@ final class EntitySenses26_1 implements EntitySenses {
 
         for (SensorType<?> t : sensorsHandle.keySet()) {
             Identifier currentKey = BuiltInRegistries.SENSOR_TYPE.getKey(t);
-            if (ChipUtil26_1.toNMS(key).equals(currentKey)) {
+            if (wrapper.toNMS(key).equals(currentKey)) {
                 b.set(true);
                 break;
             }

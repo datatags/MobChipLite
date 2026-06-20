@@ -8,7 +8,7 @@ import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.EnderDragon;
 import org.jetbrains.annotations.NotNull;
 
-final class DragonPhase26_1 implements DragonPhase {
+public class DragonPhase26_1 implements DragonPhase {
 
     private final EnderDragon dragon;
     private final DragonPhaseInstance handle;
@@ -25,7 +25,7 @@ final class DragonPhase26_1 implements DragonPhase {
 
     @Override
     public @NotNull Location getTargetLocation() {
-        return ChipUtil26_1.fromNMS(handle.getFlyTargetLocation(), dragon.getWorld());
+        return ChipUtil26_1.instance().fromNMS(handle.getFlyTargetLocation(), dragon.getWorld());
     }
 
     @Override

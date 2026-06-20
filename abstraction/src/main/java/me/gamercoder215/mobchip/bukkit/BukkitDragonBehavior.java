@@ -1,6 +1,7 @@
 package me.gamercoder215.mobchip.bukkit;
 
 import me.gamercoder215.mobchip.abstraction.ChipUtil;
+import me.gamercoder215.mobchip.abstraction.ChipUtilFactory;
 import me.gamercoder215.mobchip.ai.behavior.BehaviorResult;
 import me.gamercoder215.mobchip.ai.behavior.DragonBehavior;
 import org.bukkit.entity.EnderDragon;
@@ -11,13 +12,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static me.gamercoder215.mobchip.abstraction.ChipUtil.getWrapper;
-
 public class BukkitDragonBehavior extends BukkitEntityBehavior implements DragonBehavior {
+    protected static final ChipUtil wrapper = ChipUtilFactory.getChipUtil();
 
-    final EnderDragon m;
-
-    private static final ChipUtil wrapper = getWrapper();
+    protected final EnderDragon m;
 
     public BukkitDragonBehavior(EnderDragon m) {
         super((Mob) m);
@@ -26,8 +24,9 @@ public class BukkitDragonBehavior extends BukkitEntityBehavior implements Dragon
 
     @Override
     public @NotNull BehaviorResult naturalKnockback(@Nullable List<Entity> entities) {
-        if (entities == null) return BehaviorResult.STOPPED;
-        wrapper.knockback(m, entities);
+        if (entities != null) {
+            wrapper.knockback(m, entities);
+        }
         return BehaviorResult.STOPPED;
     }
 }

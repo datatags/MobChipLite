@@ -8,7 +8,8 @@ import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-final class BehaviorResult26_1 extends BehaviorResult {
+public class BehaviorResult26_1 extends BehaviorResult {
+    protected final ChipUtil26_1 wrapper = ChipUtil26_1.instance();
     private final BehaviorControl b;
     private final LivingEntity mob;
     private final ServerLevel l;
@@ -16,14 +17,14 @@ final class BehaviorResult26_1 extends BehaviorResult {
     public <T extends LivingEntity> BehaviorResult26_1(BehaviorControl<T> b, T mob) {
         this.b = b;
         this.mob = mob;
-        this.l = ChipUtil26_1.toNMS(Bukkit.getWorld(mob.level().getWorld().getUID()));
+        this.l = wrapper.toNMS(Bukkit.getWorld(mob.level().getWorld().getUID()));
 
         b.tryStart(l, mob, 0);
     }
 
     @Override
     public @NotNull Status getStatus() {
-        return ChipUtil26_1.fromNMS(b.getStatus());
+        return wrapper.fromNMS(b.getStatus());
     }
 
     @Override
