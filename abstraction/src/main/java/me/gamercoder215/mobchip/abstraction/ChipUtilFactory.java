@@ -68,8 +68,13 @@ public class ChipUtilFactory {
                     return "1_21_R7";
             }
         } else if (major >= 26) {
-            // optimism
-            return "26_1";
+            switch (minor) {
+                case 1:
+                    return "26_1";
+                case 2:
+                default: // optimism
+                    return "26_2";
+            }
         }
         throw new IllegalStateException("Unsupported version: " + bukkit);
     }

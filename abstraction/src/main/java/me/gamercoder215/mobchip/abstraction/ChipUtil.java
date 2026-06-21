@@ -176,4 +176,12 @@ public interface ChipUtil {
         }
         return types;
     }
+
+    /**
+     * Replaced by {@link ChipUtilFactory#getChipUtil()}
+     */
+    @Deprecated
+    static ChipUtil getWrapper() {
+        return ChipUtilFactory.getChipUtil();
+    }
 }

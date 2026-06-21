@@ -157,7 +157,7 @@ public class ChipUtil26_1 implements ChipUtil {
             while (utilClass != Object.class) {
                 try {
                     String version = utilClass.getSimpleName().substring("ChipUtil".length());
-                    Class<?> clazz = Class.forName(getClass().getPackageName() + "." + name + version);
+                    Class<?> clazz = Class.forName(utilClass.getPackageName() + "." + name + version);
                     Constructor<?>[] constructors = clazz.getDeclaredConstructors();
                     for (Constructor<?> constructor : constructors) {
                         if (constructor.getParameterTypes().length == args.length) {
@@ -239,7 +239,7 @@ public class ChipUtil26_1 implements ChipUtil {
     }
 
     protected ChipUtil26_1(ImmutableBiMap.Builder<Class<? extends Entity>, Class<? extends net.minecraft.world.entity.Entity>> entityMap) {
-        BUKKIT_NMS_MAP = entityMap
+        entityMap
                 .put(Entity.class, net.minecraft.world.entity.Entity.class)
                 .put(LivingEntity.class, net.minecraft.world.entity.LivingEntity.class)
                 .put(Mob.class, net.minecraft.world.entity.Mob.class)
@@ -327,7 +327,6 @@ public class ChipUtil26_1 implements ChipUtil {
                 .put(LingeringPotion.class, ThrownLingeringPotion.class)
                 .put(Llama.class, net.minecraft.world.entity.animal.equine.Llama.class)
                 .put(LlamaSpit.class, net.minecraft.world.entity.projectile.LlamaSpit.class)
-                .put(MagmaCube.class, net.minecraft.world.entity.monster.MagmaCube.class)
                 .put(Mannequin.class, net.minecraft.world.entity.decoration.Mannequin.class)
                 .put(Marker.class, net.minecraft.world.entity.Marker.class)
                 .put(Mule.class, net.minecraft.world.entity.animal.equine.Mule.class)
@@ -360,7 +359,6 @@ public class ChipUtil26_1 implements ChipUtil {
                 .put(Silverfish.class, net.minecraft.world.entity.monster.Silverfish.class)
                 .put(Skeleton.class, net.minecraft.world.entity.monster.skeleton.Skeleton.class)
                 .put(SkeletonHorse.class, net.minecraft.world.entity.animal.equine.SkeletonHorse.class)
-                .put(Slime.class, net.minecraft.world.entity.monster.Slime.class)
                 .put(SmallFireball.class, net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball.class)
                 .put(Sniffer.class, net.minecraft.world.entity.animal.sniffer.Sniffer.class)
                 .put(Snowball.class, net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball.class)
@@ -397,8 +395,15 @@ public class ChipUtil26_1 implements ChipUtil {
                 .put(Zombie.class, net.minecraft.world.entity.monster.zombie.Zombie.class)
                 .put(ZombieHorse.class, net.minecraft.world.entity.animal.equine.ZombieHorse.class)
                 .put(ZombieNautilus.class, net.minecraft.world.entity.animal.nautilus.ZombieNautilus.class)
-                .put(ZombieVillager.class, net.minecraft.world.entity.monster.zombie.ZombieVillager.class)
-                .build();
+                .put(ZombieVillager.class, net.minecraft.world.entity.monster.zombie.ZombieVillager.class);
+        try {
+            // Mobs that have been moved in future versions
+            entityMap
+                    .put(MagmaCube.class, net.minecraft.world.entity.monster.MagmaCube.class)
+                    .put(Slime.class, net.minecraft.world.entity.monster.Slime.class);
+        } catch (NoClassDefFoundError ignored) {
+        }
+        BUKKIT_NMS_MAP = entityMap.build();
     }
 
     public ChipUtil26_1() {
