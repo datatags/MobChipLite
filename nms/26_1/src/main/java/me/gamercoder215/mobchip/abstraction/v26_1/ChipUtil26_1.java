@@ -397,10 +397,13 @@ public class ChipUtil26_1 implements ChipUtil {
                 .put(ZombieNautilus.class, net.minecraft.world.entity.animal.nautilus.ZombieNautilus.class)
                 .put(ZombieVillager.class, net.minecraft.world.entity.monster.zombie.ZombieVillager.class);
         try {
-            // Mobs that have been moved in future versions
-            entityMap
-                    .put(MagmaCube.class, net.minecraft.world.entity.monster.MagmaCube.class)
-                    .put(Slime.class, net.minecraft.world.entity.monster.Slime.class);
+            // paper is too smart
+            if (!Slime.class.getSimpleName().equals("AbstractCubeMob")) {
+                // Mobs that have been moved in future versions
+                entityMap
+                        .put(MagmaCube.class, net.minecraft.world.entity.monster.MagmaCube.class)
+                        .put(Slime.class, net.minecraft.world.entity.monster.Slime.class);
+            }
         } catch (NoClassDefFoundError ignored) {
         }
         BUKKIT_NMS_MAP = entityMap.build();
@@ -410,11 +413,15 @@ public class ChipUtil26_1 implements ChipUtil {
         this(ImmutableBiMap.builder());
     }
 
+    protected GoalSelector getGoalSelector(net.minecraft.world.entity.Mob mob, boolean target) {
+        return target ? mob.targetSelector : mob.goalSelector;
+    }
+
     @Override
     public void addCustomPathfinder(CustomPathfinder p, int priority, boolean target) {
         Mob m = p.getEntity();
         net.minecraft.world.entity.Mob mob = toNMS(m);
-        GoalSelector s = target ? mob.targetSelector : mob.goalSelector;
+        GoalSelector s = getGoalSelector(mob, target);
         Goal g = custom(p);
         Set<Goal.Flag> nms = this.getFlags(g);
 
@@ -431,7 +438,7 @@ public class ChipUtil26_1 implements ChipUtil {
     @Override
     public Set<WrappedPathfinder> getGoals(Mob m, boolean target) {
         net.minecraft.world.entity.Mob mob = toNMS(m);
-        GoalSelector s = target ? mob.targetSelector : mob.goalSelector;
+        GoalSelector s = getGoalSelector(mob, target);
 
         Set<WrappedPathfinder> pF = new HashSet<>();
         s.getAvailableGoals().forEach(w -> pF.add(new WrappedPathfinder(fromNMS(w.getGoal()), w.getPriority())));
@@ -442,7 +449,7 @@ public class ChipUtil26_1 implements ChipUtil {
     @Override
     public Collection<WrappedPathfinder> getRunningGoals(Mob m, boolean target) {
         net.minecraft.world.entity.Mob mob = toNMS(m);
-        GoalSelector s = target ? mob.targetSelector : mob.goalSelector;
+        GoalSelector s = getGoalSelector(mob, target);
 
         Collection<WrappedPathfinder> l = new HashSet<>();
         s.getAvailableGoals().stream().filter(WrappedGoal::isRunning).forEach(w ->
@@ -454,7 +461,7 @@ public class ChipUtil26_1 implements ChipUtil {
     @Override
     public void setFlag(Mob m, Pathfinder.PathfinderFlag flag, boolean target, boolean value) {
         net.minecraft.world.entity.Mob mob = toNMS(m);
-        GoalSelector s = target ? mob.targetSelector : mob.goalSelector;
+        GoalSelector s = getGoalSelector(mob, target);
         if (value) s.enableControlFlag(toNMS(flag)); else s.disableControlFlag(toNMS(flag));
     }
 
@@ -585,7 +592,7 @@ public class ChipUtil26_1 implements ChipUtil {
     public void addPathfinder(Pathfinder b, int priority, boolean target) {
         Mob mob = b.getEntity();
         net.minecraft.world.entity.Mob m = toNMS(mob);
-        GoalSelector s = target ? m.targetSelector : m.goalSelector;
+        GoalSelector s = getGoalSelector(m, target);
 
         final Goal g = toNMS(b);
         if (g == null) return;
@@ -596,7 +603,7 @@ public class ChipUtil26_1 implements ChipUtil {
     public void removePathfinder(Pathfinder b, boolean target) {
         Mob mob = b.getEntity();
         net.minecraft.world.entity.Mob m = toNMS(mob);
-        GoalSelector s = target ? m.targetSelector : m.goalSelector;
+        GoalSelector s = getGoalSelector(m, target);
 
         final Goal g = toNMS(b);
         if (g == null) return;
@@ -606,7 +613,7 @@ public class ChipUtil26_1 implements ChipUtil {
     @Override
     public void clearPathfinders(Mob mob, boolean target) {
         net.minecraft.world.entity.Mob m = toNMS(mob);
-        GoalSelector s = target ? m.targetSelector : m.goalSelector;
+        GoalSelector s = getGoalSelector(m, target);
 
         s.removeAllGoals(g -> true);
     }
@@ -1226,7 +1233,7 @@ public class ChipUtil26_1 implements ChipUtil {
 
     public BlockPos toNMS(Location l) { return new BlockPos(l.getBlockX(), l.getBlockY(), l.getBlockZ()); }
 
-    public List<ItemStack> fromNMS(Ingredient in) { return in.itemStacks().stream().map(CraftItemStack::asBukkitCopy).collect(Collectors.toList()); }
+    public List<ItemStack> fromNMS(Ingredient in) { return in.itemStacks().stream().map(this::fromNMS).collect(Collectors.toList()); }
 
     public Sound fromNMS(SoundEvent s) { return CraftSound.minecraftToBukkit(s); }
 
@@ -1371,12 +1378,12 @@ public class ChipUtil26_1 implements ChipUtil {
 
     public Location fromNMS(Position p, World w) { return new Location(w, p.x(), p.y(), p.z()); }
 
-    private double speedMod(Goal g) {
+    protected double speedMod(Goal g) {
         // convenience
         return getDouble(g, "speedModifier");
     }
 
-    private Pathfinder fromNMS(Goal g) {
+    public Pathfinder fromNMS(Goal g) {
         if (g instanceof CustomGoal26_1 custom) {
             return custom.getPathfinder();
         }
@@ -1464,7 +1471,7 @@ public class ChipUtil26_1 implements ChipUtil {
         };
     }
 
-    private Pathfinder createPathfinderTempt(Creature m, Goal g) {
+    public Pathfinder createPathfinderTempt(Creature m, Goal g) {
         Predicate<net.minecraft.world.item.ItemStack> predicate = getObject(g, "items", Predicate.class);
         if (predicate instanceof ItemStackPredicateContainer container) {
             return new PathfinderTempt(m, speedMod(g), container.items());
@@ -1492,7 +1499,7 @@ public class ChipUtil26_1 implements ChipUtil {
 
         @Override
         public boolean test(net.minecraft.world.item.ItemStack itemStack) {
-            ItemStack bukkitItem = CraftItemStack.asBukkitCopy(itemStack);
+            ItemStack bukkitItem = ChipUtil26_1.instance().fromNMS(itemStack);
             for (ItemStack stack : items) {
                 if (stack.isSimilar(bukkitItem)) {
                     return true;
@@ -1559,7 +1566,7 @@ public class ChipUtil26_1 implements ChipUtil {
     }
 
     @NotNull
-    private AttributeInstance26_1 getOrCreateInstance(Mob m, Attribute a) {
+    public AttributeInstance26_1 getOrCreateInstance(Mob m, Attribute a) {
         net.minecraft.world.entity.Mob nms = toNMS(m);
         AttributeMap map = nms.getAttributes();
         Optional<Holder.Reference<net.minecraft.world.entity.ai.attributes.Attribute>> nmsAH = BuiltInRegistries.ATTRIBUTE.get(toNMS(a.getKey()));
