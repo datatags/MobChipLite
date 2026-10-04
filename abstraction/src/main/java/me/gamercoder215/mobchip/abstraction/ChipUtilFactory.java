@@ -72,8 +72,10 @@ public class ChipUtilFactory {
                 case 1:
                     return "26_1";
                 case 2:
-                default: // optimism
                     return "26_2";
+                case 3:
+                default: // optimism
+                    return "26_3";
             }
         }
         throw new IllegalStateException("Unsupported version: " + bukkit);

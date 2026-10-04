@@ -83,7 +83,6 @@ import net.minecraft.world.entity.decoration.LeashFenceKnotEntity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.monster.illager.AbstractIllager;
 import net.minecraft.world.entity.monster.warden.Warden;
@@ -238,6 +237,52 @@ public class ChipUtil26_1 implements ChipUtil {
         return createHelper("SensorDefault", handle);
     }
 
+    /**
+     * The NMS class backing {@link Enderman}. This was renamed in later versions, so subclasses
+     * that target those versions should override this.
+     *
+     * @return the NMS enderman class for this version
+     */
+    protected Class<? extends net.minecraft.world.entity.Entity> enderManClass() {
+        return net.minecraft.world.entity.monster.EnderMan.class;
+    }
+
+    /**
+     * The NMS goal backing {@link PathfinderCatOnBed}. This was renamed in later versions, so
+     * subclasses that target those versions should override this.
+     * <p>
+     * The class is looked up reflectively on purpose: a direct {@code new} here would make the
+     * JVM verifier resolve the 26.1 name while linking this class, which breaks on versions that
+     * renamed it - even though the method itself is never called there.
+     *
+     * @param cat   the cat to control
+     * @param speed the movement speed modifier
+     * @param range the search range
+     * @return the NMS goal for this version
+     */
+    protected Goal catOnBedGoal(net.minecraft.world.entity.animal.feline.Cat cat, double speed, int range) {
+        return newGoal("CatLieOnBedGoal", new Class<?>[]{net.minecraft.world.entity.animal.feline.Cat.class, double.class, int.class}, cat, speed, range);
+    }
+
+    /**
+     * The NMS goal backing {@link PathfinderFindWater}. This was renamed (and gained a fluid tag
+     * argument) in later versions, so subclasses that target those versions should override this.
+     *
+     * @param mob the mob to control
+     * @return the NMS goal for this version
+     */
+    protected Goal findWaterGoal(PathfinderMob mob) {
+        return newGoal("TryFindWaterGoal", new Class<?>[]{PathfinderMob.class}, mob);
+    }
+
+    private Goal newGoal(String name, Class<?>[] argTypes, Object... args) {
+        try {
+            return (Goal) Class.forName("net.minecraft.world.entity.ai.goal." + name).getConstructor(argTypes).newInstance(args);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     protected ChipUtil26_1(ImmutableBiMap.Builder<Class<? extends Entity>, Class<? extends net.minecraft.world.entity.Entity>> entityMap) {
         entityMap
                 .put(Entity.class, net.minecraft.world.entity.Entity.class)
@@ -290,7 +335,7 @@ public class ChipUtil26_1 implements ChipUtil {
                 .put(EnderDragon.class, net.minecraft.world.entity.boss.enderdragon.EnderDragon.class)
                 .put(EnderPearl.class, ThrownEnderpearl.class)
                 .put(EnderSignal.class, EyeOfEnder.class)
-                .put(Enderman.class, EnderMan.class)
+                .put(Enderman.class, enderManClass())
                 .put(Endermite.class, net.minecraft.world.entity.monster.Endermite.class)
                 .put(Evoker.class, net.minecraft.world.entity.monster.illager.Evoker.class)
                 .put(EvokerFangs.class, net.minecraft.world.entity.projectile.EvokerFangs.class)
@@ -510,12 +555,12 @@ public class ChipUtil26_1 implements ChipUtil {
             case PathfinderBreakDoor p -> new BreakDoorGoal(m, p.getBreakTime(), d -> p.getCondition().test(fromNMS(d)));
             case PathfinderBreathAir p -> new BreathAirGoal((PathfinderMob) m);
             case PathfinderBreed p -> new BreedGoal((Animal) m, p.getSpeedModifier());
-            case PathfinderCatOnBed p -> new CatLieOnBedGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier(), Math.min((int) p.getRange(), 1));
+            case PathfinderCatOnBed p -> catOnBedGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier(), Math.min((int) p.getRange(), 1));
             case PathfinderCatOnBlock p -> new CatSitOnBlockGoal((net.minecraft.world.entity.animal.feline.Cat) m, p.getSpeedModifier());
             case PathfinderClimbPowderedSnow p -> new ClimbOnTopOfPowderSnowGoal(m, toNMS(mob.getWorld()));
             case PathfinderDolphinJump p -> new DolphinJumpGoal((net.minecraft.world.entity.animal.dolphin.Dolphin) m, p.getInterval());
             case PathfinderEatTile p -> new EatBlockGoal(m);
-            case PathfinderFindWater p -> new TryFindWaterGoal((PathfinderMob) m);
+            case PathfinderFindWater p -> findWaterGoal((PathfinderMob) m);
             case PathfinderFleeSun p -> new FleeSunGoal((PathfinderMob) m, p.getSpeedModifier());
             case PathfinderFloat p -> new FloatGoal(m);
             case PathfinderFollowFishLeader p -> new FollowFlockLeaderGoal((AbstractSchoolingFish) m);
