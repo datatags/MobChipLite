@@ -20,6 +20,7 @@ val versions = mapOf(
     "1_21_R7" to true,
     "26_1" to false,
     "26_2" to false,
+    "26_3" to false,
 )
 
 dependencies {

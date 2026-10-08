@@ -33,6 +33,7 @@ listOf(
     "1_21_R7",
     "26_1",
     "26_2",
+    "26_3",
 ).forEach {
     include(":mobchip-$it")
     project(":mobchip-$it").projectDir = rootDir.resolve("nms/$it")
